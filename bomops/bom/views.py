@@ -4,15 +4,16 @@ BOMOps API ビュー定義
 Django REST FrameworkのViewSetとカスタムAPIビューを定義。
 """
 
+from datetime import datetime, time
 from typing import Any
 
-from django.db.models import QuerySet
+from django.db.models import Count, QuerySet
 from django.utils import timezone
 from django_filters import rest_framework as django_filters
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
-from rest_framework import status, viewsets
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -22,10 +23,14 @@ from .models import (
     BssSetConfig,
     Customer,
     CustomerSite,
+    DeployEvent,
+    EquipmentRef,
+    MaintenanceEvent,
     PartMaster,
     PartUnit,
     ProductBOM,
     ProductModel,
+    SiteConfig,
 )
 from .serializers import (
     BssSetCompositionSerializer,
@@ -34,12 +39,18 @@ from .serializers import (
     BssSetSerializer,
     CustomerSerializer,
     CustomerSiteSerializer,
+    DashboardSummarySerializer,
+    DeployEventSerializer,
     EffectiveConfigSerializer,
+    EquipmentRefSerializer,
     LookupBySerialSerializer,
+    MaintenanceEventSerializer,
     PartMasterSerializer,
+    PartUnitHistorySerializer,
     PartUnitSerializer,
     ProductBOMSerializer,
     ProductModelSerializer,
+    SiteConfigSerializer,
 )
 
 
@@ -87,10 +98,69 @@ class CustomerSiteFilter(django_filters.FilterSet):
     """顧客拠点用フィルタ"""
 
     customer = django_filters.NumberFilter()
+    lifecycle_status = django_filters.ChoiceFilter(
+        choices=CustomerSite.LifecycleStatus.choices
+    )
 
     class Meta:
         model = CustomerSite
-        fields = ["customer"]
+        fields = ["customer", "lifecycle_status"]
+
+
+class SiteConfigFilter(django_filters.FilterSet):
+    """拠点設定用フィルタ"""
+
+    customer_site = django_filters.NumberFilter()
+
+    class Meta:
+        model = SiteConfig
+        fields = ["customer_site"]
+
+
+class MaintenanceEventFilter(django_filters.FilterSet):
+    """保守イベント用フィルタ"""
+
+    bss_set = django_filters.NumberFilter()
+    part_unit = django_filters.NumberFilter()
+    event_type = django_filters.ChoiceFilter(choices=MaintenanceEvent.EventType.choices)
+    occurred_after = django_filters.DateTimeFilter(
+        field_name="occurred_at", lookup_expr="gte"
+    )
+    occurred_before = django_filters.DateTimeFilter(
+        field_name="occurred_at", lookup_expr="lte"
+    )
+
+    class Meta:
+        model = MaintenanceEvent
+        fields = ["bss_set", "part_unit", "event_type"]
+
+
+class DeployEventFilter(django_filters.FilterSet):
+    """導入イベント用フィルタ"""
+
+    bss_set = django_filters.NumberFilter()
+    stage = django_filters.ChoiceFilter(choices=DeployEvent.Stage.choices)
+    occurred_after = django_filters.DateTimeFilter(
+        field_name="occurred_at", lookup_expr="gte"
+    )
+    occurred_before = django_filters.DateTimeFilter(
+        field_name="occurred_at", lookup_expr="lte"
+    )
+
+    class Meta:
+        model = DeployEvent
+        fields = ["bss_set", "stage"]
+
+
+class EquipmentRefFilter(django_filters.FilterSet):
+    """機器管理参照用フィルタ"""
+
+    external_id = django_filters.CharFilter(lookup_expr="icontains")
+    part_units = django_filters.NumberFilter()
+
+    class Meta:
+        model = EquipmentRef
+        fields = ["external_id", "part_units"]
 
 
 class BssSetFilter(django_filters.FilterSet):
@@ -181,6 +251,90 @@ class PartUnitViewSet(viewsets.ModelViewSet):
     filterset_class = PartUnitFilter
     search_fields = ["serial_number"]
     ordering_fields = ["serial_number", "status", "created_at"]
+
+    @extend_schema(
+        summary="部品使用履歴取得",
+        description="指定部品の購入・搭載/取外し・保守の履歴を時系列タイムラインで返す",
+        responses={200: PartUnitHistorySerializer},
+        tags=["部品実物"],
+    )
+    @action(detail=True, methods=["get"], url_path="history")
+    def history(self, request: Request, pk: int | None = None) -> Response:
+        """
+        部品使用履歴API（CLAUDE.md「Identity = serial_no」のトレーサビリティビュー）
+
+        購入(PURCHASED)・搭載(MOUNTED)・取外し(UNMOUNTED)・保守(MAINTENANCE)を
+        1本のタイムラインに統合して時系列降順で返す。
+        """
+        part_unit = self.get_object()
+        timeline: list[dict[str, Any]] = []
+
+        def entry(**kwargs: Any) -> dict[str, Any]:
+            base: dict[str, Any] = {
+                "set_code": None,
+                "role": None,
+                "event_type": None,
+                "event_type_display": None,
+                "note": None,
+                "purchase_order_no": None,
+            }
+            base.update(kwargs)
+            return base
+
+        if part_unit.purchase_date:
+            purchased_at = timezone.make_aware(
+                datetime.combine(part_unit.purchase_date, time.min)
+            )
+            timeline.append(entry(
+                kind="PURCHASED",
+                occurred_at=purchased_at,
+                purchase_order_no=part_unit.purchase_order_no,
+            ))
+
+        assignments = part_unit.set_assignments.select_related("bss_set")
+        for assignment in assignments:
+            if assignment.mounted_at:
+                timeline.append(entry(
+                    kind="MOUNTED",
+                    occurred_at=assignment.mounted_at,
+                    set_code=assignment.bss_set.set_code,
+                    role=assignment.role,
+                    note=assignment.note,
+                ))
+            if assignment.unmounted_at:
+                timeline.append(entry(
+                    kind="UNMOUNTED",
+                    occurred_at=assignment.unmounted_at,
+                    set_code=assignment.bss_set.set_code,
+                    role=assignment.role,
+                ))
+
+        events = part_unit.maintenance_events.select_related("bss_set")
+        for event in events:
+            timeline.append(entry(
+                kind="MAINTENANCE",
+                occurred_at=event.occurred_at,
+                set_code=event.bss_set.set_code,
+                event_type=event.event_type,
+                event_type_display=event.get_event_type_display(),
+                note=event.note,
+            ))
+
+        timeline.sort(key=lambda e: e["occurred_at"], reverse=True)
+
+        data = {
+            "part_unit": {
+                "id": part_unit.id,
+                "serial_number": part_unit.serial_number,
+                "part_code": part_unit.part_master.part_code,
+                "part_name": part_unit.part_master.name,
+                "status": part_unit.status,
+                "status_display": part_unit.get_status_display(),
+            },
+            "timeline": timeline,
+        }
+        serializer = PartUnitHistorySerializer(data)
+        return Response(serializer.data)
 
 
 @extend_schema_view(
@@ -436,9 +590,171 @@ class BssSetConfigViewSet(viewsets.ModelViewSet):
     ordering_fields = ["bss_set", "config_group", "key", "created_at"]
 
 
+@extend_schema_view(
+    list=extend_schema(summary="拠点設定一覧取得", tags=["拠点設定"]),
+    create=extend_schema(summary="拠点設定作成", tags=["拠点設定"]),
+    retrieve=extend_schema(summary="拠点設定詳細取得", tags=["拠点設定"]),
+    update=extend_schema(summary="拠点設定更新", tags=["拠点設定"]),
+    partial_update=extend_schema(summary="拠点設定部分更新", tags=["拠点設定"]),
+    destroy=extend_schema(summary="拠点設定削除", tags=["拠点設定"]),
+)
+class SiteConfigViewSet(viewsets.ModelViewSet):
+    """
+    拠点設定 CRUD API
+
+    拠点固有のクレデンシャル/設定（POS・決済・通知等）を管理。
+    token / secret 系はレスポンスでマスクされる。
+    フィルタ: customer_site
+    """
+
+    queryset = SiteConfig.objects.select_related(
+        "customer_site",
+        "customer_site__customer",
+    ).all()
+    serializer_class = SiteConfigSerializer
+    filterset_class = SiteConfigFilter
+    ordering_fields = ["customer_site", "created_at"]
+
+
+class AppendOnlyViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    """追記型イベント用ViewSet基底クラス
+
+    履歴を消さない原則（CLAUDE.md §4.3）に従い、
+    作成・一覧・詳細のみを許可し、更新・削除は提供しない。
+    """
+
+
+@extend_schema_view(
+    list=extend_schema(summary="保守イベント一覧取得", tags=["保守イベント"]),
+    create=extend_schema(summary="保守イベント追記", tags=["保守イベント"]),
+    retrieve=extend_schema(summary="保守イベント詳細取得", tags=["保守イベント"]),
+)
+class MaintenanceEventViewSet(AppendOnlyViewSet):
+    """
+    保守イベント API（追記型）
+
+    故障・交換・点検・設定変更の履歴を追記する。更新・削除は不可。
+    フィルタ: bss_set, part_unit, event_type, occurred_after, occurred_before
+    """
+
+    queryset = MaintenanceEvent.objects.select_related(
+        "bss_set",
+        "part_unit",
+    ).all()
+    serializer_class = MaintenanceEventSerializer
+    filterset_class = MaintenanceEventFilter
+    ordering_fields = ["occurred_at", "created_at"]
+
+
+@extend_schema_view(
+    list=extend_schema(summary="導入イベント一覧取得", tags=["導入イベント"]),
+    create=extend_schema(summary="導入イベント追記", tags=["導入イベント"]),
+    retrieve=extend_schema(summary="導入イベント詳細取得", tags=["導入イベント"]),
+)
+class DeployEventViewSet(AppendOnlyViewSet):
+    """
+    導入イベント API（追記型）
+
+    設置・開通・稼働・回収・再組立の履歴を追記する。更新・削除は不可。
+    フィルタ: bss_set, stage, occurred_after, occurred_before
+    """
+
+    queryset = DeployEvent.objects.select_related("bss_set").all()
+    serializer_class = DeployEventSerializer
+    filterset_class = DeployEventFilter
+    ordering_fields = ["occurred_at", "created_at"]
+
+
+@extend_schema_view(
+    list=extend_schema(summary="機器管理参照一覧取得", tags=["機器管理参照"]),
+    create=extend_schema(summary="機器管理参照作成", tags=["機器管理参照"]),
+    retrieve=extend_schema(summary="機器管理参照詳細取得", tags=["機器管理参照"]),
+    update=extend_schema(summary="機器管理参照更新", tags=["機器管理参照"]),
+    partial_update=extend_schema(summary="機器管理参照部分更新", tags=["機器管理参照"]),
+    destroy=extend_schema(summary="機器管理参照削除", tags=["機器管理参照"]),
+)
+class EquipmentRefViewSet(viewsets.ModelViewSet):
+    """
+    機器管理参照 CRUD API
+
+    L4 機器管理DBレコードと部品実物のN:M対応を管理。
+    フィルタ: external_id, part_units
+    """
+
+    queryset = EquipmentRef.objects.prefetch_related("part_units").all()
+    serializer_class = EquipmentRefSerializer
+    filterset_class = EquipmentRefFilter
+    search_fields = ["external_id", "name"]
+    ordering_fields = ["external_id", "created_at"]
+
+
 # =============================================================================
 # カスタムAPI（仮置きstub）
 # =============================================================================
+
+
+@extend_schema(
+    summary="ヘルスチェック",
+    description="フロントエンドの接続状態検知用の軽量エンドポイント（認証不要）",
+    responses={200: None},
+    tags=["ヘルスチェック"],
+)
+@api_view(["GET", "HEAD"])
+@permission_classes([AllowAny])
+def health(request: Request) -> Response:
+    """接続状態検知用ヘルスチェックAPI（DBアクセスなし）"""
+    return Response({"status": "ok"})
+
+
+def _count_by(queryset: QuerySet, field: str) -> dict[str, int]:
+    """指定フィールドの値ごとの件数を辞書で返す"""
+    rows = queryset.values(field).annotate(n=Count("id")).order_by(field)
+    return {row[field]: row["n"] for row in rows}
+
+
+@extend_schema(
+    summary="ダッシュボードサマリー取得",
+    description="セット・部品実物・拠点・顧客の総数と状態別集計を1レスポンスで返す",
+    responses={200: DashboardSummarySerializer},
+    tags=["ダッシュボード"],
+)
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def dashboard_summary(request: Request) -> Response:
+    """
+    ダッシュボードサマリーAPI
+
+    件数集計のみを返す（個人情報・secretは含まない）。
+    """
+    data = {
+        "sets": {
+            "total": BssSet.objects.count(),
+            "by_status": _count_by(BssSet.objects.all(), "status"),
+        },
+        "part_units": {
+            "total": PartUnit.objects.count(),
+            "by_status": _count_by(PartUnit.objects.all(), "status"),
+            "by_category": _count_by(
+                PartUnit.objects.all(), "part_master__category"
+            ),
+        },
+        "sites": {
+            "total": CustomerSite.objects.count(),
+            "by_lifecycle_status": _count_by(
+                CustomerSite.objects.all(), "lifecycle_status"
+            ),
+        },
+        "customers": {
+            "total": Customer.objects.count(),
+        },
+    }
+    serializer = DashboardSummarySerializer(data)
+    return Response(serializer.data)
 
 
 @extend_schema(
@@ -511,6 +827,7 @@ def lookup_by_serial(request: Request) -> Response:
             }
 
     data = {
+        "part_unit_id": part_unit.id,
         "serial_number": part_unit.serial_number,
         "part_master": part_unit.part_master.name,
         "current_set": current_set,

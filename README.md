@@ -115,12 +115,35 @@ python bomops/manage.py runserver
 | `/api/v1/bss-sets/` | BSSセット CRUD |
 | `/api/v1/bss-set-components/` | セット構成部品 CRUD |
 | `/api/v1/bss-set-configs/` | セット設定 CRUD |
+| `/api/v1/site-configs/` | 拠点設定 CRUD（token/secret系は暗号化保存・レスポンスでマスク） |
+| `/api/v1/maintenance-events/` | 保守イベント（追記型: 作成・閲覧のみ） |
+| `/api/v1/deploy-events/` | 導入イベント（追記型: 作成・閲覧のみ） |
+| `/api/v1/equipment-refs/` | 機器管理参照 CRUD（部品実物とN:M） |
 
 ### カスタムAPI
 
 - `GET /api/v1/bss-sets/{id}/composition/` - セット構成ビュー
 - `GET /api/v1/bss-sets/{id}/effective-configs/` - 有効なコンフィグ一覧
+- `GET /api/v1/part-units/{id}/history/` - 部品使用履歴タイムライン
 - `GET /api/v1/lookup/by-serial/?serial_number=XXX` - シリアル番号逆引き
+- `GET /api/v1/dashboard/summary/` - ダッシュボードサマリー（状態別集計）
+- `GET /api/v1/health/` - ヘルスチェック（認証不要）
+
+## フロントエンド
+
+`frontend/web/` に Workspace / Dashboard の React SPA がある。
+セットアップ・開発手順は `frontend/web/README.md` を参照。
+
+## デプロイ（GCP）
+
+Cloud Run + Cloud SQL + Firebase Hosting 構成。手順は `docs/gcp-deploy.md` を参照。
+
+```bash
+./scripts/gcp/setup.sh             # 初回プロビジョニング（Cloud SQL作成・課金開始に注意）
+./scripts/gcp/deploy.sh            # バックエンド ビルド＆デプロイ（マイグレーション込み）
+./scripts/gcp/create-superuser.sh admin admin@aibod.com
+./scripts/gcp/deploy-frontend.sh   # フロントエンド（Firebase Hosting）
+```
 
 ## テスト実行
 
@@ -130,6 +153,9 @@ python bomops/manage.py test bom
 
 # pytest
 pytest
+
+# PostgreSQL を起動していない環境では sqlite 設定で実行
+pytest --ds=config.settings_sqlite
 ```
 
 ## ライセンス

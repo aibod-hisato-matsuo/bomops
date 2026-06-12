@@ -1,0 +1,83 @@
+/*
+ * BOMOps グローバルスタイル
+ * AIBODブランドガイドライン（ネイビーインディゴ × スカイブルー）準拠
+ */
+
+:root {
+  /* コーポレートカラー（3色） */
+  --aibod-navy: #1d2087;
+  --aibod-blue: #0068b6;
+  --aibod-sky: #00b3ec;
+
+  /* サポートカラー */
+  --aibod-white: #ffffff;
+  --aibod-black: #1a1a1a;
+  --aibod-gray-mid: #6b8299;
+  --aibod-gray-light: #d6e8f5;
+  --aibod-blue-pale: #bfe4f8;
+
+  /* セマンティック（業務システム用の最小限の補助色） */
+  --color-bg: #f6f9fc;
+  --color-surface: var(--aibod-white);
+  --color-text: var(--aibod-black);
+  --color-text-sub: var(--aibod-gray-mid);
+  --color-border: var(--aibod-gray-light);
+  --color-danger: #c0392b;
+
+  /* フォント */
+  --font-base: 'Poppins', 'Noto Sans JP', '源ノ角ゴシック', 'Source Han Sans JP',
+    sans-serif;
+
+  /* レイアウト */
+  --sidebar-width: 220px;
+  --radius: 8px;
+  --shadow: 0 1px 3px rgba(29, 32, 135, 0.08), 0 4px 12px rgba(29, 32, 135, 0.06);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-base);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-text);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--color-text);
+  font-weight: 600;
+  margin: 0;
+}
+
+a {
+  color: var(--aibod-blue);
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 14px;
+}

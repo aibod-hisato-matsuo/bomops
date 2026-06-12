@@ -1,0 +1,5286 @@
+openapi: 3.0.3
+info:
+  title: BOMOps API
+  version: 1.0.0
+  description: AIBOD Factory / BOMOps - BOM（部品構成）＋セット＋設置先＋設定情報の一元管理システム API
+paths:
+  /api/v1/auth/token/:
+    post:
+      operationId: auth_token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/v1/auth/token/refresh/:
+    post:
+      operationId: auth_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/v1/auth/token/verify/:
+    post:
+      operationId: auth_token_verify_create
+      description: |-
+        Takes a token and indicates if it is valid.  This view provides no
+        information about a token's fitness for a particular use.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+        required: true
+      responses:
+        '200':
+          description: No response body
+  /api/v1/bss-set-components/:
+    get:
+      operationId: bss_set_components_list
+      description: |-
+        BSSセット構成部品 CRUD API
+
+        セットに搭載されている部品を管理。
+        フィルタ: bss_set, part_unit, role
+      summary: BSSセット構成部品一覧取得
+      parameters:
+      - in: query
+        name: bss_set
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: part_unit
+        schema:
+          type: integer
+      - in: query
+        name: role
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - BSSセット構成部品
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBssSetComponentList'
+          description: ''
+    post:
+      operationId: bss_set_components_create
+      description: |-
+        BSSセット構成部品 CRUD API
+
+        セットに搭載されている部品を管理。
+        フィルタ: bss_set, part_unit, role
+      summary: BSSセット構成部品作成
+      tags:
+      - BSSセット構成部品
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BssSetComponentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BssSetComponentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BssSetComponentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BssSetComponent'
+          description: ''
+  /api/v1/bss-set-components/{id}/:
+    get:
+      operationId: bss_set_components_retrieve
+      description: |-
+        BSSセット構成部品 CRUD API
+
+        セットに搭載されている部品を管理。
+        フィルタ: bss_set, part_unit, role
+      summary: BSSセット構成部品詳細取得
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this BSSセット構成部品.
+        required: true
+      tags:
+      - BSSセット構成部品
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BssSetComponent'
+          description: ''
+    put:
+      operationId: bss_set_components_update
+      description: |-
+        BSSセット構成部品 CRUD API
+
+        セットに搭載されている部品を管理。
+        フィルタ: bss_set, part_unit, role
+      summary: BSSセット構成部品更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this BSSセット構成部品.
+        required: true
+      tags:
+      - BSSセット構成部品
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BssSetComponentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BssSetComponentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BssSetComponentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BssSetComponent'
+          description: ''
+    patch:
+      operationId: bss_set_components_partial_update
+      description: |-
+        BSSセット構成部品 CRUD API
+
+        セットに搭載されている部品を管理。
+        フィルタ: bss_set, part_unit, role
+      summary: BSSセット構成部品部分更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this BSSセット構成部品.
+        required: true
+      tags:
+      - BSSセット構成部品
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBssSetComponentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBssSetComponentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBssSetComponentRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BssSetComponent'
+          description: ''
+    delete:
+      operationId: bss_set_components_destroy
+      description: |-
+        BSSセット構成部品 CRUD API
+
+        セットに搭載されている部品を管理。
+        フィルタ: bss_set, part_unit, role
+      summary: BSSセット構成部品削除
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this BSSセット構成部品.
+        required: true
+      tags:
+      - BSSセット構成部品
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/bss-set-configs/:
+    get:
+      operationId: bss_set_configs_list
+      description: |-
+        BSSセット設定 CRUD API
+
+        セットごとの設定情報（POS/PayPay/ネットワーク等）を管理。
+        フィルタ: bss_set, config_group, key, is_secret
+      summary: BSSセット設定一覧取得
+      parameters:
+      - in: query
+        name: bss_set
+        schema:
+          type: integer
+      - in: query
+        name: config_group
+        schema:
+          type: string
+      - in: query
+        name: is_secret
+        schema:
+          type: boolean
+      - in: query
+        name: key
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - BSSセット設定
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBssSetConfigList'
+          description: ''
+    post:
+      operationId: bss_set_configs_create
+      description: |-
+        BSSセット設定 CRUD API
+
+        セットごとの設定情報（POS/PayPay/ネットワーク等）を管理。
+        フィルタ: bss_set, config_group, key, is_secret
+      summary: BSSセット設定作成
+      tags:
+      - BSSセット設定
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BssSetConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BssSetConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BssSetConfigRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BssSetConfig'
+          description: ''
+  /api/v1/bss-set-configs/{id}/:
+    get:
+      operationId: bss_set_configs_retrieve
+      description: |-
+        BSSセット設定 CRUD API
+
+        セットごとの設定情報（POS/PayPay/ネットワーク等）を管理。
+        フィルタ: bss_set, config_group, key, is_secret
+      summary: BSSセット設定詳細取得
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this BSSセット設定.
+        required: true
+      tags:
+      - BSSセット設定
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BssSetConfig'
+          description: ''
+    put:
+      operationId: bss_set_configs_update
+      description: |-
+        BSSセット設定 CRUD API
+
+        セットごとの設定情報（POS/PayPay/ネットワーク等）を管理。
+        フィルタ: bss_set, config_group, key, is_secret
+      summary: BSSセット設定更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this BSSセット設定.
+        required: true
+      tags:
+      - BSSセット設定
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BssSetConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BssSetConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BssSetConfigRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BssSetConfig'
+          description: ''
+    patch:
+      operationId: bss_set_configs_partial_update
+      description: |-
+        BSSセット設定 CRUD API
+
+        セットごとの設定情報（POS/PayPay/ネットワーク等）を管理。
+        フィルタ: bss_set, config_group, key, is_secret
+      summary: BSSセット設定部分更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this BSSセット設定.
+        required: true
+      tags:
+      - BSSセット設定
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBssSetConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBssSetConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBssSetConfigRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BssSetConfig'
+          description: ''
+    delete:
+      operationId: bss_set_configs_destroy
+      description: |-
+        BSSセット設定 CRUD API
+
+        セットごとの設定情報（POS/PayPay/ネットワーク等）を管理。
+        フィルタ: bss_set, config_group, key, is_secret
+      summary: BSSセット設定削除
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this BSSセット設定.
+        required: true
+      tags:
+      - BSSセット設定
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/bss-sets/:
+    get:
+      operationId: bss_sets_list
+      description: |-
+        BSSセット CRUD API
+
+        BAITEN STAND 実機を管理。
+        フィルタ: product_model, customer_site, status
+        検索: set_code
+      summary: BSSセット一覧取得
+      parameters:
+      - in: query
+        name: customer_site
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: product_model
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: set_code
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          title: ステータス
+          enum:
+          - ASSEMBLED
+          - INSTALLED
+          - RECOVERED
+          - REPAIR
+          - SCRAPPED
+        description: |-
+          * `ASSEMBLED` - 組立完了
+          * `INSTALLED` - 設置済
+          * `REPAIR` - 修理中
+          * `RECOVERED` - 回収済
+          * `SCRAPPED` - 廃棄
+      tags:
+      - BSSセット
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBssSetList'
+          description: ''
+    post:
+      operationId: bss_sets_create
+      description: |-
+        BSSセット CRUD API
+
+        BAITEN STAND 実機を管理。
+        フィルタ: product_model, customer_site, status
+        検索: set_code
+      summary: BSSセット作成
+      tags:
+      - BSSセット
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BssSetRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BssSetRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BssSetRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BssSet'
+          description: ''
+  /api/v1/bss-sets/{id}/:
+    get:
+      operationId: bss_sets_retrieve
+      description: |-
+        BSSセット CRUD API
+
+        BAITEN STAND 実機を管理。
+        フィルタ: product_model, customer_site, status
+        検索: set_code
+      summary: BSSセット詳細取得
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this BSSセット.
+        required: true
+      tags:
+      - BSSセット
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BssSet'
+          description: ''
+    put:
+      operationId: bss_sets_update
+      description: |-
+        BSSセット CRUD API
+
+        BAITEN STAND 実機を管理。
+        フィルタ: product_model, customer_site, status
+        検索: set_code
+      summary: BSSセット更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this BSSセット.
+        required: true
+      tags:
+      - BSSセット
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BssSetRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BssSetRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BssSetRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BssSet'
+          description: ''
+    patch:
+      operationId: bss_sets_partial_update
+      description: |-
+        BSSセット CRUD API
+
+        BAITEN STAND 実機を管理。
+        フィルタ: product_model, customer_site, status
+        検索: set_code
+      summary: BSSセット部分更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this BSSセット.
+        required: true
+      tags:
+      - BSSセット
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBssSetRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBssSetRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBssSetRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BssSet'
+          description: ''
+    delete:
+      operationId: bss_sets_destroy
+      description: |-
+        BSSセット CRUD API
+
+        BAITEN STAND 実機を管理。
+        フィルタ: product_model, customer_site, status
+        検索: set_code
+      summary: BSSセット削除
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this BSSセット.
+        required: true
+      tags:
+      - BSSセット
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/bss-sets/{id}/composition/:
+    get:
+      operationId: bss_sets_composition_retrieve
+      description: セットに搭載されている部品の構成情報を返す
+      summary: セット構成ビュー取得
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this BSSセット.
+        required: true
+      tags:
+      - BSSセット
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BssSetComposition'
+          description: ''
+  /api/v1/bss-sets/{id}/effective-configs/:
+    get:
+      operationId: bss_sets_effective_configs_list
+      description: 現在有効な設定情報の一覧を返す
+      summary: 有効なコンフィグ一覧取得
+      parameters:
+      - in: query
+        name: customer_site
+        schema:
+          type: integer
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this BSSセット.
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: product_model
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: set_code
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          title: ステータス
+          enum:
+          - ASSEMBLED
+          - INSTALLED
+          - RECOVERED
+          - REPAIR
+          - SCRAPPED
+        description: |-
+          * `ASSEMBLED` - 組立完了
+          * `INSTALLED` - 設置済
+          * `REPAIR` - 修理中
+          * `RECOVERED` - 回収済
+          * `SCRAPPED` - 廃棄
+      tags:
+      - BSSセット
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEffectiveConfigList'
+          description: ''
+  /api/v1/customer-sites/:
+    get:
+      operationId: customer_sites_list
+      description: |-
+        顧客拠点 CRUD API
+
+        顧客ごとの設置拠点を管理。
+        フィルタ: customer
+      summary: 顧客拠点一覧取得
+      parameters:
+      - in: query
+        name: customer
+        schema:
+          type: integer
+      - in: query
+        name: lifecycle_status
+        schema:
+          type: string
+          title: ライフサイクル状態
+          enum:
+          - ACTIVE
+          - BASE
+          - LOANED
+          - PREPARING
+          - WITHDRAWN
+        description: |-
+          * `PREPARING` - 準備中
+          * `ACTIVE` - 稼働中
+          * `WITHDRAWN` - 撤退済
+          * `BASE` - 拠点
+          * `LOANED` - 貸出中
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 顧客拠点
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCustomerSiteList'
+          description: ''
+    post:
+      operationId: customer_sites_create
+      description: |-
+        顧客拠点 CRUD API
+
+        顧客ごとの設置拠点を管理。
+        フィルタ: customer
+      summary: 顧客拠点作成
+      tags:
+      - 顧客拠点
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerSiteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomerSiteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomerSiteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerSite'
+          description: ''
+  /api/v1/customer-sites/{id}/:
+    get:
+      operationId: customer_sites_retrieve
+      description: |-
+        顧客拠点 CRUD API
+
+        顧客ごとの設置拠点を管理。
+        フィルタ: customer
+      summary: 顧客拠点詳細取得
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 顧客拠点.
+        required: true
+      tags:
+      - 顧客拠点
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerSite'
+          description: ''
+    put:
+      operationId: customer_sites_update
+      description: |-
+        顧客拠点 CRUD API
+
+        顧客ごとの設置拠点を管理。
+        フィルタ: customer
+      summary: 顧客拠点更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 顧客拠点.
+        required: true
+      tags:
+      - 顧客拠点
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerSiteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomerSiteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomerSiteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerSite'
+          description: ''
+    patch:
+      operationId: customer_sites_partial_update
+      description: |-
+        顧客拠点 CRUD API
+
+        顧客ごとの設置拠点を管理。
+        フィルタ: customer
+      summary: 顧客拠点部分更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 顧客拠点.
+        required: true
+      tags:
+      - 顧客拠点
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomerSiteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomerSiteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomerSiteRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerSite'
+          description: ''
+    delete:
+      operationId: customer_sites_destroy
+      description: |-
+        顧客拠点 CRUD API
+
+        顧客ごとの設置拠点を管理。
+        フィルタ: customer
+      summary: 顧客拠点削除
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 顧客拠点.
+        required: true
+      tags:
+      - 顧客拠点
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/customers/:
+    get:
+      operationId: customers_list
+      description: |-
+        顧客 CRUD API
+
+        装置を設置する顧客を管理。
+        検索: name, code
+      summary: 顧客一覧取得
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 顧客
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCustomerList'
+          description: ''
+    post:
+      operationId: customers_create
+      description: |-
+        顧客 CRUD API
+
+        装置を設置する顧客を管理。
+        検索: name, code
+      summary: 顧客作成
+      tags:
+      - 顧客
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          description: ''
+  /api/v1/customers/{id}/:
+    get:
+      operationId: customers_retrieve
+      description: |-
+        顧客 CRUD API
+
+        装置を設置する顧客を管理。
+        検索: name, code
+      summary: 顧客詳細取得
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 顧客.
+        required: true
+      tags:
+      - 顧客
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          description: ''
+    put:
+      operationId: customers_update
+      description: |-
+        顧客 CRUD API
+
+        装置を設置する顧客を管理。
+        検索: name, code
+      summary: 顧客更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 顧客.
+        required: true
+      tags:
+      - 顧客
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          description: ''
+    patch:
+      operationId: customers_partial_update
+      description: |-
+        顧客 CRUD API
+
+        装置を設置する顧客を管理。
+        検索: name, code
+      summary: 顧客部分更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 顧客.
+        required: true
+      tags:
+      - 顧客
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomerRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomerRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomerRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          description: ''
+    delete:
+      operationId: customers_destroy
+      description: |-
+        顧客 CRUD API
+
+        装置を設置する顧客を管理。
+        検索: name, code
+      summary: 顧客削除
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 顧客.
+        required: true
+      tags:
+      - 顧客
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/dashboard/summary/:
+    get:
+      operationId: dashboard_summary_retrieve
+      description: セット・部品実物・拠点・顧客の総数と状態別集計を1レスポンスで返す
+      summary: ダッシュボードサマリー取得
+      tags:
+      - ダッシュボード
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardSummary'
+          description: ''
+  /api/v1/deploy-events/:
+    get:
+      operationId: deploy_events_list
+      description: |-
+        導入イベント API（追記型）
+
+        設置・開通・稼働・回収・再組立の履歴を追記する。更新・削除は不可。
+        フィルタ: bss_set, stage, occurred_after, occurred_before
+      summary: 導入イベント一覧取得
+      parameters:
+      - in: query
+        name: bss_set
+        schema:
+          type: integer
+      - in: query
+        name: occurred_after
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: occurred_before
+        schema:
+          type: string
+          format: date-time
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: stage
+        schema:
+          type: string
+          title: ステージ
+          enum:
+          - ACTIVATION
+          - INSTALL
+          - OPERATION
+          - REASSEMBLY
+          - RECOVERY
+        description: |-
+          * `INSTALL` - 設置
+          * `ACTIVATION` - 開通
+          * `OPERATION` - 稼働
+          * `RECOVERY` - 回収
+          * `REASSEMBLY` - 再組立
+      tags:
+      - 導入イベント
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDeployEventList'
+          description: ''
+    post:
+      operationId: deploy_events_create
+      description: |-
+        導入イベント API（追記型）
+
+        設置・開通・稼働・回収・再組立の履歴を追記する。更新・削除は不可。
+        フィルタ: bss_set, stage, occurred_after, occurred_before
+      summary: 導入イベント追記
+      tags:
+      - 導入イベント
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeployEventRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DeployEventRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DeployEventRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeployEvent'
+          description: ''
+  /api/v1/deploy-events/{id}/:
+    get:
+      operationId: deploy_events_retrieve
+      description: |-
+        導入イベント API（追記型）
+
+        設置・開通・稼働・回収・再組立の履歴を追記する。更新・削除は不可。
+        フィルタ: bss_set, stage, occurred_after, occurred_before
+      summary: 導入イベント詳細取得
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 導入イベント.
+        required: true
+      tags:
+      - 導入イベント
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeployEvent'
+          description: ''
+  /api/v1/equipment-refs/:
+    get:
+      operationId: equipment_refs_list
+      description: |-
+        機器管理参照 CRUD API
+
+        L4 機器管理DBレコードと部品実物のN:M対応を管理。
+        フィルタ: external_id, part_units
+      summary: 機器管理参照一覧取得
+      parameters:
+      - in: query
+        name: external_id
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: part_units
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 機器管理参照
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEquipmentRefList'
+          description: ''
+    post:
+      operationId: equipment_refs_create
+      description: |-
+        機器管理参照 CRUD API
+
+        L4 機器管理DBレコードと部品実物のN:M対応を管理。
+        フィルタ: external_id, part_units
+      summary: 機器管理参照作成
+      tags:
+      - 機器管理参照
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EquipmentRefRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EquipmentRefRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EquipmentRefRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentRef'
+          description: ''
+  /api/v1/equipment-refs/{id}/:
+    get:
+      operationId: equipment_refs_retrieve
+      description: |-
+        機器管理参照 CRUD API
+
+        L4 機器管理DBレコードと部品実物のN:M対応を管理。
+        フィルタ: external_id, part_units
+      summary: 機器管理参照詳細取得
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 機器管理参照.
+        required: true
+      tags:
+      - 機器管理参照
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentRef'
+          description: ''
+    put:
+      operationId: equipment_refs_update
+      description: |-
+        機器管理参照 CRUD API
+
+        L4 機器管理DBレコードと部品実物のN:M対応を管理。
+        フィルタ: external_id, part_units
+      summary: 機器管理参照更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 機器管理参照.
+        required: true
+      tags:
+      - 機器管理参照
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EquipmentRefRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EquipmentRefRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EquipmentRefRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentRef'
+          description: ''
+    patch:
+      operationId: equipment_refs_partial_update
+      description: |-
+        機器管理参照 CRUD API
+
+        L4 機器管理DBレコードと部品実物のN:M対応を管理。
+        フィルタ: external_id, part_units
+      summary: 機器管理参照部分更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 機器管理参照.
+        required: true
+      tags:
+      - 機器管理参照
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEquipmentRefRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEquipmentRefRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEquipmentRefRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentRef'
+          description: ''
+    delete:
+      operationId: equipment_refs_destroy
+      description: |-
+        機器管理参照 CRUD API
+
+        L4 機器管理DBレコードと部品実物のN:M対応を管理。
+        フィルタ: external_id, part_units
+      summary: 機器管理参照削除
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 機器管理参照.
+        required: true
+      tags:
+      - 機器管理参照
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/health/:
+    get:
+      operationId: health_retrieve
+      description: フロントエンドの接続状態検知用の軽量エンドポイント（認証不要）
+      summary: ヘルスチェック
+      tags:
+      - ヘルスチェック
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/lookup/by-serial/:
+    get:
+      operationId: lookup_by_serial_retrieve
+      description: シリアル番号を指定して、その部品が搭載されているセットと設置先を検索する
+      summary: シリアル番号からセットと設置先を逆引き
+      parameters:
+      - in: query
+        name: serial_number
+        schema:
+          type: string
+        description: 検索するシリアル番号
+        required: true
+      tags:
+      - 逆引き検索
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LookupBySerial'
+          description: ''
+  /api/v1/maintenance-events/:
+    get:
+      operationId: maintenance_events_list
+      description: |-
+        保守イベント API（追記型）
+
+        故障・交換・点検・設定変更の履歴を追記する。更新・削除は不可。
+        フィルタ: bss_set, part_unit, event_type, occurred_after, occurred_before
+      summary: 保守イベント一覧取得
+      parameters:
+      - in: query
+        name: bss_set
+        schema:
+          type: integer
+      - in: query
+        name: event_type
+        schema:
+          type: string
+          title: イベント種別
+          enum:
+          - CONFIG_CHANGE
+          - FAILURE
+          - INSPECTION
+          - REPLACEMENT
+        description: |-
+          * `FAILURE` - 故障
+          * `REPLACEMENT` - 交換
+          * `INSPECTION` - 点検
+          * `CONFIG_CHANGE` - 設定変更
+      - in: query
+        name: occurred_after
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: occurred_before
+        schema:
+          type: string
+          format: date-time
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: part_unit
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 保守イベント
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMaintenanceEventList'
+          description: ''
+    post:
+      operationId: maintenance_events_create
+      description: |-
+        保守イベント API（追記型）
+
+        故障・交換・点検・設定変更の履歴を追記する。更新・削除は不可。
+        フィルタ: bss_set, part_unit, event_type, occurred_after, occurred_before
+      summary: 保守イベント追記
+      tags:
+      - 保守イベント
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaintenanceEventRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MaintenanceEventRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MaintenanceEventRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceEvent'
+          description: ''
+  /api/v1/maintenance-events/{id}/:
+    get:
+      operationId: maintenance_events_retrieve
+      description: |-
+        保守イベント API（追記型）
+
+        故障・交換・点検・設定変更の履歴を追記する。更新・削除は不可。
+        フィルタ: bss_set, part_unit, event_type, occurred_after, occurred_before
+      summary: 保守イベント詳細取得
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 保守イベント.
+        required: true
+      tags:
+      - 保守イベント
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceEvent'
+          description: ''
+  /api/v1/part-masters/:
+    get:
+      operationId: part_masters_list
+      description: |-
+        部品マスタ CRUD API
+
+        部品の種類（型番レベル）を管理。
+        フィルタ: part_code, category, is_active
+        検索: name, model_number
+      summary: 部品マスタ一覧取得
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+          title: カテゴリ
+          enum:
+          - BARCODE
+          - CABLE
+          - CAMERA
+          - MONITOR
+          - OTHER
+          - PAYMENT
+          - PC
+        description: |-
+          * `PC` - PC
+          * `MONITOR` - モニター
+          * `CAMERA` - カメラ
+          * `BARCODE` - バーコードリーダー
+          * `PAYMENT` - 決済端末
+          * `CABLE` - ケーブル
+          * `OTHER` - その他
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: part_code
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 部品マスタ
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPartMasterList'
+          description: ''
+    post:
+      operationId: part_masters_create
+      description: |-
+        部品マスタ CRUD API
+
+        部品の種類（型番レベル）を管理。
+        フィルタ: part_code, category, is_active
+        検索: name, model_number
+      summary: 部品マスタ作成
+      tags:
+      - 部品マスタ
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartMasterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PartMasterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PartMasterRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartMaster'
+          description: ''
+  /api/v1/part-masters/{id}/:
+    get:
+      operationId: part_masters_retrieve
+      description: |-
+        部品マスタ CRUD API
+
+        部品の種類（型番レベル）を管理。
+        フィルタ: part_code, category, is_active
+        検索: name, model_number
+      summary: 部品マスタ詳細取得
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 部品マスタ.
+        required: true
+      tags:
+      - 部品マスタ
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartMaster'
+          description: ''
+    put:
+      operationId: part_masters_update
+      description: |-
+        部品マスタ CRUD API
+
+        部品の種類（型番レベル）を管理。
+        フィルタ: part_code, category, is_active
+        検索: name, model_number
+      summary: 部品マスタ更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 部品マスタ.
+        required: true
+      tags:
+      - 部品マスタ
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartMasterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PartMasterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PartMasterRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartMaster'
+          description: ''
+    patch:
+      operationId: part_masters_partial_update
+      description: |-
+        部品マスタ CRUD API
+
+        部品の種類（型番レベル）を管理。
+        フィルタ: part_code, category, is_active
+        検索: name, model_number
+      summary: 部品マスタ部分更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 部品マスタ.
+        required: true
+      tags:
+      - 部品マスタ
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPartMasterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPartMasterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPartMasterRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartMaster'
+          description: ''
+    delete:
+      operationId: part_masters_destroy
+      description: |-
+        部品マスタ CRUD API
+
+        部品の種類（型番レベル）を管理。
+        フィルタ: part_code, category, is_active
+        検索: name, model_number
+      summary: 部品マスタ削除
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 部品マスタ.
+        required: true
+      tags:
+      - 部品マスタ
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/part-units/:
+    get:
+      operationId: part_units_list
+      description: |-
+        部品実物 CRUD API
+
+        シリアル番号付きの部品実物を管理。
+        フィルタ: part_master, status, serial_number
+      summary: 部品実物一覧取得
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: part_master
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: serial_number
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          title: ステータス
+          enum:
+          - ASSIGNED
+          - BROKEN
+          - IN_STOCK
+          - SCRAPPED
+        description: |-
+          * `IN_STOCK` - 在庫
+          * `ASSIGNED` - 割当済
+          * `BROKEN` - 故障
+          * `SCRAPPED` - 廃棄
+      tags:
+      - 部品実物
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPartUnitList'
+          description: ''
+    post:
+      operationId: part_units_create
+      description: |-
+        部品実物 CRUD API
+
+        シリアル番号付きの部品実物を管理。
+        フィルタ: part_master, status, serial_number
+      summary: 部品実物作成
+      tags:
+      - 部品実物
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartUnitRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PartUnitRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PartUnitRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartUnit'
+          description: ''
+  /api/v1/part-units/{id}/:
+    get:
+      operationId: part_units_retrieve
+      description: |-
+        部品実物 CRUD API
+
+        シリアル番号付きの部品実物を管理。
+        フィルタ: part_master, status, serial_number
+      summary: 部品実物詳細取得
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 部品実物.
+        required: true
+      tags:
+      - 部品実物
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartUnit'
+          description: ''
+    put:
+      operationId: part_units_update
+      description: |-
+        部品実物 CRUD API
+
+        シリアル番号付きの部品実物を管理。
+        フィルタ: part_master, status, serial_number
+      summary: 部品実物更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 部品実物.
+        required: true
+      tags:
+      - 部品実物
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartUnitRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PartUnitRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PartUnitRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartUnit'
+          description: ''
+    patch:
+      operationId: part_units_partial_update
+      description: |-
+        部品実物 CRUD API
+
+        シリアル番号付きの部品実物を管理。
+        フィルタ: part_master, status, serial_number
+      summary: 部品実物部分更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 部品実物.
+        required: true
+      tags:
+      - 部品実物
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPartUnitRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPartUnitRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPartUnitRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartUnit'
+          description: ''
+    delete:
+      operationId: part_units_destroy
+      description: |-
+        部品実物 CRUD API
+
+        シリアル番号付きの部品実物を管理。
+        フィルタ: part_master, status, serial_number
+      summary: 部品実物削除
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 部品実物.
+        required: true
+      tags:
+      - 部品実物
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/part-units/{id}/history/:
+    get:
+      operationId: part_units_history_retrieve
+      description: 指定部品の購入・搭載/取外し・保守の履歴を時系列タイムラインで返す
+      summary: 部品使用履歴取得
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 部品実物.
+        required: true
+      tags:
+      - 部品実物
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartUnitHistory'
+          description: ''
+  /api/v1/product-boms/:
+    get:
+      operationId: product_boms_list
+      description: |-
+        製品BOM CRUD API
+
+        製品モデルに対する部品構成表を管理。
+        フィルタ: product_model, part_master
+      summary: 製品BOM一覧取得
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: part_master
+        schema:
+          type: integer
+      - in: query
+        name: product_model
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 製品BOM
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProductBOMList'
+          description: ''
+    post:
+      operationId: product_boms_create
+      description: |-
+        製品BOM CRUD API
+
+        製品モデルに対する部品構成表を管理。
+        フィルタ: product_model, part_master
+      summary: 製品BOM作成
+      tags:
+      - 製品BOM
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductBOMRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProductBOMRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProductBOMRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductBOM'
+          description: ''
+  /api/v1/product-boms/{id}/:
+    get:
+      operationId: product_boms_retrieve
+      description: |-
+        製品BOM CRUD API
+
+        製品モデルに対する部品構成表を管理。
+        フィルタ: product_model, part_master
+      summary: 製品BOM詳細取得
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 製品BOM.
+        required: true
+      tags:
+      - 製品BOM
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductBOM'
+          description: ''
+    put:
+      operationId: product_boms_update
+      description: |-
+        製品BOM CRUD API
+
+        製品モデルに対する部品構成表を管理。
+        フィルタ: product_model, part_master
+      summary: 製品BOM更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 製品BOM.
+        required: true
+      tags:
+      - 製品BOM
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductBOMRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProductBOMRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProductBOMRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductBOM'
+          description: ''
+    patch:
+      operationId: product_boms_partial_update
+      description: |-
+        製品BOM CRUD API
+
+        製品モデルに対する部品構成表を管理。
+        フィルタ: product_model, part_master
+      summary: 製品BOM部分更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 製品BOM.
+        required: true
+      tags:
+      - 製品BOM
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProductBOMRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProductBOMRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProductBOMRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductBOM'
+          description: ''
+    delete:
+      operationId: product_boms_destroy
+      description: |-
+        製品BOM CRUD API
+
+        製品モデルに対する部品構成表を管理。
+        フィルタ: product_model, part_master
+      summary: 製品BOM削除
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 製品BOM.
+        required: true
+      tags:
+      - 製品BOM
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/product-models/:
+    get:
+      operationId: product_models_list
+      description: |-
+        製品モデル CRUD API
+
+        BAITEN STAND などの製品型番・バージョンを管理。
+      summary: 製品モデル一覧取得
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 製品モデル
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProductModelList'
+          description: ''
+    post:
+      operationId: product_models_create
+      description: |-
+        製品モデル CRUD API
+
+        BAITEN STAND などの製品型番・バージョンを管理。
+      summary: 製品モデル作成
+      tags:
+      - 製品モデル
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductModelRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProductModelRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProductModelRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductModel'
+          description: ''
+  /api/v1/product-models/{id}/:
+    get:
+      operationId: product_models_retrieve
+      description: |-
+        製品モデル CRUD API
+
+        BAITEN STAND などの製品型番・バージョンを管理。
+      summary: 製品モデル詳細取得
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 製品モデル.
+        required: true
+      tags:
+      - 製品モデル
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductModel'
+          description: ''
+    put:
+      operationId: product_models_update
+      description: |-
+        製品モデル CRUD API
+
+        BAITEN STAND などの製品型番・バージョンを管理。
+      summary: 製品モデル更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 製品モデル.
+        required: true
+      tags:
+      - 製品モデル
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductModelRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProductModelRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProductModelRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductModel'
+          description: ''
+    patch:
+      operationId: product_models_partial_update
+      description: |-
+        製品モデル CRUD API
+
+        BAITEN STAND などの製品型番・バージョンを管理。
+      summary: 製品モデル部分更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 製品モデル.
+        required: true
+      tags:
+      - 製品モデル
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProductModelRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProductModelRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProductModelRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductModel'
+          description: ''
+    delete:
+      operationId: product_models_destroy
+      description: |-
+        製品モデル CRUD API
+
+        BAITEN STAND などの製品型番・バージョンを管理。
+      summary: 製品モデル削除
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 製品モデル.
+        required: true
+      tags:
+      - 製品モデル
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/site-configs/:
+    get:
+      operationId: site_configs_list
+      description: |-
+        拠点設定 CRUD API
+
+        拠点固有のクレデンシャル/設定（POS・決済・通知等）を管理。
+        token / secret 系はレスポンスでマスクされる。
+        フィルタ: customer_site
+      summary: 拠点設定一覧取得
+      parameters:
+      - in: query
+        name: customer_site
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 拠点設定
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSiteConfigList'
+          description: ''
+    post:
+      operationId: site_configs_create
+      description: |-
+        拠点設定 CRUD API
+
+        拠点固有のクレデンシャル/設定（POS・決済・通知等）を管理。
+        token / secret 系はレスポンスでマスクされる。
+        フィルタ: customer_site
+      summary: 拠点設定作成
+      tags:
+      - 拠点設定
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SiteConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SiteConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SiteConfigRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteConfig'
+          description: ''
+  /api/v1/site-configs/{id}/:
+    get:
+      operationId: site_configs_retrieve
+      description: |-
+        拠点設定 CRUD API
+
+        拠点固有のクレデンシャル/設定（POS・決済・通知等）を管理。
+        token / secret 系はレスポンスでマスクされる。
+        フィルタ: customer_site
+      summary: 拠点設定詳細取得
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 拠点設定.
+        required: true
+      tags:
+      - 拠点設定
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteConfig'
+          description: ''
+    put:
+      operationId: site_configs_update
+      description: |-
+        拠点設定 CRUD API
+
+        拠点固有のクレデンシャル/設定（POS・決済・通知等）を管理。
+        token / secret 系はレスポンスでマスクされる。
+        フィルタ: customer_site
+      summary: 拠点設定更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 拠点設定.
+        required: true
+      tags:
+      - 拠点設定
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SiteConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SiteConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SiteConfigRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteConfig'
+          description: ''
+    patch:
+      operationId: site_configs_partial_update
+      description: |-
+        拠点設定 CRUD API
+
+        拠点固有のクレデンシャル/設定（POS・決済・通知等）を管理。
+        token / secret 系はレスポンスでマスクされる。
+        フィルタ: customer_site
+      summary: 拠点設定部分更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 拠点設定.
+        required: true
+      tags:
+      - 拠点設定
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSiteConfigRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSiteConfigRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSiteConfigRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteConfig'
+          description: ''
+    delete:
+      operationId: site_configs_destroy
+      description: |-
+        拠点設定 CRUD API
+
+        拠点固有のクレデンシャル/設定（POS・決済・通知等）を管理。
+        token / secret 系はレスポンスでマスクされる。
+        フィルタ: customer_site
+      summary: 拠点設定削除
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 拠点設定.
+        required: true
+      tags:
+      - 拠点設定
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    BssSet:
+      type: object
+      description: BSSセットシリアライザ
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        set_code:
+          type: string
+          title: セットコード
+          description: '例: BST-2025-0010'
+          maxLength: 50
+        product_model:
+          type: integer
+          title: 製品モデル
+          description: どのBOMで組んだか
+        product_model_code:
+          type: string
+          readOnly: true
+        product_model_name:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/BssSetStatusEnum'
+          title: ステータス
+        status_display:
+          type: string
+          readOnly: true
+        customer_site:
+          type: integer
+          nullable: true
+          title: 設置拠点
+        customer_site_name:
+          type: string
+          readOnly: true
+        customer_name:
+          type: string
+          readOnly: true
+        installed_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: 設置日時
+        removed_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: 撤去日時
+        note:
+          type: string
+          nullable: true
+          title: 備考
+        components_count:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 作成日時
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新日時
+      required:
+      - components_count
+      - created_at
+      - customer_name
+      - customer_site_name
+      - id
+      - product_model
+      - product_model_code
+      - product_model_name
+      - set_code
+      - status_display
+      - updated_at
+    BssSetComponent:
+      type: object
+      description: BSSセット構成部品シリアライザ
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        bss_set:
+          type: integer
+          title: BSSセット
+        set_code:
+          type: string
+          readOnly: true
+        part_unit:
+          type: integer
+          title: 部品実物
+        serial_number:
+          type: string
+          readOnly: true
+        part_code:
+          type: string
+          readOnly: true
+        part_name:
+          type: string
+          readOnly: true
+        role:
+          type: string
+          nullable: true
+          title: 役割
+          description: '例: MAIN_PC, CAMERA1, PAYMENT'
+          maxLength: 50
+        mounted_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: 搭載日時
+        unmounted_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: 取り外し日時
+        is_mounted:
+          type: boolean
+          readOnly: true
+        note:
+          type: string
+          nullable: true
+          title: 備考
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 作成日時
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新日時
+      required:
+      - bss_set
+      - created_at
+      - id
+      - is_mounted
+      - part_code
+      - part_name
+      - part_unit
+      - serial_number
+      - set_code
+      - updated_at
+    BssSetComponentRequest:
+      type: object
+      description: BSSセット構成部品シリアライザ
+      properties:
+        bss_set:
+          type: integer
+          title: BSSセット
+        part_unit:
+          type: integer
+          title: 部品実物
+        role:
+          type: string
+          nullable: true
+          title: 役割
+          description: '例: MAIN_PC, CAMERA1, PAYMENT'
+          maxLength: 50
+        mounted_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: 搭載日時
+        unmounted_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: 取り外し日時
+        note:
+          type: string
+          nullable: true
+          title: 備考
+      required:
+      - bss_set
+      - part_unit
+    BssSetComposition:
+      type: object
+      description: セット構成ビュー用シリアライザ（読み取り専用）
+      properties:
+        set_id:
+          type: integer
+        set_code:
+          type: string
+        product_model:
+          type: string
+        components:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComponentDetail'
+      required:
+      - components
+      - product_model
+      - set_code
+      - set_id
+    BssSetConfig:
+      type: object
+      description: BSSセット設定シリアライザ
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        bss_set:
+          type: integer
+          title: BSSセット
+        set_code:
+          type: string
+          readOnly: true
+        config_group:
+          type: string
+          title: 設定グループ
+          description: '例: POS, PAYPAY, NETWORK, SYSTEM'
+          maxLength: 50
+        key:
+          type: string
+          title: 設定キー
+          description: '例: paypay_merchant_id, pos_store_id'
+          maxLength: 100
+        value:
+          type: string
+          nullable: true
+          title: 設定値
+        masked_value:
+          type: string
+          nullable: true
+          description: 秘匿情報の場合はマスクした値を返す
+          readOnly: true
+        value_json:
+          nullable: true
+          title: 設定値(JSON)
+          description: 複雑な設定を入れる場所
+        is_secret:
+          type: boolean
+          title: 秘匿情報
+          description: APIキーなど秘匿情報の場合はTrue
+        valid_from:
+          type: string
+          format: date-time
+          nullable: true
+          title: 有効開始日時
+        valid_to:
+          type: string
+          format: date-time
+          nullable: true
+          title: 有効終了日時
+        is_valid:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 作成日時
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新日時
+      required:
+      - bss_set
+      - config_group
+      - created_at
+      - id
+      - is_valid
+      - key
+      - masked_value
+      - set_code
+      - updated_at
+    BssSetConfigRequest:
+      type: object
+      description: BSSセット設定シリアライザ
+      properties:
+        bss_set:
+          type: integer
+          title: BSSセット
+        config_group:
+          type: string
+          minLength: 1
+          title: 設定グループ
+          description: '例: POS, PAYPAY, NETWORK, SYSTEM'
+          maxLength: 50
+        key:
+          type: string
+          minLength: 1
+          title: 設定キー
+          description: '例: paypay_merchant_id, pos_store_id'
+          maxLength: 100
+        value:
+          type: string
+          nullable: true
+          title: 設定値
+        value_json:
+          nullable: true
+          title: 設定値(JSON)
+          description: 複雑な設定を入れる場所
+        is_secret:
+          type: boolean
+          title: 秘匿情報
+          description: APIキーなど秘匿情報の場合はTrue
+        valid_from:
+          type: string
+          format: date-time
+          nullable: true
+          title: 有効開始日時
+        valid_to:
+          type: string
+          format: date-time
+          nullable: true
+          title: 有効終了日時
+      required:
+      - bss_set
+      - config_group
+      - key
+    BssSetRequest:
+      type: object
+      description: BSSセットシリアライザ
+      properties:
+        set_code:
+          type: string
+          minLength: 1
+          title: セットコード
+          description: '例: BST-2025-0010'
+          maxLength: 50
+        product_model:
+          type: integer
+          title: 製品モデル
+          description: どのBOMで組んだか
+        status:
+          allOf:
+          - $ref: '#/components/schemas/BssSetStatusEnum'
+          title: ステータス
+        customer_site:
+          type: integer
+          nullable: true
+          title: 設置拠点
+        installed_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: 設置日時
+        removed_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: 撤去日時
+        note:
+          type: string
+          nullable: true
+          title: 備考
+      required:
+      - product_model
+      - set_code
+    BssSetStatusEnum:
+      enum:
+      - ASSEMBLED
+      - INSTALLED
+      - REPAIR
+      - RECOVERED
+      - SCRAPPED
+      type: string
+      description: |-
+        * `ASSEMBLED` - 組立完了
+        * `INSTALLED` - 設置済
+        * `REPAIR` - 修理中
+        * `RECOVERED` - 回収済
+        * `SCRAPPED` - 廃棄
+    CategoryEnum:
+      enum:
+      - PC
+      - MONITOR
+      - CAMERA
+      - BARCODE
+      - PAYMENT
+      - CABLE
+      - OTHER
+      type: string
+      description: |-
+        * `PC` - PC
+        * `MONITOR` - モニター
+        * `CAMERA` - カメラ
+        * `BARCODE` - バーコードリーダー
+        * `PAYMENT` - 決済端末
+        * `CABLE` - ケーブル
+        * `OTHER` - その他
+    ComponentDetail:
+      type: object
+      description: セット構成詳細用シリアライザ（読み取り専用）
+      properties:
+        role:
+          type: string
+        part_code:
+          type: string
+        serial_number:
+          type: string
+      required:
+      - part_code
+      - role
+      - serial_number
+    Customer:
+      type: object
+      description: 顧客シリアライザ
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          title: 顧客コード
+          maxLength: 50
+        name:
+          type: string
+          title: 顧客名
+          maxLength: 200
+        contact_person:
+          type: string
+          nullable: true
+          title: 担当者名
+          maxLength: 100
+        contact_email:
+          type: string
+          format: email
+          nullable: true
+          title: 連絡先メール
+          maxLength: 254
+        contact_tel:
+          type: string
+          nullable: true
+          title: 連絡先電話番号
+          maxLength: 20
+        note:
+          type: string
+          nullable: true
+          title: 備考
+        sites_count:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 作成日時
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新日時
+      required:
+      - code
+      - created_at
+      - id
+      - name
+      - sites_count
+      - updated_at
+    CustomerRequest:
+      type: object
+      description: 顧客シリアライザ
+      properties:
+        code:
+          type: string
+          minLength: 1
+          title: 顧客コード
+          maxLength: 50
+        name:
+          type: string
+          minLength: 1
+          title: 顧客名
+          maxLength: 200
+        contact_person:
+          type: string
+          nullable: true
+          title: 担当者名
+          maxLength: 100
+        contact_email:
+          type: string
+          format: email
+          nullable: true
+          title: 連絡先メール
+          maxLength: 254
+        contact_tel:
+          type: string
+          nullable: true
+          title: 連絡先電話番号
+          maxLength: 20
+        note:
+          type: string
+          nullable: true
+          title: 備考
+      required:
+      - code
+      - name
+    CustomerSite:
+      type: object
+      description: 顧客拠点シリアライザ
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        customer:
+          type: integer
+          title: 顧客
+        customer_name:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          title: 拠点名
+          description: '例: ○○工場売店'
+          maxLength: 200
+        address:
+          type: string
+          nullable: true
+          title: 住所
+          maxLength: 500
+        timezone:
+          type: string
+          title: タイムゾーン
+          maxLength: 50
+        lifecycle_status:
+          allOf:
+          - $ref: '#/components/schemas/LifecycleStatusEnum'
+          title: ライフサイクル状態
+        lifecycle_status_display:
+          type: string
+          readOnly: true
+        note:
+          type: string
+          nullable: true
+          title: 備考
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 作成日時
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新日時
+      required:
+      - created_at
+      - customer
+      - customer_name
+      - id
+      - lifecycle_status_display
+      - name
+      - updated_at
+    CustomerSiteRequest:
+      type: object
+      description: 顧客拠点シリアライザ
+      properties:
+        customer:
+          type: integer
+          title: 顧客
+        name:
+          type: string
+          minLength: 1
+          title: 拠点名
+          description: '例: ○○工場売店'
+          maxLength: 200
+        address:
+          type: string
+          nullable: true
+          title: 住所
+          maxLength: 500
+        timezone:
+          type: string
+          minLength: 1
+          title: タイムゾーン
+          maxLength: 50
+        lifecycle_status:
+          allOf:
+          - $ref: '#/components/schemas/LifecycleStatusEnum'
+          title: ライフサイクル状態
+        note:
+          type: string
+          nullable: true
+          title: 備考
+      required:
+      - customer
+      - name
+    DashboardCustomersSummary:
+      type: object
+      description: 'ダッシュボード: 顧客集計'
+      properties:
+        total:
+          type: integer
+      required:
+      - total
+    DashboardPartUnitsSummary:
+      type: object
+      description: 'ダッシュボード: 部品実物集計'
+      properties:
+        total:
+          type: integer
+        by_status:
+          type: object
+          additionalProperties:
+            type: integer
+        by_category:
+          type: object
+          additionalProperties:
+            type: integer
+      required:
+      - by_category
+      - by_status
+      - total
+    DashboardSetsSummary:
+      type: object
+      description: 'ダッシュボード: セット集計'
+      properties:
+        total:
+          type: integer
+        by_status:
+          type: object
+          additionalProperties:
+            type: integer
+      required:
+      - by_status
+      - total
+    DashboardSitesSummary:
+      type: object
+      description: 'ダッシュボード: 拠点集計'
+      properties:
+        total:
+          type: integer
+        by_lifecycle_status:
+          type: object
+          additionalProperties:
+            type: integer
+      required:
+      - by_lifecycle_status
+      - total
+    DashboardSummary:
+      type: object
+      description: ダッシュボードサマリーのシリアライザ（読み取り専用）
+      properties:
+        sets:
+          $ref: '#/components/schemas/DashboardSetsSummary'
+        part_units:
+          $ref: '#/components/schemas/DashboardPartUnitsSummary'
+        sites:
+          $ref: '#/components/schemas/DashboardSitesSummary'
+        customers:
+          $ref: '#/components/schemas/DashboardCustomersSummary'
+      required:
+      - customers
+      - part_units
+      - sets
+      - sites
+    DeployEvent:
+      type: object
+      description: 導入イベントシリアライザ（追記型）
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        bss_set:
+          type: integer
+          title: BSSセット
+        set_code:
+          type: string
+          readOnly: true
+        stage:
+          allOf:
+          - $ref: '#/components/schemas/StageEnum'
+          title: ステージ
+        stage_display:
+          type: string
+          readOnly: true
+        note:
+          type: string
+          nullable: true
+          title: 備考
+        occurred_at:
+          type: string
+          format: date-time
+          title: 発生日時
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 作成日時
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新日時
+      required:
+      - bss_set
+      - created_at
+      - id
+      - set_code
+      - stage
+      - stage_display
+      - updated_at
+    DeployEventRequest:
+      type: object
+      description: 導入イベントシリアライザ（追記型）
+      properties:
+        bss_set:
+          type: integer
+          title: BSSセット
+        stage:
+          allOf:
+          - $ref: '#/components/schemas/StageEnum'
+          title: ステージ
+        note:
+          type: string
+          nullable: true
+          title: 備考
+        occurred_at:
+          type: string
+          format: date-time
+          title: 発生日時
+      required:
+      - bss_set
+      - stage
+    EffectiveConfig:
+      type: object
+      description: 有効なコンフィグ一覧用シリアライザ（読み取り専用）
+      properties:
+        config_group:
+          type: string
+        key:
+          type: string
+        value:
+          type: string
+          nullable: true
+        value_json:
+          nullable: true
+        is_secret:
+          type: boolean
+        valid_from:
+          type: string
+          format: date-time
+          nullable: true
+        valid_to:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - config_group
+      - is_secret
+      - key
+      - valid_from
+      - valid_to
+      - value
+      - value_json
+    EquipmentRef:
+      type: object
+      description: 機器管理参照シリアライザ
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        external_id:
+          type: string
+          title: 外部ID
+          description: L4 機器管理DBのレコードID
+          maxLength: 100
+        name:
+          type: string
+          nullable: true
+          title: 機器名
+          maxLength: 200
+        part_units:
+          type: array
+          items:
+            type: integer
+            title: 部品実物
+          title: 部品実物
+        part_unit_serials:
+          type: array
+          items:
+            type: string
+            title: シリアル番号
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 作成日時
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新日時
+      required:
+      - created_at
+      - external_id
+      - id
+      - part_unit_serials
+      - updated_at
+    EquipmentRefRequest:
+      type: object
+      description: 機器管理参照シリアライザ
+      properties:
+        external_id:
+          type: string
+          minLength: 1
+          title: 外部ID
+          description: L4 機器管理DBのレコードID
+          maxLength: 100
+        name:
+          type: string
+          nullable: true
+          title: 機器名
+          maxLength: 200
+        part_units:
+          type: array
+          items:
+            type: integer
+            title: 部品実物
+          title: 部品実物
+      required:
+      - external_id
+    EventTypeEnum:
+      enum:
+      - FAILURE
+      - REPLACEMENT
+      - INSPECTION
+      - CONFIG_CHANGE
+      type: string
+      description: |-
+        * `FAILURE` - 故障
+        * `REPLACEMENT` - 交換
+        * `INSPECTION` - 点検
+        * `CONFIG_CHANGE` - 設定変更
+    KindEnum:
+      enum:
+      - PURCHASED
+      - MOUNTED
+      - UNMOUNTED
+      - MAINTENANCE
+      type: string
+      description: |-
+        * `PURCHASED` - PURCHASED
+        * `MOUNTED` - MOUNTED
+        * `UNMOUNTED` - UNMOUNTED
+        * `MAINTENANCE` - MAINTENANCE
+    LifecycleStatusEnum:
+      enum:
+      - PREPARING
+      - ACTIVE
+      - WITHDRAWN
+      - BASE
+      - LOANED
+      type: string
+      description: |-
+        * `PREPARING` - 準備中
+        * `ACTIVE` - 稼働中
+        * `WITHDRAWN` - 撤退済
+        * `BASE` - 拠点
+        * `LOANED` - 貸出中
+    LookupBySerial:
+      type: object
+      description: シリアル番号逆引き用シリアライザ（読み取り専用）
+      properties:
+        part_unit_id:
+          type: integer
+        serial_number:
+          type: string
+        part_master:
+          type: string
+        current_set:
+          type: object
+          additionalProperties: {}
+          nullable: true
+        current_site:
+          type: object
+          additionalProperties: {}
+          nullable: true
+      required:
+      - current_set
+      - current_site
+      - part_master
+      - part_unit_id
+      - serial_number
+    MaintenanceEvent:
+      type: object
+      description: 保守イベントシリアライザ（追記型）
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        bss_set:
+          type: integer
+          title: BSSセット
+        set_code:
+          type: string
+          readOnly: true
+        part_unit:
+          type: integer
+          nullable: true
+          title: 対象部品実物
+        serial_number:
+          type: string
+          nullable: true
+          description: 対象部品実物のシリアル番号（部品指定なしの場合はNone）
+          readOnly: true
+        event_type:
+          allOf:
+          - $ref: '#/components/schemas/EventTypeEnum'
+          title: イベント種別
+        event_type_display:
+          type: string
+          readOnly: true
+        note:
+          type: string
+          nullable: true
+          title: 備考
+        occurred_at:
+          type: string
+          format: date-time
+          title: 発生日時
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 作成日時
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新日時
+      required:
+      - bss_set
+      - created_at
+      - event_type
+      - event_type_display
+      - id
+      - serial_number
+      - set_code
+      - updated_at
+    MaintenanceEventRequest:
+      type: object
+      description: 保守イベントシリアライザ（追記型）
+      properties:
+        bss_set:
+          type: integer
+          title: BSSセット
+        part_unit:
+          type: integer
+          nullable: true
+          title: 対象部品実物
+        event_type:
+          allOf:
+          - $ref: '#/components/schemas/EventTypeEnum'
+          title: イベント種別
+        note:
+          type: string
+          nullable: true
+          title: 備考
+        occurred_at:
+          type: string
+          format: date-time
+          title: 発生日時
+      required:
+      - bss_set
+      - event_type
+    PaginatedBssSetComponentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BssSetComponent'
+    PaginatedBssSetConfigList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BssSetConfig'
+    PaginatedBssSetList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BssSet'
+    PaginatedCustomerList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Customer'
+    PaginatedCustomerSiteList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerSite'
+    PaginatedDeployEventList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeployEvent'
+    PaginatedEffectiveConfigList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/EffectiveConfig'
+    PaginatedEquipmentRefList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/EquipmentRef'
+    PaginatedMaintenanceEventList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaintenanceEvent'
+    PaginatedPartMasterList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PartMaster'
+    PaginatedPartUnitList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PartUnit'
+    PaginatedProductBOMList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductBOM'
+    PaginatedProductModelList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductModel'
+    PaginatedSiteConfigList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SiteConfig'
+    PartMaster:
+      type: object
+      description: 部品マスタシリアライザ
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        part_code:
+          type: string
+          title: 部品コード
+          description: '社内部品コード（例: CAM-USB-001）'
+          maxLength: 50
+        name:
+          type: string
+          title: 部品名
+          description: '部品名（例: USB Camera FullHD）'
+          maxLength: 200
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategoryEnum'
+          title: カテゴリ
+        category_display:
+          type: string
+          readOnly: true
+        maker:
+          type: string
+          nullable: true
+          title: メーカー
+          maxLength: 100
+        model_number:
+          type: string
+          nullable: true
+          title: 型番
+          maxLength: 100
+        spec_json:
+          nullable: true
+          title: スペック情報
+          description: 解像度やインターフェースなどをJSON形式で保存
+        size:
+          type: string
+          nullable: true
+          title: サイズ
+          maxLength: 100
+        used_in_ai:
+          type: boolean
+          title: AI使用
+          description: BAITEN AI モデルで使用する部品
+        used_in_mini:
+          type: boolean
+          title: Mini使用
+          description: BAITEN Mini モデルで使用する部品
+        is_active:
+          type: boolean
+          title: 有効フラグ
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 作成日時
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新日時
+      required:
+      - category_display
+      - created_at
+      - id
+      - name
+      - part_code
+      - updated_at
+    PartMasterRequest:
+      type: object
+      description: 部品マスタシリアライザ
+      properties:
+        part_code:
+          type: string
+          minLength: 1
+          title: 部品コード
+          description: '社内部品コード（例: CAM-USB-001）'
+          maxLength: 50
+        name:
+          type: string
+          minLength: 1
+          title: 部品名
+          description: '部品名（例: USB Camera FullHD）'
+          maxLength: 200
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategoryEnum'
+          title: カテゴリ
+        maker:
+          type: string
+          nullable: true
+          title: メーカー
+          maxLength: 100
+        model_number:
+          type: string
+          nullable: true
+          title: 型番
+          maxLength: 100
+        spec_json:
+          nullable: true
+          title: スペック情報
+          description: 解像度やインターフェースなどをJSON形式で保存
+        size:
+          type: string
+          nullable: true
+          title: サイズ
+          maxLength: 100
+        used_in_ai:
+          type: boolean
+          title: AI使用
+          description: BAITEN AI モデルで使用する部品
+        used_in_mini:
+          type: boolean
+          title: Mini使用
+          description: BAITEN Mini モデルで使用する部品
+        is_active:
+          type: boolean
+          title: 有効フラグ
+      required:
+      - name
+      - part_code
+    PartUnit:
+      type: object
+      description: 部品実物シリアライザ
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        part_master:
+          type: integer
+          title: 部品マスタ
+        part_master_code:
+          type: string
+          readOnly: true
+        part_master_name:
+          type: string
+          readOnly: true
+        serial_number:
+          type: string
+          title: シリアル番号
+          maxLength: 100
+        purchase_date:
+          type: string
+          format: date
+          nullable: true
+          title: 購入日
+        purchase_order_no:
+          type: string
+          nullable: true
+          title: 発注番号
+          maxLength: 50
+        status:
+          allOf:
+          - $ref: '#/components/schemas/PartUnitStatusEnum'
+          title: ステータス
+        status_display:
+          type: string
+          readOnly: true
+        note:
+          type: string
+          nullable: true
+          title: 備考
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 作成日時
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新日時
+      required:
+      - created_at
+      - id
+      - part_master
+      - part_master_code
+      - part_master_name
+      - serial_number
+      - status_display
+      - updated_at
+    PartUnitHistory:
+      type: object
+      description: 部品使用履歴レスポンスのシリアライザ（読み取り専用）
+      properties:
+        part_unit:
+          type: object
+          additionalProperties: {}
+        timeline:
+          type: array
+          items:
+            $ref: '#/components/schemas/PartUnitHistoryEntry'
+      required:
+      - part_unit
+      - timeline
+    PartUnitHistoryEntry:
+      type: object
+      description: 部品使用履歴タイムライン1件分のシリアライザ（読み取り専用）
+      properties:
+        kind:
+          $ref: '#/components/schemas/KindEnum'
+        occurred_at:
+          type: string
+          format: date-time
+        set_code:
+          type: string
+          nullable: true
+        role:
+          type: string
+          nullable: true
+        event_type:
+          type: string
+          nullable: true
+        event_type_display:
+          type: string
+          nullable: true
+        note:
+          type: string
+          nullable: true
+        purchase_order_no:
+          type: string
+          nullable: true
+      required:
+      - event_type
+      - event_type_display
+      - kind
+      - note
+      - occurred_at
+      - purchase_order_no
+      - role
+      - set_code
+    PartUnitRequest:
+      type: object
+      description: 部品実物シリアライザ
+      properties:
+        part_master:
+          type: integer
+          title: 部品マスタ
+        serial_number:
+          type: string
+          minLength: 1
+          title: シリアル番号
+          maxLength: 100
+        purchase_date:
+          type: string
+          format: date
+          nullable: true
+          title: 購入日
+        purchase_order_no:
+          type: string
+          nullable: true
+          title: 発注番号
+          maxLength: 50
+        status:
+          allOf:
+          - $ref: '#/components/schemas/PartUnitStatusEnum'
+          title: ステータス
+        note:
+          type: string
+          nullable: true
+          title: 備考
+      required:
+      - part_master
+      - serial_number
+    PartUnitStatusEnum:
+      enum:
+      - IN_STOCK
+      - ASSIGNED
+      - BROKEN
+      - SCRAPPED
+      type: string
+      description: |-
+        * `IN_STOCK` - 在庫
+        * `ASSIGNED` - 割当済
+        * `BROKEN` - 故障
+        * `SCRAPPED` - 廃棄
+    PatchedBssSetComponentRequest:
+      type: object
+      description: BSSセット構成部品シリアライザ
+      properties:
+        bss_set:
+          type: integer
+          title: BSSセット
+        part_unit:
+          type: integer
+          title: 部品実物
+        role:
+          type: string
+          nullable: true
+          title: 役割
+          description: '例: MAIN_PC, CAMERA1, PAYMENT'
+          maxLength: 50
+        mounted_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: 搭載日時
+        unmounted_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: 取り外し日時
+        note:
+          type: string
+          nullable: true
+          title: 備考
+    PatchedBssSetConfigRequest:
+      type: object
+      description: BSSセット設定シリアライザ
+      properties:
+        bss_set:
+          type: integer
+          title: BSSセット
+        config_group:
+          type: string
+          minLength: 1
+          title: 設定グループ
+          description: '例: POS, PAYPAY, NETWORK, SYSTEM'
+          maxLength: 50
+        key:
+          type: string
+          minLength: 1
+          title: 設定キー
+          description: '例: paypay_merchant_id, pos_store_id'
+          maxLength: 100
+        value:
+          type: string
+          nullable: true
+          title: 設定値
+        value_json:
+          nullable: true
+          title: 設定値(JSON)
+          description: 複雑な設定を入れる場所
+        is_secret:
+          type: boolean
+          title: 秘匿情報
+          description: APIキーなど秘匿情報の場合はTrue
+        valid_from:
+          type: string
+          format: date-time
+          nullable: true
+          title: 有効開始日時
+        valid_to:
+          type: string
+          format: date-time
+          nullable: true
+          title: 有効終了日時
+    PatchedBssSetRequest:
+      type: object
+      description: BSSセットシリアライザ
+      properties:
+        set_code:
+          type: string
+          minLength: 1
+          title: セットコード
+          description: '例: BST-2025-0010'
+          maxLength: 50
+        product_model:
+          type: integer
+          title: 製品モデル
+          description: どのBOMで組んだか
+        status:
+          allOf:
+          - $ref: '#/components/schemas/BssSetStatusEnum'
+          title: ステータス
+        customer_site:
+          type: integer
+          nullable: true
+          title: 設置拠点
+        installed_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: 設置日時
+        removed_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: 撤去日時
+        note:
+          type: string
+          nullable: true
+          title: 備考
+    PatchedCustomerRequest:
+      type: object
+      description: 顧客シリアライザ
+      properties:
+        code:
+          type: string
+          minLength: 1
+          title: 顧客コード
+          maxLength: 50
+        name:
+          type: string
+          minLength: 1
+          title: 顧客名
+          maxLength: 200
+        contact_person:
+          type: string
+          nullable: true
+          title: 担当者名
+          maxLength: 100
+        contact_email:
+          type: string
+          format: email
+          nullable: true
+          title: 連絡先メール
+          maxLength: 254
+        contact_tel:
+          type: string
+          nullable: true
+          title: 連絡先電話番号
+          maxLength: 20
+        note:
+          type: string
+          nullable: true
+          title: 備考
+    PatchedCustomerSiteRequest:
+      type: object
+      description: 顧客拠点シリアライザ
+      properties:
+        customer:
+          type: integer
+          title: 顧客
+        name:
+          type: string
+          minLength: 1
+          title: 拠点名
+          description: '例: ○○工場売店'
+          maxLength: 200
+        address:
+          type: string
+          nullable: true
+          title: 住所
+          maxLength: 500
+        timezone:
+          type: string
+          minLength: 1
+          title: タイムゾーン
+          maxLength: 50
+        lifecycle_status:
+          allOf:
+          - $ref: '#/components/schemas/LifecycleStatusEnum'
+          title: ライフサイクル状態
+        note:
+          type: string
+          nullable: true
+          title: 備考
+    PatchedEquipmentRefRequest:
+      type: object
+      description: 機器管理参照シリアライザ
+      properties:
+        external_id:
+          type: string
+          minLength: 1
+          title: 外部ID
+          description: L4 機器管理DBのレコードID
+          maxLength: 100
+        name:
+          type: string
+          nullable: true
+          title: 機器名
+          maxLength: 200
+        part_units:
+          type: array
+          items:
+            type: integer
+            title: 部品実物
+          title: 部品実物
+    PatchedPartMasterRequest:
+      type: object
+      description: 部品マスタシリアライザ
+      properties:
+        part_code:
+          type: string
+          minLength: 1
+          title: 部品コード
+          description: '社内部品コード（例: CAM-USB-001）'
+          maxLength: 50
+        name:
+          type: string
+          minLength: 1
+          title: 部品名
+          description: '部品名（例: USB Camera FullHD）'
+          maxLength: 200
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategoryEnum'
+          title: カテゴリ
+        maker:
+          type: string
+          nullable: true
+          title: メーカー
+          maxLength: 100
+        model_number:
+          type: string
+          nullable: true
+          title: 型番
+          maxLength: 100
+        spec_json:
+          nullable: true
+          title: スペック情報
+          description: 解像度やインターフェースなどをJSON形式で保存
+        size:
+          type: string
+          nullable: true
+          title: サイズ
+          maxLength: 100
+        used_in_ai:
+          type: boolean
+          title: AI使用
+          description: BAITEN AI モデルで使用する部品
+        used_in_mini:
+          type: boolean
+          title: Mini使用
+          description: BAITEN Mini モデルで使用する部品
+        is_active:
+          type: boolean
+          title: 有効フラグ
+    PatchedPartUnitRequest:
+      type: object
+      description: 部品実物シリアライザ
+      properties:
+        part_master:
+          type: integer
+          title: 部品マスタ
+        serial_number:
+          type: string
+          minLength: 1
+          title: シリアル番号
+          maxLength: 100
+        purchase_date:
+          type: string
+          format: date
+          nullable: true
+          title: 購入日
+        purchase_order_no:
+          type: string
+          nullable: true
+          title: 発注番号
+          maxLength: 50
+        status:
+          allOf:
+          - $ref: '#/components/schemas/PartUnitStatusEnum'
+          title: ステータス
+        note:
+          type: string
+          nullable: true
+          title: 備考
+    PatchedProductBOMRequest:
+      type: object
+      description: 製品BOMシリアライザ
+      properties:
+        product_model:
+          type: integer
+          title: 製品モデル
+        part_master:
+          type: integer
+          title: 部品マスタ
+        quantity:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: 数量
+        is_optional:
+          type: boolean
+          title: オプション部品
+          description: 代替・オプション部品の場合はTrue
+    PatchedProductModelRequest:
+      type: object
+      description: 製品モデルシリアライザ
+      properties:
+        code:
+          type: string
+          minLength: 1
+          title: 製品コード
+          description: '例: BSTAND-V1.2'
+          maxLength: 50
+        name:
+          type: string
+          minLength: 1
+          title: 製品名
+          maxLength: 200
+        description:
+          type: string
+          nullable: true
+          title: 説明
+    PatchedSiteConfigRequest:
+      type: object
+      description: |-
+        拠点設定シリアライザ
+
+        token / secret 系フィールドは書き込み可能だが、
+        レスポンスでは必ずマスクして返す（CLAUDE.md §4.1）。
+      properties:
+        customer_site:
+          type: integer
+          title: 顧客拠点
+        loyverse_account:
+          type: string
+          nullable: true
+          title: Loyverseアカウント
+          maxLength: 200
+        loyverse_store_id:
+          type: string
+          nullable: true
+          title: Loyverse店舗ID
+          maxLength: 100
+        loyverse_token:
+          type: string
+          nullable: true
+          title: Loyverseトークン
+        square_account:
+          type: string
+          nullable: true
+          title: Squareアカウント
+          maxLength: 200
+        squ_device_id:
+          type: string
+          nullable: true
+          title: SquareデバイスID
+          maxLength: 100
+        squ_location_id:
+          type: string
+          nullable: true
+          title: SquareロケーションID
+          maxLength: 100
+        squ_token:
+          type: string
+          nullable: true
+          title: Squareトークン
+        paypay_secret:
+          type: string
+          nullable: true
+          title: PayPayシークレット
+        baiten_cloud_key:
+          type: string
+          nullable: true
+          title: BAITENクラウドキー
+        google_secret:
+          type: string
+          nullable: true
+          title: Googleシークレット
+        slack_bot_token:
+          type: string
+          nullable: true
+          title: Slack Botトークン
+        config_toml:
+          type: string
+          nullable: true
+          title: Config.toml
+          description: 端末に配布する config.toml の内容
+        baiten_env:
+          type: string
+          nullable: true
+          title: Baiten.env
+          description: 端末に配布する環境変数ファイルの内容
+    ProductBOM:
+      type: object
+      description: 製品BOMシリアライザ
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        product_model:
+          type: integer
+          title: 製品モデル
+        product_model_code:
+          type: string
+          readOnly: true
+        part_master:
+          type: integer
+          title: 部品マスタ
+        part_master_code:
+          type: string
+          readOnly: true
+        part_master_name:
+          type: string
+          readOnly: true
+        quantity:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: 数量
+        is_optional:
+          type: boolean
+          title: オプション部品
+          description: 代替・オプション部品の場合はTrue
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 作成日時
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新日時
+      required:
+      - created_at
+      - id
+      - part_master
+      - part_master_code
+      - part_master_name
+      - product_model
+      - product_model_code
+      - updated_at
+    ProductBOMRequest:
+      type: object
+      description: 製品BOMシリアライザ
+      properties:
+        product_model:
+          type: integer
+          title: 製品モデル
+        part_master:
+          type: integer
+          title: 部品マスタ
+        quantity:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: 数量
+        is_optional:
+          type: boolean
+          title: オプション部品
+          description: 代替・オプション部品の場合はTrue
+      required:
+      - part_master
+      - product_model
+    ProductModel:
+      type: object
+      description: 製品モデルシリアライザ
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          title: 製品コード
+          description: '例: BSTAND-V1.2'
+          maxLength: 50
+        name:
+          type: string
+          title: 製品名
+          maxLength: 200
+        description:
+          type: string
+          nullable: true
+          title: 説明
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 作成日時
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新日時
+      required:
+      - code
+      - created_at
+      - id
+      - name
+      - updated_at
+    ProductModelRequest:
+      type: object
+      description: 製品モデルシリアライザ
+      properties:
+        code:
+          type: string
+          minLength: 1
+          title: 製品コード
+          description: '例: BSTAND-V1.2'
+          maxLength: 50
+        name:
+          type: string
+          minLength: 1
+          title: 製品名
+          maxLength: 200
+        description:
+          type: string
+          nullable: true
+          title: 説明
+      required:
+      - code
+      - name
+    SiteConfig:
+      type: object
+      description: |-
+        拠点設定シリアライザ
+
+        token / secret 系フィールドは書き込み可能だが、
+        レスポンスでは必ずマスクして返す（CLAUDE.md §4.1）。
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        customer_site:
+          type: integer
+          title: 顧客拠点
+        customer_site_name:
+          type: string
+          readOnly: true
+        loyverse_account:
+          type: string
+          nullable: true
+          title: Loyverseアカウント
+          maxLength: 200
+        loyverse_store_id:
+          type: string
+          nullable: true
+          title: Loyverse店舗ID
+          maxLength: 100
+        loyverse_token:
+          type: string
+          nullable: true
+          title: Loyverseトークン
+        square_account:
+          type: string
+          nullable: true
+          title: Squareアカウント
+          maxLength: 200
+        squ_device_id:
+          type: string
+          nullable: true
+          title: SquareデバイスID
+          maxLength: 100
+        squ_location_id:
+          type: string
+          nullable: true
+          title: SquareロケーションID
+          maxLength: 100
+        squ_token:
+          type: string
+          nullable: true
+          title: Squareトークン
+        paypay_secret:
+          type: string
+          nullable: true
+          title: PayPayシークレット
+        baiten_cloud_key:
+          type: string
+          nullable: true
+          title: BAITENクラウドキー
+        google_secret:
+          type: string
+          nullable: true
+          title: Googleシークレット
+        slack_bot_token:
+          type: string
+          nullable: true
+          title: Slack Botトークン
+        config_toml:
+          type: string
+          nullable: true
+          title: Config.toml
+          description: 端末に配布する config.toml の内容
+        baiten_env:
+          type: string
+          nullable: true
+          title: Baiten.env
+          description: 端末に配布する環境変数ファイルの内容
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 作成日時
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新日時
+      required:
+      - created_at
+      - customer_site
+      - customer_site_name
+      - id
+      - updated_at
+    SiteConfigRequest:
+      type: object
+      description: |-
+        拠点設定シリアライザ
+
+        token / secret 系フィールドは書き込み可能だが、
+        レスポンスでは必ずマスクして返す（CLAUDE.md §4.1）。
+      properties:
+        customer_site:
+          type: integer
+          title: 顧客拠点
+        loyverse_account:
+          type: string
+          nullable: true
+          title: Loyverseアカウント
+          maxLength: 200
+        loyverse_store_id:
+          type: string
+          nullable: true
+          title: Loyverse店舗ID
+          maxLength: 100
+        loyverse_token:
+          type: string
+          nullable: true
+          title: Loyverseトークン
+        square_account:
+          type: string
+          nullable: true
+          title: Squareアカウント
+          maxLength: 200
+        squ_device_id:
+          type: string
+          nullable: true
+          title: SquareデバイスID
+          maxLength: 100
+        squ_location_id:
+          type: string
+          nullable: true
+          title: SquareロケーションID
+          maxLength: 100
+        squ_token:
+          type: string
+          nullable: true
+          title: Squareトークン
+        paypay_secret:
+          type: string
+          nullable: true
+          title: PayPayシークレット
+        baiten_cloud_key:
+          type: string
+          nullable: true
+          title: BAITENクラウドキー
+        google_secret:
+          type: string
+          nullable: true
+          title: Googleシークレット
+        slack_bot_token:
+          type: string
+          nullable: true
+          title: Slack Botトークン
+        config_toml:
+          type: string
+          nullable: true
+          title: Config.toml
+          description: 端末に配布する config.toml の内容
+        baiten_env:
+          type: string
+          nullable: true
+          title: Baiten.env
+          description: 端末に配布する環境変数ファイルの内容
+      required:
+      - customer_site
+    StageEnum:
+      enum:
+      - INSTALL
+      - ACTIVATION
+      - OPERATION
+      - RECOVERY
+      - REASSEMBLY
+      type: string
+      description: |-
+        * `INSTALL` - 設置
+        * `ACTIVATION` - 開通
+        * `OPERATION` - 稼働
+        * `RECOVERY` - 回収
+        * `REASSEMBLY` - 再組立
+    TokenObtainPair:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - refresh
+    TokenObtainPairRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - password
+      - username
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+      - refresh
+    TokenVerifyRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - token
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

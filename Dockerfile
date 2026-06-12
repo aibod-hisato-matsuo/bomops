@@ -1,4 +1,5 @@
-# BOMOps Dockerfile (開発用)
+# BOMOps Dockerfile（Cloud Run 対応）
+# 開発時は docker-compose.yml が command を runserver に上書きする
 FROM python:3.11-slim
 
 # 環境変数設定
@@ -9,12 +10,6 @@ ENV PYTHONPATH=/app/bomops
 # 作業ディレクトリ設定
 WORKDIR /app
 
-# システム依存パッケージのインストール
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
 # Python依存パッケージのインストール
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -22,8 +17,17 @@ RUN pip install --no-cache-dir -r requirements.txt
 # アプリケーションコードのコピー
 COPY . .
 
-# ポート公開
-EXPOSE 8000
+# 静的ファイルの収集（WhiteNoise配信用。SECRET_KEYはビルド時ダミー）
+RUN DJANGO_SECRET_KEY=collectstatic-build-dummy \
+    python bomops/manage.py collectstatic --noinput --settings=config.settings_prod
 
-# 起動コマンド（開発用: runserver）
-CMD ["python", "bomops/manage.py", "runserver", "0.0.0.0:8000"]
+# Cloud Run は $PORT（既定8080）で待ち受ける
+EXPOSE 8080
+
+# 起動コマンド（本番: gunicorn。$PORT 展開のため shell 形式）
+CMD exec gunicorn config.wsgi:application \
+    --chdir bomops \
+    --bind 0.0.0.0:${PORT:-8080} \
+    --workers 2 \
+    --threads 4 \
+    --timeout 60

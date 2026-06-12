@@ -1,0 +1,52 @@
+.bigSearch {
+  width: 100%;
+  max-width: 640px;
+  padding: 13px 18px;
+  font-size: 15px;
+  border: 2px solid var(--aibod-sky);
+  border-radius: var(--radius);
+  outline: none;
+  background: var(--color-surface);
+  margin-bottom: 24px;
+}
+
+.bigSearch:focus {
+  border-color: var(--aibod-blue);
+}
+
+.placeholder {
+  color: var(--color-text-sub);
+  font-size: 13px;
+}
+
+.results {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 0 24px;
+}
+
+.lookupCard {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--aibod-sky);
+  padding: 14px 20px;
+}
+
+.lookupRow {
+  display: flex;
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+.lookupLabel {
+  width: 130px;
+  flex-shrink: 0;
+  color: var(--color-text-sub);
+  font-size: 12px;
+}
+
+.lookupActions {
+  margin-top: 8px;
+  font-size: 13px;
+}

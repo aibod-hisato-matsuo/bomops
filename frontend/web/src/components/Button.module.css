@@ -1,0 +1,49 @@
+.button {
+  padding: 8px 18px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.12s;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sm {
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.primary {
+  background: var(--aibod-blue);
+  color: var(--aibod-white);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--aibod-navy);
+}
+
+.secondary {
+  background: var(--color-surface);
+  color: var(--aibod-blue);
+  border-color: var(--aibod-blue);
+}
+
+.secondary:hover:not(:disabled) {
+  background: var(--aibod-blue-pale);
+}
+
+.danger {
+  background: var(--color-surface);
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.danger:hover:not(:disabled) {
+  background: #fdecea;
+}

@@ -1,0 +1,39 @@
+.container {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 200;
+}
+
+.toast {
+  padding: 11px 18px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--aibod-white);
+  box-shadow: var(--shadow);
+  animation: fadeIn 0.15s ease-out;
+  max-width: 360px;
+}
+
+@keyframes fadeIn {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.success {
+  background: var(--aibod-blue);
+}
+
+.error {
+  background: var(--color-danger);
+}

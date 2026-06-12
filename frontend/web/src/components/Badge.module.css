@@ -1,0 +1,33 @@
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sky {
+  background: var(--aibod-sky);
+  color: var(--aibod-white);
+}
+
+.pale {
+  background: var(--aibod-blue-pale);
+  color: var(--aibod-blue);
+}
+
+.navy {
+  background: var(--aibod-navy);
+  color: var(--aibod-white);
+}
+
+.gray {
+  background: #e8edf2;
+  color: var(--aibod-gray-mid);
+}
+
+.danger {
+  background: #fdecea;
+  color: var(--color-danger);
+}

@@ -27,6 +27,12 @@ router.register(
     r"bss-set-components", views.BssSetComponentViewSet, basename="bss-set-component"
 )
 router.register(r"bss-set-configs", views.BssSetConfigViewSet, basename="bss-set-config")
+router.register(r"site-configs", views.SiteConfigViewSet, basename="site-config")
+router.register(
+    r"maintenance-events", views.MaintenanceEventViewSet, basename="maintenance-event"
+)
+router.register(r"deploy-events", views.DeployEventViewSet, basename="deploy-event")
+router.register(r"equipment-refs", views.EquipmentRefViewSet, basename="equipment-ref")
 
 app_name = "bom"
 
@@ -36,7 +42,9 @@ urlpatterns = [
     path("auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("auth/token/verify/", TokenVerifyView.as_view(), name="token_verify"),
     # カスタムAPI
+    path("health/", views.health, name="health"),
     path("lookup/by-serial/", views.lookup_by_serial, name="lookup-by-serial"),
+    path("dashboard/summary/", views.dashboard_summary, name="dashboard-summary"),
     # ViewSet Router
     path("", include(router.urls)),
 ]

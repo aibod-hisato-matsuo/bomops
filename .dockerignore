@@ -1,0 +1,29 @@
+# Git / IDE
+.git
+.gitignore
+.DS_Store
+.vscode
+.idea
+
+# Python
+__pycache__
+*.pyc
+venv
+.venv
+.pytest_cache
+
+# 環境変数（Secret Manager から注入する）
+.env
+
+# フロントエンド（Firebase Hosting で別配信）
+frontend
+
+# ドキュメント・作業記録
+docs
+.claudetasks
+CLAUDE.md
+README.md
+
+# ローカルDB・静的ファイル（ビルド時に collectstatic で生成）
+*.sqlite3
+staticfiles

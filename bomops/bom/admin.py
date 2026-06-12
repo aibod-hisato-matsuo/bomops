@@ -14,10 +14,14 @@ from .models import (
     BssSetConfig,
     Customer,
     CustomerSite,
+    DeployEvent,
+    EquipmentRef,
+    MaintenanceEvent,
     PartMaster,
     PartUnit,
     ProductBOM,
     ProductModel,
+    SiteConfig,
 )
 
 
@@ -50,7 +54,10 @@ class PartMasterAdmin(admin.ModelAdmin):
             "fields": ["part_code", "name", "category", "is_active"],
         }),
         ("製品情報", {
-            "fields": ["maker", "model_number", "spec_json"],
+            "fields": ["maker", "model_number", "spec_json", "size"],
+        }),
+        ("使用モデル", {
+            "fields": ["used_in_ai", "used_in_mini"],
         }),
         ("システム情報", {
             "fields": ["created_at", "updated_at"],
@@ -241,12 +248,13 @@ class CustomerSiteAdmin(admin.ModelAdmin):
     list_display = [
         "name",
         "customer",
+        "lifecycle_status",
         "address",
         "timezone",
         "set_count",
         "created_at",
     ]
-    list_filter = ["customer", "timezone"]
+    list_filter = ["lifecycle_status", "customer", "timezone"]
     search_fields = ["name", "address", "customer__name"]
     ordering = ["customer", "name"]
     readonly_fields = ["created_at", "updated_at"]
@@ -254,7 +262,7 @@ class CustomerSiteAdmin(admin.ModelAdmin):
 
     fieldsets = [
         ("基本情報", {
-            "fields": ["customer", "name", "address", "timezone"],
+            "fields": ["customer", "name", "lifecycle_status", "address", "timezone"],
         }),
         ("その他", {
             "fields": ["note"],
@@ -454,6 +462,140 @@ class BssSetConfigAdmin(admin.ModelAdmin):
     @admin.display(description="有効", boolean=True)
     def is_valid_display(self, obj):
         return obj.is_valid
+
+
+# =============================================================================
+# 拠点設定
+# =============================================================================
+
+
+@admin.register(SiteConfig)
+class SiteConfigAdmin(admin.ModelAdmin):
+    """拠点設定管理"""
+
+    list_display = [
+        "customer_site",
+        "loyverse_account",
+        "square_account",
+        "updated_at",
+    ]
+    search_fields = [
+        "customer_site__name",
+        "customer_site__customer__name",
+        "loyverse_account",
+        "square_account",
+    ]
+    ordering = ["customer_site"]
+    readonly_fields = ["created_at", "updated_at"]
+    autocomplete_fields = ["customer_site"]
+
+    fieldsets = [
+        ("基本情報", {
+            "fields": ["customer_site"],
+        }),
+        ("Loyverse (POS)", {
+            "fields": ["loyverse_account", "loyverse_store_id", "loyverse_token"],
+        }),
+        ("Square (決済)", {
+            "fields": ["square_account", "squ_device_id", "squ_location_id", "squ_token"],
+        }),
+        ("その他クレデンシャル", {
+            "fields": ["paypay_secret", "baiten_cloud_key", "google_secret", "slack_bot_token"],
+            "classes": ["collapse"],
+        }),
+        ("設定ファイル", {
+            "fields": ["config_toml", "baiten_env"],
+            "classes": ["collapse"],
+        }),
+        ("システム情報", {
+            "fields": ["created_at", "updated_at"],
+            "classes": ["collapse"],
+        }),
+    ]
+
+
+# =============================================================================
+# 運用履歴（追記型イベント）
+# =============================================================================
+
+
+class AppendOnlyAdminMixin:
+    """追記型イベント用Mixin — 履歴を消さない原則のため変更・削除を禁止"""
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(MaintenanceEvent)
+class MaintenanceEventAdmin(AppendOnlyAdminMixin, admin.ModelAdmin):
+    """保守イベント管理（追記のみ）"""
+
+    list_display = [
+        "bss_set",
+        "event_type",
+        "part_unit",
+        "occurred_at",
+        "created_at",
+    ]
+    list_filter = ["event_type", "bss_set"]
+    search_fields = [
+        "bss_set__set_code",
+        "part_unit__serial_number",
+        "note",
+    ]
+    ordering = ["-occurred_at"]
+    autocomplete_fields = ["bss_set", "part_unit"]
+    date_hierarchy = "occurred_at"
+
+
+@admin.register(DeployEvent)
+class DeployEventAdmin(AppendOnlyAdminMixin, admin.ModelAdmin):
+    """導入イベント管理（追記のみ）"""
+
+    list_display = [
+        "bss_set",
+        "stage",
+        "occurred_at",
+        "created_at",
+    ]
+    list_filter = ["stage", "bss_set"]
+    search_fields = ["bss_set__set_code", "note"]
+    ordering = ["-occurred_at"]
+    autocomplete_fields = ["bss_set"]
+    date_hierarchy = "occurred_at"
+
+
+# =============================================================================
+# 外部連携
+# =============================================================================
+
+
+@admin.register(EquipmentRef)
+class EquipmentRefAdmin(admin.ModelAdmin):
+    """機器管理参照管理"""
+
+    list_display = [
+        "external_id",
+        "name",
+        "unit_count",
+        "created_at",
+    ]
+    search_fields = ["external_id", "name", "part_units__serial_number"]
+    ordering = ["external_id"]
+    readonly_fields = ["created_at", "updated_at"]
+    filter_horizontal = ["part_units"]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(
+            _unit_count=Count("part_units")
+        )
+
+    @admin.display(description="部品実物数", ordering="_unit_count")
+    def unit_count(self, obj):
+        return obj._unit_count
 
 
 # =============================================================================

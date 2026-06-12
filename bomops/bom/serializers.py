@@ -14,10 +14,14 @@ from .models import (
     BssSetConfig,
     Customer,
     CustomerSite,
+    DeployEvent,
+    EquipmentRef,
+    MaintenanceEvent,
     PartMaster,
     PartUnit,
     ProductBOM,
     ProductModel,
+    SiteConfig,
 )
 
 
@@ -45,6 +49,9 @@ class PartMasterSerializer(serializers.ModelSerializer):
             "maker",
             "model_number",
             "spec_json",
+            "size",
+            "used_in_ai",
+            "used_in_mini",
             "is_active",
             "created_at",
             "updated_at",
@@ -178,6 +185,10 @@ class CustomerSiteSerializer(serializers.ModelSerializer):
         source="customer.name",
         read_only=True,
     )
+    lifecycle_status_display = serializers.CharField(
+        source="get_lifecycle_status_display",
+        read_only=True,
+    )
 
     class Meta:
         model = CustomerSite
@@ -188,11 +199,62 @@ class CustomerSiteSerializer(serializers.ModelSerializer):
             "name",
             "address",
             "timezone",
+            "lifecycle_status",
+            "lifecycle_status_display",
             "note",
             "created_at",
             "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
+
+
+class SiteConfigSerializer(serializers.ModelSerializer):
+    """拠点設定シリアライザ
+
+    token / secret 系フィールドは書き込み可能だが、
+    レスポンスでは必ずマスクして返す（CLAUDE.md §4.1）。
+    """
+
+    customer_site_name = serializers.CharField(
+        source="customer_site.name",
+        read_only=True,
+    )
+
+    class Meta:
+        model = SiteConfig
+        fields = [
+            "id",
+            "customer_site",
+            "customer_site_name",
+            "loyverse_account",
+            "loyverse_store_id",
+            "loyverse_token",
+            "square_account",
+            "squ_device_id",
+            "squ_location_id",
+            "squ_token",
+            "paypay_secret",
+            "baiten_cloud_key",
+            "google_secret",
+            "slack_bot_token",
+            "config_toml",
+            "baiten_env",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+    @staticmethod
+    def _mask(value: str | None) -> str | None:
+        if not value:
+            return value
+        return "****" + value[-4:] if len(value) > 4 else "****"
+
+    def to_representation(self, instance: SiteConfig) -> dict[str, Any]:
+        data = super().to_representation(instance)
+        for field in SiteConfig.SECRET_FIELDS:
+            data[field] = self._mask(data.get(field))
+        return data
 
 
 # =============================================================================
@@ -332,6 +394,103 @@ class BssSetConfigSerializer(serializers.ModelSerializer):
 
 
 # =============================================================================
+# 運用履歴（Operations Layer — 追記型イベント）
+# =============================================================================
+
+
+class MaintenanceEventSerializer(serializers.ModelSerializer):
+    """保守イベントシリアライザ（追記型）"""
+
+    set_code = serializers.CharField(
+        source="bss_set.set_code",
+        read_only=True,
+    )
+    serial_number = serializers.SerializerMethodField()
+    event_type_display = serializers.CharField(
+        source="get_event_type_display",
+        read_only=True,
+    )
+
+    class Meta:
+        model = MaintenanceEvent
+        fields = [
+            "id",
+            "bss_set",
+            "set_code",
+            "part_unit",
+            "serial_number",
+            "event_type",
+            "event_type_display",
+            "note",
+            "occurred_at",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+    def get_serial_number(self, obj: MaintenanceEvent) -> str | None:
+        """対象部品実物のシリアル番号（部品指定なしの場合はNone）"""
+        return obj.part_unit.serial_number if obj.part_unit else None
+
+
+class DeployEventSerializer(serializers.ModelSerializer):
+    """導入イベントシリアライザ（追記型）"""
+
+    set_code = serializers.CharField(
+        source="bss_set.set_code",
+        read_only=True,
+    )
+    stage_display = serializers.CharField(
+        source="get_stage_display",
+        read_only=True,
+    )
+
+    class Meta:
+        model = DeployEvent
+        fields = [
+            "id",
+            "bss_set",
+            "set_code",
+            "stage",
+            "stage_display",
+            "note",
+            "occurred_at",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+
+# =============================================================================
+# 外部連携
+# =============================================================================
+
+
+class EquipmentRefSerializer(serializers.ModelSerializer):
+    """機器管理参照シリアライザ"""
+
+    part_unit_serials = serializers.SlugRelatedField(
+        source="part_units",
+        slug_field="serial_number",
+        many=True,
+        read_only=True,
+    )
+
+    class Meta:
+        model = EquipmentRef
+        fields = [
+            "id",
+            "external_id",
+            "name",
+            "part_units",
+            "part_unit_serials",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+
+# =============================================================================
 # カスタムAPI用シリアライザ
 # =============================================================================
 
@@ -368,7 +527,67 @@ class EffectiveConfigSerializer(serializers.Serializer):
 class LookupBySerialSerializer(serializers.Serializer):
     """シリアル番号逆引き用シリアライザ（読み取り専用）"""
 
+    part_unit_id = serializers.IntegerField()
     serial_number = serializers.CharField()
     part_master = serializers.CharField()
     current_set = serializers.DictField(allow_null=True)
     current_site = serializers.DictField(allow_null=True)
+
+
+class PartUnitHistoryEntrySerializer(serializers.Serializer):
+    """部品使用履歴タイムライン1件分のシリアライザ（読み取り専用）"""
+
+    kind = serializers.ChoiceField(
+        choices=["PURCHASED", "MOUNTED", "UNMOUNTED", "MAINTENANCE"],
+    )
+    occurred_at = serializers.DateTimeField()
+    set_code = serializers.CharField(allow_null=True)
+    role = serializers.CharField(allow_null=True)
+    event_type = serializers.CharField(allow_null=True)
+    event_type_display = serializers.CharField(allow_null=True)
+    note = serializers.CharField(allow_null=True)
+    purchase_order_no = serializers.CharField(allow_null=True)
+
+
+class PartUnitHistorySerializer(serializers.Serializer):
+    """部品使用履歴レスポンスのシリアライザ（読み取り専用）"""
+
+    part_unit = serializers.DictField()
+    timeline = PartUnitHistoryEntrySerializer(many=True)
+
+
+class DashboardSetsSummarySerializer(serializers.Serializer):
+    """ダッシュボード: セット集計"""
+
+    total = serializers.IntegerField()
+    by_status = serializers.DictField(child=serializers.IntegerField())
+
+
+class DashboardPartUnitsSummarySerializer(serializers.Serializer):
+    """ダッシュボード: 部品実物集計"""
+
+    total = serializers.IntegerField()
+    by_status = serializers.DictField(child=serializers.IntegerField())
+    by_category = serializers.DictField(child=serializers.IntegerField())
+
+
+class DashboardSitesSummarySerializer(serializers.Serializer):
+    """ダッシュボード: 拠点集計"""
+
+    total = serializers.IntegerField()
+    by_lifecycle_status = serializers.DictField(child=serializers.IntegerField())
+
+
+class DashboardCustomersSummarySerializer(serializers.Serializer):
+    """ダッシュボード: 顧客集計"""
+
+    total = serializers.IntegerField()
+
+
+class DashboardSummarySerializer(serializers.Serializer):
+    """ダッシュボードサマリーのシリアライザ（読み取り専用）"""
+
+    sets = DashboardSetsSummarySerializer()
+    part_units = DashboardPartUnitsSummarySerializer()
+    sites = DashboardSitesSummarySerializer()
+    customers = DashboardCustomersSummarySerializer()

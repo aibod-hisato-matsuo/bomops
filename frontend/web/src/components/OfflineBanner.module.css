@@ -1,0 +1,21 @@
+.banner {
+  position: sticky;
+  top: 0;
+  z-index: 150;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.offline {
+  background: #fff4e5;
+  color: #7a4f00;
+  border-bottom: 1px solid #7a4f0033;
+}
+
+.recovered {
+  background: var(--aibod-blue-pale);
+  color: var(--aibod-blue);
+  border-bottom: 1px solid var(--aibod-sky);
+}

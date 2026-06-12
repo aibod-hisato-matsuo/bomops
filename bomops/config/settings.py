@@ -19,6 +19,10 @@ load_dotenv(BASE_DIR / ".env")
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-change-me-in-production")
 
+# SiteConfig の token/secret 系フィールドの暗号化キー
+# 未設定の場合は SECRET_KEY から導出する（本番では必ず個別に設定すること）
+BOMOPS_ENCRYPTION_KEY = os.getenv("BOMOPS_ENCRYPTION_KEY", "")
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() in ("true", "1", "yes")
 
@@ -129,9 +133,10 @@ REST_FRAMEWORK = {
         "rest_framework.filters.SearchFilter",
         "rest_framework.filters.OrderingFilter",
     ],
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "DEFAULT_PAGINATION_CLASS": "bom.pagination.DefaultPagination",
     "PAGE_SIZE": 20,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "EXCEPTION_HANDLER": "bom.exceptions.bomops_exception_handler",
 }
 
 # Simple JWT settings
@@ -156,7 +161,7 @@ SPECTACULAR_SETTINGS = {
 # CORS settings (開発用)
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 CORS_ALLOWED_ORIGINS: list[str] = os.getenv(
-    "CORS_ALLOWED_ORIGINS", "http://localhost:3000"
+    "CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173"
 ).split(",")
 
 # Logging

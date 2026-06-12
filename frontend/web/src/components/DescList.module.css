@@ -1,0 +1,39 @@
+.list {
+  margin: 0;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 8px 0;
+}
+
+.row {
+  display: flex;
+  padding: 8px 20px;
+}
+
+.label {
+  width: 180px;
+  flex-shrink: 0;
+  color: var(--color-text-sub);
+  font-size: 12px;
+  padding-top: 1px;
+}
+
+.value {
+  margin: 0;
+  font-size: 13px;
+  min-width: 0;
+  word-break: break-all;
+}
+
+.section {
+  margin-bottom: 28px;
+}
+
+.sectionTitle {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  padding-left: 10px;
+  border-left: 3px solid var(--aibod-sky);
+}

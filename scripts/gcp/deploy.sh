@@ -39,7 +39,7 @@ gcloud run jobs "${JOB_VERB}" "${MIGRATE_JOB_NAME}" \
   --set-env-vars "${COMMON_ENV}" \
   --set-secrets "${COMMON_SECRETS}" \
   --command python \
-  --args "bomops/manage.py,migrate,--noinput" \
+  --args "bomops_core/manage.py,migrate,--noinput" \
   --max-retries 1
 
 echo "=== 3/4 マイグレーション実行"

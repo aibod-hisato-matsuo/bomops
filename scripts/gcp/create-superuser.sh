@@ -40,7 +40,7 @@ gcloud run jobs "${JOB_VERB}" "${JOB_NAME}" \
   --set-env-vars "${COMMON_ENV}" \
   --set-secrets "${COMMON_SECRETS}" \
   --command python \
-  --args "bomops/manage.py,createsuperuser,--noinput" \
+  --args "bomops_core/manage.py,createsuperuser,--noinput" \
   --max-retries 0
 
 gcloud run jobs execute "${JOB_NAME}" --region "${REGION}" --project "${PROJECT_ID}" --wait

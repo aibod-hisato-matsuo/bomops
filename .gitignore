@@ -16,7 +16,7 @@ eggs/
 .eggs/
 lib/
 lib64/
-parts/
+/parts/
 sdist/
 var/
 wheels/
@@ -208,3 +208,7 @@ __marimo__/
 
 # collectstatic 出力（ビルド時生成）
 staticfiles/
+
+# ローカル開発用 sqlite DB
+data/*.sqlite3
+data/*.sqlite3-journal

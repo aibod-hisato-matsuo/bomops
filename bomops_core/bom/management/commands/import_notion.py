@@ -31,6 +31,7 @@ from bom.models import (
     BssSetComponent,
     Customer,
     CustomerSite,
+    PartCategory,
     PartMaster,
     PartUnit,
     ProductModel,
@@ -42,16 +43,16 @@ RELATION_ITEM_RE = re.compile(
     r"(.+?)\s*\(https://www\.notion\.so/[^)]+\)(?:,\s*|$)"
 )
 
-# Notion Type → PartMaster.Category
+# Notion Type → 部品カテゴリ名（PartCategory.name）
 TYPE_TO_CATEGORY = {
     "MiniPC": "PC",
-    "タッチモニター": "MONITOR",
-    "ディスプレイ": "MONITOR",
-    "商品カメラ": "CAMERA",
-    "Barcode": "BARCODE",
-    "PayDevice": "PAYMENT",
-    "PayOption": "PAYMENT",
-    "モニターケーブル": "CABLE",
+    "タッチモニター": "モニター",
+    "ディスプレイ": "モニター",
+    "商品カメラ": "カメラ",
+    "Barcode": "バーコードリーダー",
+    "PayDevice": "決済端末",
+    "PayOption": "決済端末",
+    "モニターケーブル": "ケーブル",
 }
 
 # サービス管理の稼働 → CustomerSite.LifecycleStatus
@@ -185,6 +186,11 @@ class Command(BaseCommand):
         with open(path, encoding="utf-8-sig") as fp:
             return list(csv.DictReader(fp))
 
+    def _category(self, name: str) -> PartCategory:
+        """カテゴリ名から PartCategory を取得（なければ作成）"""
+        category, _ = PartCategory.objects.get_or_create(name=name)
+        return category
+
     def _count(self, model: str, action: str) -> None:
         self.stats.setdefault(model, {"created": 0, "updated": 0, "skipped": 0})
         self.stats[model][action] += 1
@@ -217,8 +223,11 @@ class Command(BaseCommand):
                 "spec": clean(row.get("仕様")),
                 "description": clean(row.get("商品説明")),
             }
+            category_name = TYPE_TO_CATEGORY.get(
+                clean(row.get("Type")) or "", "その他"
+            )
             defaults = {
-                "category": TYPE_TO_CATEGORY.get(clean(row.get("Type")) or "", "OTHER"),
+                "category": self._category(category_name),
                 "maker": clean(row.get("Provider")),
                 "size": clean(row.get("サイズ")),
                 "spec_json": {k: v for k, v in spec_json.items() if v},
@@ -236,7 +245,11 @@ class Command(BaseCommand):
         # BOMリレーション欠損Parts用のフォールバックマスタ
         PartMaster.objects.get_or_create(
             part_code="UNKNOWN-000",
-            defaults={"name": "(BOM未指定)", "category": "OTHER", "is_active": False},
+            defaults={
+                "name": "(BOM未指定)",
+                "category": self._category("その他"),
+                "is_active": False,
+            },
         )
 
     # ------------------------------------------------------------------
@@ -468,7 +481,7 @@ class Command(BaseCommand):
                 part_code="SQU-LEDGER",
                 defaults={
                     "name": "Square端末（SQUARE台帳由来）",
-                    "category": "PAYMENT",
+                    "category": self._category("決済端末"),
                 },
             )
             note = f"S/N: {clean(row.get('S/N'))}" if clean(row.get("S/N")) else None

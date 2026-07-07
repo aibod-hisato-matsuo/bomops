@@ -20,12 +20,18 @@ from .models import (
     DeployEvent,
     EquipmentRef,
     MaintenanceEvent,
+    PartCategory,
     PartMaster,
     PartUnit,
     ProductBOM,
     ProductModel,
     SiteConfig,
 )
+
+
+def make_category(name: str) -> PartCategory:
+    """テスト用: カテゴリ名から PartCategory を取得（なければ作成）"""
+    return PartCategory.objects.get_or_create(name=name)[0]
 
 
 class PartMasterModelTest(TestCase):
@@ -36,7 +42,7 @@ class PartMasterModelTest(TestCase):
         self.part_master = PartMaster.objects.create(
             part_code="CAM-USB-001",
             name="USB Camera FullHD",
-            category=PartMaster.Category.CAMERA,
+            category=make_category("カメラ"),
             maker="Logicool",
             model_number="C920n",
             spec_json={"resolution": "1920x1080", "interface": "USB2.0"},
@@ -46,7 +52,7 @@ class PartMasterModelTest(TestCase):
         """部品マスタの作成テスト"""
         self.assertEqual(self.part_master.part_code, "CAM-USB-001")
         self.assertEqual(self.part_master.name, "USB Camera FullHD")
-        self.assertEqual(self.part_master.category, PartMaster.Category.CAMERA)
+        self.assertEqual(self.part_master.category.name, "カメラ")
         self.assertTrue(self.part_master.is_active)
 
     def test_part_master_str(self) -> None:
@@ -70,7 +76,7 @@ class PartMasterAPITest(APITestCase):
         self.part_master = PartMaster.objects.create(
             part_code="PC-001",
             name="Mini PC",
-            category=PartMaster.Category.PC,
+            category=make_category("PC"),
             maker="Intel",
             model_number="NUC11",
         )
@@ -89,7 +95,7 @@ class PartMasterAPITest(APITestCase):
         data = {
             "part_code": "MON-001",
             "name": "24inch Monitor",
-            "category": "MONITOR",
+            "category": make_category("モニター").id,
             "maker": "Dell",
             "model_number": "P2422H",
         }
@@ -112,7 +118,7 @@ class PartMasterAPITest(APITestCase):
         PartMaster.objects.create(
             part_code="CAM-001",
             name="Camera",
-            category=PartMaster.Category.CAMERA,
+            category=make_category("カメラ"),
         )
 
         url = reverse("bom:part-master-list")
@@ -120,7 +126,7 @@ class PartMasterAPITest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["count"], 1)
-        self.assertEqual(response.data["results"][0]["category"], "PC")
+        self.assertEqual(response.data["results"][0]["category_display"], "PC")
 
 
 class BssSetCompositionAPITest(APITestCase):
@@ -145,12 +151,12 @@ class BssSetCompositionAPITest(APITestCase):
         self.pc_master = PartMaster.objects.create(
             part_code="PC-123",
             name="Mini PC",
-            category=PartMaster.Category.PC,
+            category=make_category("PC"),
         )
         self.cam_master = PartMaster.objects.create(
             part_code="CAM-456",
             name="USB Camera",
-            category=PartMaster.Category.CAMERA,
+            category=make_category("カメラ"),
         )
 
         # 部品実物作成
@@ -238,7 +244,7 @@ class LookupBySerialAPITest(APITestCase):
         self.cam_master = PartMaster.objects.create(
             part_code="CAM-456",
             name="USB Camera FullHD",
-            category=PartMaster.Category.CAMERA,
+            category=make_category("カメラ"),
         )
         self.cam_unit = PartUnit.objects.create(
             part_master=self.cam_master,
@@ -308,7 +314,7 @@ class PartUnitHistoryAPITest(APITestCase):
         self.part_master = PartMaster.objects.create(
             part_code="CAM-456",
             name="USB Camera",
-            category=PartMaster.Category.CAMERA,
+            category=make_category("カメラ"),
         )
         self.part_unit = PartUnit.objects.create(
             part_master=self.part_master,
@@ -403,10 +409,10 @@ class DashboardSummaryAPITest(APITestCase):
         self.client.force_authenticate(user=self.user)
 
         pm = PartMaster.objects.create(
-            part_code="PC-001", name="Mini PC", category=PartMaster.Category.PC,
+            part_code="PC-001", name="Mini PC", category=make_category("PC"),
         )
         cam = PartMaster.objects.create(
-            part_code="CAM-001", name="Camera", category=PartMaster.Category.CAMERA,
+            part_code="CAM-001", name="Camera", category=make_category("カメラ"),
         )
         PartUnit.objects.create(part_master=pm, serial_number="PC-1", status="IN_STOCK")
         PartUnit.objects.create(part_master=pm, serial_number="PC-2", status="ASSIGNED")
@@ -440,12 +446,288 @@ class DashboardSummaryAPITest(APITestCase):
         self.assertEqual(data["part_units"]["by_status"]["IN_STOCK"], 1)
         self.assertEqual(data["part_units"]["by_status"]["BROKEN"], 1)
         self.assertEqual(data["part_units"]["by_category"]["PC"], 2)
-        self.assertEqual(data["part_units"]["by_category"]["CAMERA"], 1)
+        self.assertEqual(data["part_units"]["by_category"]["カメラ"], 1)
 
         self.assertEqual(data["sites"]["total"], 2)
         self.assertEqual(data["sites"]["by_lifecycle_status"]["ACTIVE"], 1)
 
         self.assertEqual(data["customers"]["total"], 1)
+        self.assertEqual(data["part_masters"]["total"], 2)
+        self.assertEqual(data["product_models"]["total"], 1)
+
+    def test_stock_coverage_without_bom_is_empty(self) -> None:
+        """BOM未定義のモデルは stock_coverage に含まれないことのテスト"""
+        url = reverse("bom:dashboard-summary")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["stock_coverage"], [])
+
+    def test_stock_coverage_buildable_and_bottleneck(self) -> None:
+        """組立可能数が必須BOM行の min(在庫//数量) で算出されることのテスト"""
+        pm_pc = PartMaster.objects.get(part_code="PC-001")
+        pm_cam = PartMaster.objects.get(part_code="CAM-001")
+        model = ProductModel.objects.get(code="M-1")
+
+        # 必須BOM: PC x1, CAM x2 / オプション: MON x1（在庫0でも影響しない）
+        ProductBOM.objects.create(product_model=model, part_master=pm_pc, quantity=1)
+        ProductBOM.objects.create(product_model=model, part_master=pm_cam, quantity=2)
+        pm_mon = PartMaster.objects.create(
+            part_code="MON-001", name="Monitor", category=make_category("モニター"),
+        )
+        ProductBOM.objects.create(
+            product_model=model, part_master=pm_mon, quantity=1, is_optional=True,
+        )
+
+        # 在庫: PC=3, CAM=3 → PC: 3//1=3, CAM: 3//2=1 → 組立可能1台・ボトルネックCAM
+        for i in range(3, 6):
+            PartUnit.objects.create(
+                part_master=pm_pc, serial_number=f"PC-{i}", status="IN_STOCK",
+            )
+        for i in range(2, 5):
+            PartUnit.objects.create(
+                part_master=pm_cam, serial_number=f"CAM-{i}", status="IN_STOCK",
+            )
+
+        url = reverse("bom:dashboard-summary")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        coverage = response.data["stock_coverage"]
+        self.assertEqual(len(coverage), 1)
+        row = coverage[0]
+        self.assertEqual(row["product_model_code"], "M-1")
+        self.assertEqual(row["buildable"], 1)
+        self.assertEqual(row["bottleneck_part_code"], "CAM-001")
+        self.assertEqual(row["bottleneck_stock"], 3)
+        self.assertEqual(row["bottleneck_required"], 2)
+
+
+class PartCategoryAPITest(APITestCase):
+    """部品カテゴリAPIのテスト"""
+
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(
+            username="testuser",
+            password="testpass123",
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+    def test_create_category(self) -> None:
+        """新規カテゴリ作成テスト"""
+        url = reverse("bom:part-category-list")
+        response = self.client.post(url, {"name": "キーボード"})
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(PartCategory.objects.filter(name="キーボード").exists())
+
+    def test_duplicate_name_rejected(self) -> None:
+        """カテゴリ名の重複が400になることのテスト"""
+        make_category("キーボード")
+        url = reverse("bom:part-category-list")
+        response = self.client.post(url, {"name": "キーボード"})
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_delete_in_use_returns_409(self) -> None:
+        """使用中カテゴリの削除が409（PROTECT）になることのテスト"""
+        category = make_category("カメラ")
+        PartMaster.objects.create(
+            part_code="CAM-001", name="Camera", category=category,
+        )
+        url = reverse("bom:part-category-detail", kwargs={"pk": category.pk})
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+        self.assertTrue(PartCategory.objects.filter(pk=category.pk).exists())
+
+    def test_delete_unused_category(self) -> None:
+        """未使用カテゴリは削除できることのテスト"""
+        category = make_category("不要カテゴリ")
+        url = reverse("bom:part-category-detail", kwargs={"pk": category.pk})
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+
+class PartGroupTest(APITestCase):
+    """部品グループ（part_group）フィールド・フィルタのテスト"""
+
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(
+            username="testuser",
+            password="testpass123",
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+        PartMaster.objects.create(
+            part_code="MPC-M001", name="MiniPC",
+            category=make_category("PC"),
+            part_group=PartMaster.PartGroup.MAIN,
+        )
+        PartMaster.objects.create(
+            part_code="LTE-M001", name="LTE Router",
+            category=make_category("その他"),
+            part_group=PartMaster.PartGroup.PERIPHERAL,
+        )
+        PartMaster.objects.create(
+            part_code="BLEG-M001", name="Table Leg",
+            category=make_category("その他"),
+            part_group=PartMaster.PartGroup.ASSEMBLY,
+        )
+
+    def test_default_is_other(self) -> None:
+        """新規作成時の既定グループが OTHER であることのテスト"""
+        part = PartMaster.objects.create(
+            part_code="X-001", name="X", category=make_category("その他"),
+        )
+        self.assertEqual(part.part_group, PartMaster.PartGroup.OTHER)
+
+    def test_filter_by_part_group(self) -> None:
+        """part_group パラメータで絞り込めることのテスト"""
+        url = reverse("bom:part-master-list")
+        response = self.client.get(url, {"part_group": "ASSEMBLY"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+        row = response.data["results"][0]
+        self.assertEqual(row["part_code"], "BLEG-M001")
+        self.assertEqual(row["part_group_display"], "組立部品")
+
+    def test_search_matches_part_code(self) -> None:
+        """search が部品コードにもヒットすることのテスト（大文字小文字不問）"""
+        url = reverse("bom:part-master-list")
+        for term in ("lte", "LTE-M001"):
+            response = self.client.get(url, {"search": term})
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            codes = {r["part_code"] for r in response.data["results"]}
+            self.assertIn("LTE-M001", codes, f"search={term}")
+
+
+class DeriveBomCommandTest(TestCase):
+    """derive_bom 管理コマンドのテスト"""
+
+    def setUp(self) -> None:
+        """モデル1種・セット4台の実構成データを作成"""
+        self.model = ProductModel.objects.create(code="BSTAND-AI", name="AI")
+        self.pm_pc = PartMaster.objects.create(
+            part_code="MPC-M001", name="MiniPC A", category=make_category("PC"),
+        )
+        self.pm_pc2 = PartMaster.objects.create(
+            part_code="MPC-M002", name="MiniPC B", category=make_category("PC"),
+        )
+        self.pm_cam = PartMaster.objects.create(
+            part_code="CAM-M001",
+            name="Camera",
+            category=make_category("カメラ"),
+            used_in_ai=True,
+        )
+        self.pm_enc = PartMaster.objects.create(
+            part_code="ENC-M001", name="Enclosure", category=make_category("その他"),
+        )
+
+        # 4台とも MPC 搭載（3台は M001, 1台は M002）→ MPCファミリ100%・代表はM001
+        # ENC は1台のみ（25%）→ 任意 / CAM は未搭載だがフラグ付き → 必須追加
+        serial = 0
+        for i in range(4):
+            bss = BssSet.objects.create(
+                set_code=f"S-{i}", product_model=self.model,
+            )
+            pm = self.pm_pc if i < 3 else self.pm_pc2
+            serial += 1
+            unit = PartUnit.objects.create(
+                part_master=pm, serial_number=f"U-{serial}",
+            )
+            BssSetComponent.objects.create(bss_set=bss, part_unit=unit)
+            if i == 0:
+                serial += 1
+                enc_unit = PartUnit.objects.create(
+                    part_master=self.pm_enc, serial_number=f"U-{serial}",
+                )
+                BssSetComponent.objects.create(bss_set=bss, part_unit=enc_unit)
+
+    def _run(self, *args: str) -> None:
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        call_command("derive_bom", *args, stdout=StringIO())
+
+    def test_derives_required_optional_and_flagged_lines(self) -> None:
+        """観測100%→必須 / 25%→任意 / フラグのみ→必須 が導出されることのテスト"""
+        self._run()
+
+        lines = {
+            line.part_master.part_code: line
+            for line in ProductBOM.objects.filter(product_model=self.model)
+        }
+        self.assertEqual(set(lines), {"MPC-M001", "ENC-M001", "CAM-M001"})
+        self.assertFalse(lines["MPC-M001"].is_optional)  # 観測100%・代表品番
+        self.assertTrue(lines["ENC-M001"].is_optional)  # 観測25%
+        self.assertFalse(lines["CAM-M001"].is_optional)  # フラグ由来
+        self.assertEqual(lines["CAM-M001"].quantity, 1)
+
+    def test_idempotent_and_dry_run(self) -> None:
+        """再実行で重複せず、dry-run では書き込まれないことのテスト"""
+        self._run("--dry-run")
+        self.assertEqual(ProductBOM.objects.count(), 0)
+
+        self._run()
+        first = ProductBOM.objects.count()
+        self._run()
+        self.assertEqual(ProductBOM.objects.count(), first)
+
+    def test_replace_removes_stale_lines(self) -> None:
+        """--replace で既存の手登録行が置き換えられることのテスト"""
+        stale = PartMaster.objects.create(
+            part_code="OLD-M001", name="Old", category=make_category("その他"),
+        )
+        ProductBOM.objects.create(
+            product_model=self.model, part_master=stale, quantity=9,
+        )
+        self._run("--replace")
+        codes = set(
+            ProductBOM.objects.filter(product_model=self.model).values_list(
+                "part_master__part_code", flat=True
+            )
+        )
+        self.assertNotIn("OLD-M001", codes)
+        self.assertIn("MPC-M001", codes)
+
+
+class PartUnitCategoryFilterAPITest(APITestCase):
+    """部品実物のカテゴリフィルタのテスト"""
+
+    def setUp(self) -> None:
+        """テストデータのセットアップ"""
+        self.user = User.objects.create_user(
+            username="testuser",
+            password="testpass123",
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+        pm_pc = PartMaster.objects.create(
+            part_code="PC-001", name="Mini PC", category=make_category("PC"),
+        )
+        pm_cam = PartMaster.objects.create(
+            part_code="CAM-001", name="Camera", category=make_category("カメラ"),
+        )
+        PartUnit.objects.create(part_master=pm_pc, serial_number="PC-1")
+        PartUnit.objects.create(part_master=pm_cam, serial_number="CAM-1")
+        PartUnit.objects.create(part_master=pm_cam, serial_number="CAM-2")
+
+    def test_filter_by_category(self) -> None:
+        """category パラメータで部品マスタのカテゴリ横断検索ができることのテスト"""
+        url = reverse("bom:part-unit-list")
+        response = self.client.get(url, {"category": "カメラ"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 2)
+        serials = {r["serial_number"] for r in response.data["results"]}
+        self.assertEqual(serials, {"CAM-1", "CAM-2"})
 
 
 class BssSetConfigAPITest(APITestCase):
@@ -672,7 +954,7 @@ class MaintenanceEventAPITest(APITestCase):
         self.part_master = PartMaster.objects.create(
             part_code="CAM-456",
             name="USB Camera",
-            category=PartMaster.Category.CAMERA,
+            category=make_category("カメラ"),
         )
         self.part_unit = PartUnit.objects.create(
             part_master=self.part_master,
@@ -791,7 +1073,7 @@ class EquipmentRefAPITest(APITestCase):
         self.part_master = PartMaster.objects.create(
             part_code="PC-001",
             name="Mini PC",
-            category=PartMaster.Category.PC,
+            category=make_category("PC"),
         )
         self.unit1 = PartUnit.objects.create(
             part_master=self.part_master,

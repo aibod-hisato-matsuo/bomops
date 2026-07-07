@@ -17,6 +17,7 @@ from .models import (
     DeployEvent,
     EquipmentRef,
     MaintenanceEvent,
+    PartCategory,
     PartMaster,
     PartUnit,
     ProductBOM,
@@ -30,6 +31,19 @@ from .models import (
 # =============================================================================
 
 
+@admin.register(PartCategory)
+class PartCategoryAdmin(admin.ModelAdmin):
+    """部品カテゴリ管理"""
+
+    list_display = ["name", "part_count", "created_at"]
+    search_fields = ["name"]
+    readonly_fields = ["created_at", "updated_at"]
+
+    @admin.display(description="部品数")
+    def part_count(self, obj: PartCategory) -> int:
+        return obj.parts.count()
+
+
 @admin.register(PartMaster)
 class PartMasterAdmin(admin.ModelAdmin):
     """部品マスタ管理"""
@@ -38,13 +52,14 @@ class PartMasterAdmin(admin.ModelAdmin):
         "part_code",
         "name",
         "category",
+        "part_group",
         "maker",
         "model_number",
         "is_active",
         "unit_count",
         "created_at",
     ]
-    list_filter = ["category", "is_active", "maker"]
+    list_filter = ["part_group", "category", "is_active", "maker"]
     search_fields = ["part_code", "name", "model_number", "maker"]
     ordering = ["part_code"]
     readonly_fields = ["created_at", "updated_at"]

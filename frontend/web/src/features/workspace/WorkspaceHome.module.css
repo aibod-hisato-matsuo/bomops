@@ -1,23 +1,90 @@
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 16px;
+.map {
+  max-width: 860px;
 }
+
+/* ===== 層バンド ===== */
+
+.band {
+  position: relative;
+  border-radius: var(--radius);
+  padding: 28px 20px 20px;
+}
+
+.bandMaster {
+  background: rgba(29, 32, 135, 0.05);
+  border: 1px solid rgba(29, 32, 135, 0.14);
+}
+
+.bandOps {
+  background: rgba(0, 179, 236, 0.06);
+  border: 1px solid rgba(0, 179, 236, 0.25);
+}
+
+.bandLabel {
+  position: absolute;
+  top: -10px;
+  left: 16px;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--aibod-white);
+}
+
+.bandMaster .bandLabel {
+  background: var(--aibod-navy);
+}
+
+.bandOps .bandLabel {
+  background: var(--aibod-sky);
+}
+
+/* カード / 矢印を同じ3カラムグリッドに乗せて縦位置を揃える */
+.bandRow,
+.connectorRow {
+  display: grid;
+  grid-template-columns: 1fr minmax(120px, 160px) 1fr;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.bandRow + .bandRow {
+  margin-top: 4px;
+}
+
+.connectorRow {
+  padding: 0 20px;
+}
+
+/* ===== エンティティカード ===== */
 
 .card {
   display: block;
   background: var(--color-surface);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 20px;
+  padding: 14px 18px;
   color: var(--color-text);
   border-top: 3px solid var(--aibod-sky);
   transition: transform 0.12s, box-shadow 0.12s;
 }
 
-.card:hover {
+.bandMaster .card {
+  border-top-color: var(--aibod-navy);
+}
+
+.card:hover,
+.searchCard:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(29, 32, 135, 0.12), 0 8px 20px rgba(29, 32, 135, 0.1);
+}
+
+.cardHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .cardTitle {
@@ -25,8 +92,151 @@
   font-weight: 600;
 }
 
+.cardCount {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--aibod-sky);
+  white-space: nowrap;
+}
+
+.cardCount small {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-sub);
+}
+
 .cardDesc {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   font-size: 12px;
   color: var(--color-text-sub);
+}
+
+/* ===== 矢印（横） ===== */
+
+.hArrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.arrowLabel {
+  font-size: 11px;
+  color: var(--aibod-blue);
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.arrowLine {
+  position: relative;
+  width: 100%;
+  height: 2px;
+  background: var(--aibod-blue);
+}
+
+.arrowHeadRight {
+  position: absolute;
+  right: -1px;
+  top: -4px;
+  border-left: 8px solid var(--aibod-blue);
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+}
+
+/* ===== 矢印（縦） ===== */
+
+.vArrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2px 0;
+}
+
+.vArrowLine {
+  width: 2px;
+  height: 22px;
+  background: var(--aibod-blue);
+}
+
+.arrowHeadDown {
+  border-top: 8px solid var(--aibod-blue);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+}
+
+.arrowHeadUp {
+  border-bottom: 8px solid var(--aibod-blue);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+}
+
+.vArrow .arrowLabel {
+  margin-top: 2px;
+}
+
+/* 層間コネクタは左右カードの中央に落ちるよう並べ替え */
+.connectorRow .vArrow:first-child {
+  grid-column: 1;
+}
+
+.connectorRow .vArrow:last-child {
+  grid-column: 3;
+}
+
+/* ===== 検索カード ===== */
+
+.searchCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 16px;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--aibod-blue);
+  padding: 14px 18px;
+  color: var(--color-text);
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+
+.searchIcon {
+  font-size: 22px;
+}
+
+/* ===== モバイル: 縦一列に折り畳み ===== */
+
+@media (max-width: 640px) {
+  .bandRow,
+  .connectorRow {
+    grid-template-columns: 1fr;
+  }
+
+  .connectorRow .vArrow:first-child,
+  .connectorRow .vArrow:last-child {
+    grid-column: 1;
+  }
+
+  /* 横矢印は縦向きの区切りラベルとして表示 */
+  .arrowLine {
+    width: 2px;
+    height: 18px;
+    margin: 0 auto;
+  }
+
+  .arrowHeadRight {
+    right: -4px;
+    top: auto;
+    bottom: -1px;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 8px solid var(--aibod-blue);
+    border-bottom: none;
+  }
+
+  .bandRow > div:empty {
+    display: none;
+  }
 }

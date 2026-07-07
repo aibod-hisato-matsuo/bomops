@@ -13,6 +13,14 @@
   padding: 16px 20px;
   display: flex;
   flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.kpiCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(29, 32, 135, 0.12), 0 8px 20px rgba(29, 32, 135, 0.1);
 }
 
 .kpiLabel {
@@ -25,6 +33,53 @@
   font-weight: 700;
   color: var(--aibod-sky);
   line-height: 1.3;
+}
+
+.attentionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.attentionCard {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--color-danger);
+  padding: 12px 16px;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.attentionCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(29, 32, 135, 0.12), 0 8px 20px rgba(29, 32, 135, 0.1);
+}
+
+.attentionCount {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--color-danger);
+  line-height: 1.2;
+}
+
+.attentionLabel {
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.attentionOk {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--aibod-sky);
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--color-text-sub);
 }
 
 .chartGrid {
@@ -46,4 +101,25 @@
   text-align: center;
   color: var(--color-text-sub);
   font-size: 13px;
+}
+
+.buildableValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--aibod-sky);
+}
+
+.buildableZero {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-danger);
+}
+
+.tableLink {
+  color: var(--aibod-blue);
+  text-decoration: none;
+}
+
+.tableLink:hover {
+  text-decoration: underline;
 }

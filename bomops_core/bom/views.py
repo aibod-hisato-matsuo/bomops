@@ -26,6 +26,7 @@ from .models import (
     DeployEvent,
     EquipmentRef,
     MaintenanceEvent,
+    PartCategory,
     PartMaster,
     PartUnit,
     ProductBOM,
@@ -45,6 +46,7 @@ from .serializers import (
     EquipmentRefSerializer,
     LookupBySerialSerializer,
     MaintenanceEventSerializer,
+    PartCategorySerializer,
     PartMasterSerializer,
     PartUnitHistorySerializer,
     PartUnitSerializer,
@@ -63,12 +65,13 @@ class PartMasterFilter(django_filters.FilterSet):
     """部品マスタ用フィルタ"""
 
     part_code = django_filters.CharFilter(lookup_expr="icontains")
-    category = django_filters.ChoiceFilter(choices=PartMaster.Category.choices)
+    category = django_filters.CharFilter(field_name="category__name")
+    part_group = django_filters.ChoiceFilter(choices=PartMaster.PartGroup.choices)
     is_active = django_filters.BooleanFilter()
 
     class Meta:
         model = PartMaster
-        fields = ["part_code", "category", "is_active"]
+        fields = ["part_code", "category", "part_group", "is_active"]
 
 
 class PartUnitFilter(django_filters.FilterSet):
@@ -77,10 +80,11 @@ class PartUnitFilter(django_filters.FilterSet):
     part_master = django_filters.NumberFilter()
     status = django_filters.ChoiceFilter(choices=PartUnit.Status.choices)
     serial_number = django_filters.CharFilter(lookup_expr="icontains")
+    category = django_filters.CharFilter(field_name="part_master__category__name")
 
     class Meta:
         model = PartUnit
-        fields = ["part_master", "status", "serial_number"]
+        fields = ["part_master", "status", "serial_number", "category"]
 
 
 class ProductBOMFilter(django_filters.FilterSet):
@@ -207,6 +211,27 @@ class BssSetConfigFilter(django_filters.FilterSet):
 
 
 @extend_schema_view(
+    list=extend_schema(summary="部品カテゴリ一覧取得", tags=["部品カテゴリ"]),
+    create=extend_schema(summary="部品カテゴリ作成", tags=["部品カテゴリ"]),
+    retrieve=extend_schema(summary="部品カテゴリ詳細取得", tags=["部品カテゴリ"]),
+    update=extend_schema(summary="部品カテゴリ更新", tags=["部品カテゴリ"]),
+    partial_update=extend_schema(summary="部品カテゴリ部分更新", tags=["部品カテゴリ"]),
+    destroy=extend_schema(summary="部品カテゴリ削除", tags=["部品カテゴリ"]),
+)
+class PartCategoryViewSet(viewsets.ModelViewSet):
+    """
+    部品カテゴリ CRUD API
+
+    部品の種別マスタ。画面から新規カテゴリを追加できる。
+    使用中カテゴリの削除は 409 を返す（PROTECT）。
+    """
+
+    queryset = PartCategory.objects.all()
+    serializer_class = PartCategorySerializer
+    search_fields = ["name"]
+
+
+@extend_schema_view(
     list=extend_schema(summary="部品マスタ一覧取得", tags=["部品マスタ"]),
     create=extend_schema(summary="部品マスタ作成", tags=["部品マスタ"]),
     retrieve=extend_schema(summary="部品マスタ詳細取得", tags=["部品マスタ"]),
@@ -219,14 +244,14 @@ class PartMasterViewSet(viewsets.ModelViewSet):
     部品マスタ CRUD API
 
     部品の種類（型番レベル）を管理。
-    フィルタ: part_code, category, is_active
-    検索: name, model_number
+    フィルタ: part_code, category, part_group, is_active
+    検索: part_code, name, model_number
     """
 
     queryset = PartMaster.objects.all()
     serializer_class = PartMasterSerializer
     filterset_class = PartMasterFilter
-    search_fields = ["name", "model_number"]
+    search_fields = ["part_code", "name", "model_number"]
     ordering_fields = ["part_code", "name", "created_at"]
 
 
@@ -717,6 +742,51 @@ def _count_by(queryset: QuerySet, field: str) -> dict[str, int]:
     return {row[field]: row["n"] for row in rows}
 
 
+def _stock_coverage() -> list[dict[str, Any]]:
+    """
+    製品モデルごとの「在庫から組み立て可能な台数」を算出する。
+
+    必須BOM行（is_optional=False）ごとに 在庫数 // 必要数量 を求め、
+    その最小値が組立可能数。最小を与える部品をボトルネックとして返す。
+    """
+    stock_by_part = {
+        row["part_master_id"]: row["n"]
+        for row in PartUnit.objects.filter(status=PartUnit.Status.IN_STOCK)
+        .values("part_master_id")
+        .annotate(n=Count("id"))
+    }
+
+    lines_by_model: dict[int, list[ProductBOM]] = {}
+    bom_lines = ProductBOM.objects.filter(is_optional=False).select_related(
+        "product_model", "part_master"
+    )
+    for line in bom_lines:
+        lines_by_model.setdefault(line.product_model_id, []).append(line)
+
+    coverage = []
+    for lines in lines_by_model.values():
+        bottleneck = min(
+            lines,
+            key=lambda ln: stock_by_part.get(ln.part_master_id, 0) // ln.quantity,
+        )
+        bottleneck_stock = stock_by_part.get(bottleneck.part_master_id, 0)
+        model = bottleneck.product_model
+        coverage.append(
+            {
+                "product_model_id": model.id,
+                "product_model_code": model.code,
+                "product_model_name": model.name,
+                "buildable": bottleneck_stock // bottleneck.quantity,
+                "bottleneck_part_code": bottleneck.part_master.part_code,
+                "bottleneck_part_name": bottleneck.part_master.name,
+                "bottleneck_stock": bottleneck_stock,
+                "bottleneck_required": bottleneck.quantity,
+            }
+        )
+    coverage.sort(key=lambda c: c["product_model_code"])
+    return coverage
+
+
 @extend_schema(
     summary="ダッシュボードサマリー取得",
     description="セット・部品実物・拠点・顧客の総数と状態別集計を1レスポンスで返す",
@@ -740,7 +810,7 @@ def dashboard_summary(request: Request) -> Response:
             "total": PartUnit.objects.count(),
             "by_status": _count_by(PartUnit.objects.all(), "status"),
             "by_category": _count_by(
-                PartUnit.objects.all(), "part_master__category"
+                PartUnit.objects.all(), "part_master__category__name"
             ),
         },
         "sites": {
@@ -752,6 +822,13 @@ def dashboard_summary(request: Request) -> Response:
         "customers": {
             "total": Customer.objects.count(),
         },
+        "part_masters": {
+            "total": PartMaster.objects.count(),
+        },
+        "product_models": {
+            "total": ProductModel.objects.count(),
+        },
+        "stock_coverage": _stock_coverage(),
     }
     serializer = DashboardSummarySerializer(data)
     return Response(serializer.data)

@@ -55,6 +55,44 @@
   transition: background 0.12s;
 }
 
+/* ===== サブグループ（層ラベル＋ツリー罫線） ===== */
+
+.subGroup {
+  margin: 10px 0 2px;
+}
+
+.subGroupLabel {
+  padding: 4px 20px 4px 28px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.toneMaster .subGroupLabel {
+  color: var(--aibod-blue-pale);
+}
+
+.toneOps .subGroupLabel {
+  color: var(--aibod-sky);
+}
+
+.treeChildren {
+  margin-left: 28px;
+  border-left: 2px solid rgba(191, 228, 248, 0.35);
+}
+
+.toneOps .treeChildren {
+  border-left-color: rgba(0, 179, 236, 0.55);
+}
+
+/* ツリー内のリンクはインデントを詰め、アクティブ罫線がガイド線に重なるようにする */
+.treeChildren .navLink {
+  padding: 8px 16px 8px 13px;
+  margin-left: -2px;
+  border-left-width: 2px;
+  font-size: 12.5px;
+}
+
 .navLink:hover {
   background: rgba(255, 255, 255, 0.08);
   color: var(--aibod-white);

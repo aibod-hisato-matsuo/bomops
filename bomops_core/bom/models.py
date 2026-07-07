@@ -31,6 +31,30 @@ class TimestampMixin(models.Model):
 # =============================================================================
 
 
+class PartCategory(TimestampMixin):
+    """
+    部品カテゴリマスタ
+
+    部品の種別（PC/モニター/カメラ等）。ユーザーが画面から追加できる。
+    使用中カテゴリの削除は PROTECT で防ぐ。
+    """
+
+    name = models.CharField(
+        max_length=100,
+        unique=True,
+        verbose_name="カテゴリ名",
+    )
+
+    class Meta:
+        db_table = "part_category"
+        verbose_name = "部品カテゴリ"
+        verbose_name_plural = "部品カテゴリ"
+        ordering = ["id"]
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class PartMaster(TimestampMixin):
     """
     部品マスタ
@@ -39,15 +63,12 @@ class PartMaster(TimestampMixin):
     実物個体は PartUnit で管理する。
     """
 
-    class Category(models.TextChoices):
-        """部品カテゴリ"""
+    class PartGroup(models.TextChoices):
+        """部品グループ（正準スキーマの 本体構成品/オプション品/組立部品/その他 に対応）"""
 
-        PC = "PC", "PC"
-        MONITOR = "MONITOR", "モニター"
-        CAMERA = "CAMERA", "カメラ"
-        BARCODE = "BARCODE", "バーコードリーダー"
-        PAYMENT = "PAYMENT", "決済端末"
-        CABLE = "CABLE", "ケーブル"
+        MAIN = "MAIN", "主要部品"
+        PERIPHERAL = "PERIPHERAL", "周辺部品"
+        ASSEMBLY = "ASSEMBLY", "組立部品"
         OTHER = "OTHER", "その他"
 
     part_code = models.CharField(
@@ -61,11 +82,18 @@ class PartMaster(TimestampMixin):
         verbose_name="部品名",
         help_text="部品名（例: USB Camera FullHD）",
     )
-    category = models.CharField(
-        max_length=20,
-        choices=Category.choices,
-        default=Category.OTHER,
+    category = models.ForeignKey(
+        PartCategory,
+        on_delete=models.PROTECT,
+        related_name="parts",
         verbose_name="カテゴリ",
+    )
+    part_group = models.CharField(
+        max_length=20,
+        choices=PartGroup.choices,
+        default=PartGroup.OTHER,
+        verbose_name="部品グループ",
+        help_text="主要部品/周辺部品/組立部品/その他 の大分類",
     )
     maker = models.CharField(
         max_length=100,

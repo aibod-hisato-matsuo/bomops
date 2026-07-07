@@ -9,6 +9,7 @@ import type { components } from './schema'
 
 type Schemas = components['schemas']
 
+export type PartCategory = Schemas['PartCategory']
 export type PartMaster = Schemas['PartMaster']
 export type PartUnit = Schemas['PartUnit']
 export type ProductModel = Schemas['ProductModel']
@@ -26,11 +27,11 @@ export type DeployEvent = Schemas['DeployEvent']
 export type EquipmentRef = Schemas['EquipmentRef']
 
 export type DashboardSummary = Schemas['DashboardSummary']
+export type DashboardStockCoverage = Schemas['DashboardStockCoverage']
 export type LookupBySerial = Schemas['LookupBySerial']
 export type PartUnitHistory = Schemas['PartUnitHistory']
 export type PartUnitHistoryEntry = Schemas['PartUnitHistoryEntry']
 
-export type CategoryEnum = Schemas['CategoryEnum']
 export type PartUnitStatusEnum = Schemas['PartUnitStatusEnum']
 export type BssSetStatusEnum = Schemas['BssSetStatusEnum']
 export type LifecycleStatusEnum = Schemas['LifecycleStatusEnum']

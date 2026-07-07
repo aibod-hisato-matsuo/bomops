@@ -720,6 +720,80 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/part-categories/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 部品カテゴリ一覧取得
+         * @description 部品カテゴリ CRUD API
+         *
+         *     部品の種別マスタ。画面から新規カテゴリを追加できる。
+         *     使用中カテゴリの削除は 409 を返す（PROTECT）。
+         */
+        get: operations["part_categories_list"];
+        put?: never;
+        /**
+         * 部品カテゴリ作成
+         * @description 部品カテゴリ CRUD API
+         *
+         *     部品の種別マスタ。画面から新規カテゴリを追加できる。
+         *     使用中カテゴリの削除は 409 を返す（PROTECT）。
+         */
+        post: operations["part_categories_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/part-categories/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 部品カテゴリ詳細取得
+         * @description 部品カテゴリ CRUD API
+         *
+         *     部品の種別マスタ。画面から新規カテゴリを追加できる。
+         *     使用中カテゴリの削除は 409 を返す（PROTECT）。
+         */
+        get: operations["part_categories_retrieve"];
+        /**
+         * 部品カテゴリ更新
+         * @description 部品カテゴリ CRUD API
+         *
+         *     部品の種別マスタ。画面から新規カテゴリを追加できる。
+         *     使用中カテゴリの削除は 409 を返す（PROTECT）。
+         */
+        put: operations["part_categories_update"];
+        post?: never;
+        /**
+         * 部品カテゴリ削除
+         * @description 部品カテゴリ CRUD API
+         *
+         *     部品の種別マスタ。画面から新規カテゴリを追加できる。
+         *     使用中カテゴリの削除は 409 を返す（PROTECT）。
+         */
+        delete: operations["part_categories_destroy"];
+        options?: never;
+        head?: never;
+        /**
+         * 部品カテゴリ部分更新
+         * @description 部品カテゴリ CRUD API
+         *
+         *     部品の種別マスタ。画面から新規カテゴリを追加できる。
+         *     使用中カテゴリの削除は 409 を返す（PROTECT）。
+         */
+        patch: operations["part_categories_partial_update"];
+        trace?: never;
+    };
     "/api/v1/part-masters/": {
         parameters: {
             query?: never;
@@ -732,8 +806,8 @@ export interface paths {
          * @description 部品マスタ CRUD API
          *
          *     部品の種類（型番レベル）を管理。
-         *     フィルタ: part_code, category, is_active
-         *     検索: name, model_number
+         *     フィルタ: part_code, category, part_group, is_active
+         *     検索: part_code, name, model_number
          */
         get: operations["part_masters_list"];
         put?: never;
@@ -742,8 +816,8 @@ export interface paths {
          * @description 部品マスタ CRUD API
          *
          *     部品の種類（型番レベル）を管理。
-         *     フィルタ: part_code, category, is_active
-         *     検索: name, model_number
+         *     フィルタ: part_code, category, part_group, is_active
+         *     検索: part_code, name, model_number
          */
         post: operations["part_masters_create"];
         delete?: never;
@@ -764,8 +838,8 @@ export interface paths {
          * @description 部品マスタ CRUD API
          *
          *     部品の種類（型番レベル）を管理。
-         *     フィルタ: part_code, category, is_active
-         *     検索: name, model_number
+         *     フィルタ: part_code, category, part_group, is_active
+         *     検索: part_code, name, model_number
          */
         get: operations["part_masters_retrieve"];
         /**
@@ -773,8 +847,8 @@ export interface paths {
          * @description 部品マスタ CRUD API
          *
          *     部品の種類（型番レベル）を管理。
-         *     フィルタ: part_code, category, is_active
-         *     検索: name, model_number
+         *     フィルタ: part_code, category, part_group, is_active
+         *     検索: part_code, name, model_number
          */
         put: operations["part_masters_update"];
         post?: never;
@@ -783,8 +857,8 @@ export interface paths {
          * @description 部品マスタ CRUD API
          *
          *     部品の種類（型番レベル）を管理。
-         *     フィルタ: part_code, category, is_active
-         *     検索: name, model_number
+         *     フィルタ: part_code, category, part_group, is_active
+         *     検索: part_code, name, model_number
          */
         delete: operations["part_masters_destroy"];
         options?: never;
@@ -794,8 +868,8 @@ export interface paths {
          * @description 部品マスタ CRUD API
          *
          *     部品の種類（型番レベル）を管理。
-         *     フィルタ: part_code, category, is_active
-         *     検索: name, model_number
+         *     フィルタ: part_code, category, part_group, is_active
+         *     検索: part_code, name, model_number
          */
         patch: operations["part_masters_partial_update"];
         trace?: never;
@@ -1364,17 +1438,6 @@ export interface components {
          * @enum {string}
          */
         BssSetStatusEnum: "ASSEMBLED" | "INSTALLED" | "REPAIR" | "RECOVERED" | "SCRAPPED";
-        /**
-         * @description * `PC` - PC
-         *     * `MONITOR` - モニター
-         *     * `CAMERA` - カメラ
-         *     * `BARCODE` - バーコードリーダー
-         *     * `PAYMENT` - 決済端末
-         *     * `CABLE` - ケーブル
-         *     * `OTHER` - その他
-         * @enum {string}
-         */
-        CategoryEnum: "PC" | "MONITOR" | "CAMERA" | "BARCODE" | "PAYMENT" | "CABLE" | "OTHER";
         /** @description セット構成詳細用シリアライザ（読み取り専用） */
         ComponentDetail: {
             role: string;
@@ -1506,12 +1569,30 @@ export interface components {
                 [key: string]: number;
             };
         };
+        /** @description ダッシュボード: 製品モデル別の在庫組立可能数 */
+        DashboardStockCoverage: {
+            product_model_id: number;
+            product_model_code: string;
+            product_model_name: string;
+            buildable: number;
+            bottleneck_part_code: string;
+            bottleneck_part_name: string;
+            bottleneck_stock: number;
+            bottleneck_required: number;
+        };
         /** @description ダッシュボードサマリーのシリアライザ（読み取り専用） */
         DashboardSummary: {
             sets: components["schemas"]["DashboardSetsSummary"];
             part_units: components["schemas"]["DashboardPartUnitsSummary"];
             sites: components["schemas"]["DashboardSitesSummary"];
             customers: components["schemas"]["DashboardCustomersSummary"];
+            part_masters: components["schemas"]["DashboardTotal"];
+            product_models: components["schemas"]["DashboardTotal"];
+            stock_coverage: components["schemas"]["DashboardStockCoverage"][];
+        };
+        /** @description ダッシュボード: 総数のみの集計（マスタ系） */
+        DashboardTotal: {
+            total: number;
         };
         /** @description 導入イベントシリアライザ（追記型） */
         DeployEvent: {
@@ -1821,6 +1902,21 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["MaintenanceEvent"][];
         };
+        PaginatedPartCategoryList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["PartCategory"][];
+        };
         PaginatedPartMasterList: {
             /** @example 123 */
             count: number;
@@ -1896,6 +1992,35 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["SiteConfig"][];
         };
+        /** @description 部品カテゴリシリアライザ */
+        PartCategory: {
+            readonly id: number;
+            /** カテゴリ名 */
+            name: string;
+            /**
+             * 作成日時
+             * Format: date-time
+             */
+            readonly created_at: string;
+            /**
+             * 更新日時
+             * Format: date-time
+             */
+            readonly updated_at: string;
+        };
+        /** @description 部品カテゴリシリアライザ */
+        PartCategoryRequest: {
+            /** カテゴリ名 */
+            name: string;
+        };
+        /**
+         * @description * `MAIN` - 主要部品
+         *     * `PERIPHERAL` - 周辺部品
+         *     * `ASSEMBLY` - 組立部品
+         *     * `OTHER` - その他
+         * @enum {string}
+         */
+        PartGroupEnum: "MAIN" | "PERIPHERAL" | "ASSEMBLY" | "OTHER";
         /** @description 部品マスタシリアライザ */
         PartMaster: {
             readonly id: number;
@@ -1910,8 +2035,19 @@ export interface components {
              */
             name: string;
             /** カテゴリ */
-            category?: components["schemas"]["CategoryEnum"];
+            category: number;
             readonly category_display: string;
+            /**
+             * 部品グループ
+             * @description 主要部品/周辺部品/組立部品/その他 の大分類
+             *
+             *     * `MAIN` - 主要部品
+             *     * `PERIPHERAL` - 周辺部品
+             *     * `ASSEMBLY` - 組立部品
+             *     * `OTHER` - その他
+             */
+            part_group?: components["schemas"]["PartGroupEnum"];
+            readonly part_group_display: string;
             /** メーカー */
             maker?: string | null;
             /** 型番 */
@@ -1959,7 +2095,17 @@ export interface components {
              */
             name: string;
             /** カテゴリ */
-            category?: components["schemas"]["CategoryEnum"];
+            category: number;
+            /**
+             * 部品グループ
+             * @description 主要部品/周辺部品/組立部品/その他 の大分類
+             *
+             *     * `MAIN` - 主要部品
+             *     * `PERIPHERAL` - 周辺部品
+             *     * `ASSEMBLY` - 組立部品
+             *     * `OTHER` - その他
+             */
+            part_group?: components["schemas"]["PartGroupEnum"];
             /** メーカー */
             maker?: string | null;
             /** 型番 */
@@ -2199,6 +2345,11 @@ export interface components {
             /** 部品実物 */
             part_units?: number[];
         };
+        /** @description 部品カテゴリシリアライザ */
+        PatchedPartCategoryRequest: {
+            /** カテゴリ名 */
+            name?: string;
+        };
         /** @description 部品マスタシリアライザ */
         PatchedPartMasterRequest: {
             /**
@@ -2212,7 +2363,17 @@ export interface components {
              */
             name?: string;
             /** カテゴリ */
-            category?: components["schemas"]["CategoryEnum"];
+            category?: number;
+            /**
+             * 部品グループ
+             * @description 主要部品/周辺部品/組立部品/その他 の大分類
+             *
+             *     * `MAIN` - 主要部品
+             *     * `PERIPHERAL` - 周辺部品
+             *     * `ASSEMBLY` - 組立部品
+             *     * `OTHER` - その他
+             */
+            part_group?: components["schemas"]["PartGroupEnum"];
             /** メーカー */
             maker?: string | null;
             /** 型番 */
@@ -2261,7 +2422,10 @@ export interface components {
             product_model?: number;
             /** 部品マスタ */
             part_master?: number;
-            /** 数量 */
+            /**
+             * 数量
+             * Format: int64
+             */
             quantity?: number;
             /**
              * オプション部品
@@ -2333,7 +2497,10 @@ export interface components {
             part_master: number;
             readonly part_master_code: string;
             readonly part_master_name: string;
-            /** 数量 */
+            /**
+             * 数量
+             * Format: int64
+             */
             quantity?: number;
             /**
              * オプション部品
@@ -2357,7 +2524,10 @@ export interface components {
             product_model: number;
             /** 部品マスタ */
             part_master: number;
-            /** 数量 */
+            /**
+             * 数量
+             * Format: int64
+             */
             quantity?: number;
             /**
              * オプション部品
@@ -3842,19 +4012,162 @@ export interface operations {
             };
         };
     };
+    part_categories_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description A search term. */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedPartCategoryList"];
+                };
+            };
+        };
+    };
+    part_categories_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PartCategoryRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PartCategoryRequest"];
+                "multipart/form-data": components["schemas"]["PartCategoryRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartCategory"];
+                };
+            };
+        };
+    };
+    part_categories_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this 部品カテゴリ. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartCategory"];
+                };
+            };
+        };
+    };
+    part_categories_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this 部品カテゴリ. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PartCategoryRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PartCategoryRequest"];
+                "multipart/form-data": components["schemas"]["PartCategoryRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartCategory"];
+                };
+            };
+        };
+    };
+    part_categories_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this 部品カテゴリ. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    part_categories_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this 部品カテゴリ. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedPartCategoryRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedPartCategoryRequest"];
+                "multipart/form-data": components["schemas"]["PatchedPartCategoryRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartCategory"];
+                };
+            };
+        };
+    };
     part_masters_list: {
         parameters: {
             query?: {
-                /**
-                 * @description * `PC` - PC
-                 *     * `MONITOR` - モニター
-                 *     * `CAMERA` - カメラ
-                 *     * `BARCODE` - バーコードリーダー
-                 *     * `PAYMENT` - 決済端末
-                 *     * `CABLE` - ケーブル
-                 *     * `OTHER` - その他
-                 */
-                category?: "BARCODE" | "CABLE" | "CAMERA" | "MONITOR" | "OTHER" | "PAYMENT" | "PC";
+                category?: string;
                 is_active?: boolean;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
@@ -3863,6 +4176,15 @@ export interface operations {
                 /** @description Number of results to return per page. */
                 page_size?: number;
                 part_code?: string;
+                /**
+                 * @description 主要部品/周辺部品/組立部品/その他 の大分類
+                 *
+                 *     * `MAIN` - 主要部品
+                 *     * `PERIPHERAL` - 周辺部品
+                 *     * `ASSEMBLY` - 組立部品
+                 *     * `OTHER` - その他
+                 */
+                part_group?: "ASSEMBLY" | "MAIN" | "OTHER" | "PERIPHERAL";
                 /** @description A search term. */
                 search?: string;
             };
@@ -4009,6 +4331,7 @@ export interface operations {
     part_units_list: {
         parameters: {
             query?: {
+                category?: string;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
                 /** @description A page number within the paginated result set. */

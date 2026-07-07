@@ -1841,6 +1841,212 @@ paths:
               schema:
                 $ref: '#/components/schemas/MaintenanceEvent'
           description: ''
+  /api/v1/part-categories/:
+    get:
+      operationId: part_categories_list
+      description: |-
+        部品カテゴリ CRUD API
+
+        部品の種別マスタ。画面から新規カテゴリを追加できる。
+        使用中カテゴリの削除は 409 を返す（PROTECT）。
+      summary: 部品カテゴリ一覧取得
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 部品カテゴリ
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPartCategoryList'
+          description: ''
+    post:
+      operationId: part_categories_create
+      description: |-
+        部品カテゴリ CRUD API
+
+        部品の種別マスタ。画面から新規カテゴリを追加できる。
+        使用中カテゴリの削除は 409 を返す（PROTECT）。
+      summary: 部品カテゴリ作成
+      tags:
+      - 部品カテゴリ
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartCategoryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PartCategoryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PartCategoryRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartCategory'
+          description: ''
+  /api/v1/part-categories/{id}/:
+    get:
+      operationId: part_categories_retrieve
+      description: |-
+        部品カテゴリ CRUD API
+
+        部品の種別マスタ。画面から新規カテゴリを追加できる。
+        使用中カテゴリの削除は 409 を返す（PROTECT）。
+      summary: 部品カテゴリ詳細取得
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 部品カテゴリ.
+        required: true
+      tags:
+      - 部品カテゴリ
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartCategory'
+          description: ''
+    put:
+      operationId: part_categories_update
+      description: |-
+        部品カテゴリ CRUD API
+
+        部品の種別マスタ。画面から新規カテゴリを追加できる。
+        使用中カテゴリの削除は 409 を返す（PROTECT）。
+      summary: 部品カテゴリ更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 部品カテゴリ.
+        required: true
+      tags:
+      - 部品カテゴリ
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartCategoryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PartCategoryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PartCategoryRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartCategory'
+          description: ''
+    patch:
+      operationId: part_categories_partial_update
+      description: |-
+        部品カテゴリ CRUD API
+
+        部品の種別マスタ。画面から新規カテゴリを追加できる。
+        使用中カテゴリの削除は 409 を返す（PROTECT）。
+      summary: 部品カテゴリ部分更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 部品カテゴリ.
+        required: true
+      tags:
+      - 部品カテゴリ
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPartCategoryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPartCategoryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPartCategoryRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartCategory'
+          description: ''
+    delete:
+      operationId: part_categories_destroy
+      description: |-
+        部品カテゴリ CRUD API
+
+        部品の種別マスタ。画面から新規カテゴリを追加できる。
+        使用中カテゴリの削除は 409 を返す（PROTECT）。
+      summary: 部品カテゴリ削除
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 部品カテゴリ.
+        required: true
+      tags:
+      - 部品カテゴリ
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/part-masters/:
     get:
       operationId: part_masters_list
@@ -1848,31 +2054,14 @@ paths:
         部品マスタ CRUD API
 
         部品の種類（型番レベル）を管理。
-        フィルタ: part_code, category, is_active
-        検索: name, model_number
+        フィルタ: part_code, category, part_group, is_active
+        検索: part_code, name, model_number
       summary: 部品マスタ一覧取得
       parameters:
       - in: query
         name: category
         schema:
           type: string
-          title: カテゴリ
-          enum:
-          - BARCODE
-          - CABLE
-          - CAMERA
-          - MONITOR
-          - OTHER
-          - PAYMENT
-          - PC
-        description: |-
-          * `PC` - PC
-          * `MONITOR` - モニター
-          * `CAMERA` - カメラ
-          * `BARCODE` - バーコードリーダー
-          * `PAYMENT` - 決済端末
-          * `CABLE` - ケーブル
-          * `OTHER` - その他
       - in: query
         name: is_active
         schema:
@@ -1899,6 +2088,23 @@ paths:
         name: part_code
         schema:
           type: string
+      - in: query
+        name: part_group
+        schema:
+          type: string
+          title: 部品グループ
+          enum:
+          - ASSEMBLY
+          - MAIN
+          - OTHER
+          - PERIPHERAL
+        description: |-
+          主要部品/周辺部品/組立部品/その他 の大分類
+
+          * `MAIN` - 主要部品
+          * `PERIPHERAL` - 周辺部品
+          * `ASSEMBLY` - 組立部品
+          * `OTHER` - その他
       - name: search
         required: false
         in: query
@@ -1923,8 +2129,8 @@ paths:
         部品マスタ CRUD API
 
         部品の種類（型番レベル）を管理。
-        フィルタ: part_code, category, is_active
-        検索: name, model_number
+        フィルタ: part_code, category, part_group, is_active
+        検索: part_code, name, model_number
       summary: 部品マスタ作成
       tags:
       - 部品マスタ
@@ -1957,8 +2163,8 @@ paths:
         部品マスタ CRUD API
 
         部品の種類（型番レベル）を管理。
-        フィルタ: part_code, category, is_active
-        検索: name, model_number
+        フィルタ: part_code, category, part_group, is_active
+        検索: part_code, name, model_number
       summary: 部品マスタ詳細取得
       parameters:
       - in: path
@@ -1985,8 +2191,8 @@ paths:
         部品マスタ CRUD API
 
         部品の種類（型番レベル）を管理。
-        フィルタ: part_code, category, is_active
-        検索: name, model_number
+        フィルタ: part_code, category, part_group, is_active
+        検索: part_code, name, model_number
       summary: 部品マスタ更新
       parameters:
       - in: path
@@ -2025,8 +2231,8 @@ paths:
         部品マスタ CRUD API
 
         部品の種類（型番レベル）を管理。
-        フィルタ: part_code, category, is_active
-        検索: name, model_number
+        フィルタ: part_code, category, part_group, is_active
+        検索: part_code, name, model_number
       summary: 部品マスタ部分更新
       parameters:
       - in: path
@@ -2064,8 +2270,8 @@ paths:
         部品マスタ CRUD API
 
         部品の種類（型番レベル）を管理。
-        フィルタ: part_code, category, is_active
-        検索: name, model_number
+        フィルタ: part_code, category, part_group, is_active
+        検索: part_code, name, model_number
       summary: 部品マスタ削除
       parameters:
       - in: path
@@ -2092,6 +2298,10 @@ paths:
         フィルタ: part_master, status, serial_number
       summary: 部品実物一覧取得
       parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
       - name: ordering
         required: false
         in: query
@@ -3337,24 +3547,6 @@ components:
         * `REPAIR` - 修理中
         * `RECOVERED` - 回収済
         * `SCRAPPED` - 廃棄
-    CategoryEnum:
-      enum:
-      - PC
-      - MONITOR
-      - CAMERA
-      - BARCODE
-      - PAYMENT
-      - CABLE
-      - OTHER
-      type: string
-      description: |-
-        * `PC` - PC
-        * `MONITOR` - モニター
-        * `CAMERA` - カメラ
-        * `BARCODE` - バーコードリーダー
-        * `PAYMENT` - 決済端末
-        * `CABLE` - ケーブル
-        * `OTHER` - その他
     ComponentDetail:
       type: object
       description: セット構成詳細用シリアライザ（読み取り専用）
@@ -3603,6 +3795,35 @@ components:
       required:
       - by_lifecycle_status
       - total
+    DashboardStockCoverage:
+      type: object
+      description: 'ダッシュボード: 製品モデル別の在庫組立可能数'
+      properties:
+        product_model_id:
+          type: integer
+        product_model_code:
+          type: string
+        product_model_name:
+          type: string
+        buildable:
+          type: integer
+        bottleneck_part_code:
+          type: string
+        bottleneck_part_name:
+          type: string
+        bottleneck_stock:
+          type: integer
+        bottleneck_required:
+          type: integer
+      required:
+      - bottleneck_part_code
+      - bottleneck_part_name
+      - bottleneck_required
+      - bottleneck_stock
+      - buildable
+      - product_model_code
+      - product_model_id
+      - product_model_name
     DashboardSummary:
       type: object
       description: ダッシュボードサマリーのシリアライザ（読み取り専用）
@@ -3615,11 +3836,30 @@ components:
           $ref: '#/components/schemas/DashboardSitesSummary'
         customers:
           $ref: '#/components/schemas/DashboardCustomersSummary'
+        part_masters:
+          $ref: '#/components/schemas/DashboardTotal'
+        product_models:
+          $ref: '#/components/schemas/DashboardTotal'
+        stock_coverage:
+          type: array
+          items:
+            $ref: '#/components/schemas/DashboardStockCoverage'
       required:
       - customers
+      - part_masters
       - part_units
+      - product_models
       - sets
       - sites
+      - stock_coverage
+    DashboardTotal:
+      type: object
+      description: 'ダッシュボード: 総数のみの集計（マスタ系）'
+      properties:
+        total:
+          type: integer
+      required:
+      - total
     DeployEvent:
       type: object
       description: 導入イベントシリアライザ（追記型）
@@ -4138,6 +4378,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/MaintenanceEvent'
+    PaginatedPartCategoryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PartCategory'
     PaginatedPartMasterList:
       type: object
       required:
@@ -4253,6 +4516,55 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SiteConfig'
+    PartCategory:
+      type: object
+      description: 部品カテゴリシリアライザ
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: カテゴリ名
+          maxLength: 100
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 作成日時
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新日時
+      required:
+      - created_at
+      - id
+      - name
+      - updated_at
+    PartCategoryRequest:
+      type: object
+      description: 部品カテゴリシリアライザ
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: カテゴリ名
+          maxLength: 100
+      required:
+      - name
+    PartGroupEnum:
+      enum:
+      - MAIN
+      - PERIPHERAL
+      - ASSEMBLY
+      - OTHER
+      type: string
+      description: |-
+        * `MAIN` - 主要部品
+        * `PERIPHERAL` - 周辺部品
+        * `ASSEMBLY` - 組立部品
+        * `OTHER` - その他
     PartMaster:
       type: object
       description: 部品マスタシリアライザ
@@ -4271,10 +4583,23 @@ components:
           description: '部品名（例: USB Camera FullHD）'
           maxLength: 200
         category:
-          allOf:
-          - $ref: '#/components/schemas/CategoryEnum'
+          type: integer
           title: カテゴリ
         category_display:
+          type: string
+          readOnly: true
+        part_group:
+          allOf:
+          - $ref: '#/components/schemas/PartGroupEnum'
+          title: 部品グループ
+          description: |-
+            主要部品/周辺部品/組立部品/その他 の大分類
+
+            * `MAIN` - 主要部品
+            * `PERIPHERAL` - 周辺部品
+            * `ASSEMBLY` - 組立部品
+            * `OTHER` - その他
+        part_group_display:
           type: string
           readOnly: true
         maker:
@@ -4318,11 +4643,13 @@ components:
           readOnly: true
           title: 更新日時
       required:
+      - category
       - category_display
       - created_at
       - id
       - name
       - part_code
+      - part_group_display
       - updated_at
     PartMasterRequest:
       type: object
@@ -4341,9 +4668,19 @@ components:
           description: '部品名（例: USB Camera FullHD）'
           maxLength: 200
         category:
-          allOf:
-          - $ref: '#/components/schemas/CategoryEnum'
+          type: integer
           title: カテゴリ
+        part_group:
+          allOf:
+          - $ref: '#/components/schemas/PartGroupEnum'
+          title: 部品グループ
+          description: |-
+            主要部品/周辺部品/組立部品/その他 の大分類
+
+            * `MAIN` - 主要部品
+            * `PERIPHERAL` - 周辺部品
+            * `ASSEMBLY` - 組立部品
+            * `OTHER` - その他
         maker:
           type: string
           nullable: true
@@ -4375,6 +4712,7 @@ components:
           type: boolean
           title: 有効フラグ
       required:
+      - category
       - name
       - part_code
     PartUnit:
@@ -4725,6 +5063,15 @@ components:
             type: integer
             title: 部品実物
           title: 部品実物
+    PatchedPartCategoryRequest:
+      type: object
+      description: 部品カテゴリシリアライザ
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: カテゴリ名
+          maxLength: 100
     PatchedPartMasterRequest:
       type: object
       description: 部品マスタシリアライザ
@@ -4742,9 +5089,19 @@ components:
           description: '部品名（例: USB Camera FullHD）'
           maxLength: 200
         category:
-          allOf:
-          - $ref: '#/components/schemas/CategoryEnum'
+          type: integer
           title: カテゴリ
+        part_group:
+          allOf:
+          - $ref: '#/components/schemas/PartGroupEnum'
+          title: 部品グループ
+          description: |-
+            主要部品/周辺部品/組立部品/その他 の大分類
+
+            * `MAIN` - 主要部品
+            * `PERIPHERAL` - 周辺部品
+            * `ASSEMBLY` - 組立部品
+            * `OTHER` - その他
         maker:
           type: string
           nullable: true
@@ -4817,8 +5174,9 @@ components:
           title: 部品マスタ
         quantity:
           type: integer
-          maximum: 2147483647
+          maximum: 9223372036854775807
           minimum: 0
+          format: int64
           title: 数量
         is_optional:
           type: boolean
@@ -4937,8 +5295,9 @@ components:
           readOnly: true
         quantity:
           type: integer
-          maximum: 2147483647
+          maximum: 9223372036854775807
           minimum: 0
+          format: int64
           title: 数量
         is_optional:
           type: boolean
@@ -4975,8 +5334,9 @@ components:
           title: 部品マスタ
         quantity:
           type: integer
-          maximum: 2147483647
+          maximum: 9223372036854775807
           minimum: 0
+          format: int64
           title: 数量
         is_optional:
           type: boolean

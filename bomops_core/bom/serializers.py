@@ -17,6 +17,7 @@ from .models import (
     DeployEvent,
     EquipmentRef,
     MaintenanceEvent,
+    PartCategory,
     PartMaster,
     PartUnit,
     ProductBOM,
@@ -30,11 +31,24 @@ from .models import (
 # =============================================================================
 
 
+class PartCategorySerializer(serializers.ModelSerializer):
+    """部品カテゴリシリアライザ"""
+
+    class Meta:
+        model = PartCategory
+        fields = ["id", "name", "created_at", "updated_at"]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+
 class PartMasterSerializer(serializers.ModelSerializer):
     """部品マスタシリアライザ"""
 
     category_display = serializers.CharField(
-        source="get_category_display",
+        source="category.name",
+        read_only=True,
+    )
+    part_group_display = serializers.CharField(
+        source="get_part_group_display",
         read_only=True,
     )
 
@@ -46,6 +60,8 @@ class PartMasterSerializer(serializers.ModelSerializer):
             "name",
             "category",
             "category_display",
+            "part_group",
+            "part_group_display",
             "maker",
             "model_number",
             "spec_json",
@@ -584,6 +600,25 @@ class DashboardCustomersSummarySerializer(serializers.Serializer):
     total = serializers.IntegerField()
 
 
+class DashboardTotalSerializer(serializers.Serializer):
+    """ダッシュボード: 総数のみの集計（マスタ系）"""
+
+    total = serializers.IntegerField()
+
+
+class DashboardStockCoverageSerializer(serializers.Serializer):
+    """ダッシュボード: 製品モデル別の在庫組立可能数"""
+
+    product_model_id = serializers.IntegerField()
+    product_model_code = serializers.CharField()
+    product_model_name = serializers.CharField()
+    buildable = serializers.IntegerField()
+    bottleneck_part_code = serializers.CharField()
+    bottleneck_part_name = serializers.CharField()
+    bottleneck_stock = serializers.IntegerField()
+    bottleneck_required = serializers.IntegerField()
+
+
 class DashboardSummarySerializer(serializers.Serializer):
     """ダッシュボードサマリーのシリアライザ（読み取り専用）"""
 
@@ -591,3 +626,6 @@ class DashboardSummarySerializer(serializers.Serializer):
     part_units = DashboardPartUnitsSummarySerializer()
     sites = DashboardSitesSummarySerializer()
     customers = DashboardCustomersSummarySerializer()
+    part_masters = DashboardTotalSerializer()
+    product_models = DashboardTotalSerializer()
+    stock_coverage = DashboardStockCoverageSerializer(many=True)

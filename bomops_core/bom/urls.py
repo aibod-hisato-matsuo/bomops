@@ -16,6 +16,9 @@ from . import views
 
 # DRF Router設定
 router = DefaultRouter()
+router.register(
+    r"part-categories", views.PartCategoryViewSet, basename="part-category"
+)
 router.register(r"part-masters", views.PartMasterViewSet, basename="part-master")
 router.register(r"part-units", views.PartUnitViewSet, basename="part-unit")
 router.register(r"product-models", views.ProductModelViewSet, basename="product-model")

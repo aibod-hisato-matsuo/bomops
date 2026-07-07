@@ -1,5 +1,5 @@
 /**
- * BSSセット 作成/編集フォーム
+ * 製品セット 作成/編集フォーム
  */
 
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -81,10 +81,10 @@ export function BssSetFormDrawer({ item, onClose }: Props) {
     try {
       if (item) {
         await update.mutateAsync({ id: item.id, payload })
-        toast.success('BSSセットを更新しました')
+        toast.success('製品セットを更新しました')
       } else {
         await create.mutateAsync(payload)
-        toast.success('BSSセットを作成しました')
+        toast.success('製品セットを作成しました')
       }
       onClose()
     } catch (err) {
@@ -96,7 +96,7 @@ export function BssSetFormDrawer({ item, onClose }: Props) {
 
   return (
     <Drawer
-      title={item ? `BSSセット編集: ${item.set_code}` : 'BSSセット新規作成'}
+      title={item ? `製品セット編集: ${item.set_code}` : '製品セット新規作成'}
       onClose={onClose}
       footer={
         <>

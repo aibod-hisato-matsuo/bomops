@@ -310,12 +310,12 @@ class CustomerSiteAdmin(admin.ModelAdmin):
 
 
 # =============================================================================
-# BSSセット
+# 製品セット
 # =============================================================================
 
 
 class BssSetComponentInline(admin.TabularInline):
-    """BSSセット構成部品インライン"""
+    """製品セット構成部品インライン"""
 
     model = BssSetComponent
     extra = 1
@@ -330,7 +330,7 @@ class BssSetComponentInline(admin.TabularInline):
 
 
 class BssSetConfigInline(admin.TabularInline):
-    """BSSセット設定インライン"""
+    """製品セット設定インライン"""
 
     model = BssSetConfig
     extra = 1
@@ -346,7 +346,7 @@ class BssSetConfigInline(admin.TabularInline):
 
 @admin.register(BssSet)
 class BssSetAdmin(admin.ModelAdmin):
-    """BSSセット管理"""
+    """製品セット管理"""
 
     list_display = [
         "set_code",
@@ -398,7 +398,7 @@ class BssSetAdmin(admin.ModelAdmin):
 
 @admin.register(BssSetComponent)
 class BssSetComponentAdmin(admin.ModelAdmin):
-    """BSSセット構成部品管理"""
+    """製品セット構成部品管理"""
 
     list_display = [
         "bss_set",
@@ -441,7 +441,7 @@ class BssSetComponentAdmin(admin.ModelAdmin):
 
 @admin.register(BssSetConfig)
 class BssSetConfigAdmin(admin.ModelAdmin):
-    """BSSセット設定管理"""
+    """製品セット設定管理"""
 
     list_display = [
         "bss_set",

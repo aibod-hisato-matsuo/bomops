@@ -85,11 +85,11 @@ paths:
     get:
       operationId: bss_set_components_list
       description: |-
-        BSSセット構成部品 CRUD API
+        製品セット構成部品 CRUD API
 
         セットに搭載されている部品を管理。
         フィルタ: bss_set, part_unit, role
-      summary: BSSセット構成部品一覧取得
+      summary: 製品セット構成部品一覧取得
       parameters:
       - in: query
         name: bss_set
@@ -128,7 +128,7 @@ paths:
         schema:
           type: string
       tags:
-      - BSSセット構成部品
+      - 製品セット構成部品
       security:
       - jwtAuth: []
       - cookieAuth: []
@@ -142,13 +142,13 @@ paths:
     post:
       operationId: bss_set_components_create
       description: |-
-        BSSセット構成部品 CRUD API
+        製品セット構成部品 CRUD API
 
         セットに搭載されている部品を管理。
         フィルタ: bss_set, part_unit, role
-      summary: BSSセット構成部品作成
+      summary: 製品セット構成部品作成
       tags:
-      - BSSセット構成部品
+      - 製品セット構成部品
       requestBody:
         content:
           application/json:
@@ -175,20 +175,20 @@ paths:
     get:
       operationId: bss_set_components_retrieve
       description: |-
-        BSSセット構成部品 CRUD API
+        製品セット構成部品 CRUD API
 
         セットに搭載されている部品を管理。
         フィルタ: bss_set, part_unit, role
-      summary: BSSセット構成部品詳細取得
+      summary: 製品セット構成部品詳細取得
       parameters:
       - in: path
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this BSSセット構成部品.
+        description: A unique integer value identifying this 製品セット構成部品.
         required: true
       tags:
-      - BSSセット構成部品
+      - 製品セット構成部品
       security:
       - jwtAuth: []
       - cookieAuth: []
@@ -202,20 +202,20 @@ paths:
     put:
       operationId: bss_set_components_update
       description: |-
-        BSSセット構成部品 CRUD API
+        製品セット構成部品 CRUD API
 
         セットに搭載されている部品を管理。
         フィルタ: bss_set, part_unit, role
-      summary: BSSセット構成部品更新
+      summary: 製品セット構成部品更新
       parameters:
       - in: path
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this BSSセット構成部品.
+        description: A unique integer value identifying this 製品セット構成部品.
         required: true
       tags:
-      - BSSセット構成部品
+      - 製品セット構成部品
       requestBody:
         content:
           application/json:
@@ -241,20 +241,20 @@ paths:
     patch:
       operationId: bss_set_components_partial_update
       description: |-
-        BSSセット構成部品 CRUD API
+        製品セット構成部品 CRUD API
 
         セットに搭載されている部品を管理。
         フィルタ: bss_set, part_unit, role
-      summary: BSSセット構成部品部分更新
+      summary: 製品セット構成部品部分更新
       parameters:
       - in: path
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this BSSセット構成部品.
+        description: A unique integer value identifying this 製品セット構成部品.
         required: true
       tags:
-      - BSSセット構成部品
+      - 製品セット構成部品
       requestBody:
         content:
           application/json:
@@ -279,20 +279,20 @@ paths:
     delete:
       operationId: bss_set_components_destroy
       description: |-
-        BSSセット構成部品 CRUD API
+        製品セット構成部品 CRUD API
 
         セットに搭載されている部品を管理。
         フィルタ: bss_set, part_unit, role
-      summary: BSSセット構成部品削除
+      summary: 製品セット構成部品削除
       parameters:
       - in: path
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this BSSセット構成部品.
+        description: A unique integer value identifying this 製品セット構成部品.
         required: true
       tags:
-      - BSSセット構成部品
+      - 製品セット構成部品
       security:
       - jwtAuth: []
       - cookieAuth: []
@@ -303,11 +303,11 @@ paths:
     get:
       operationId: bss_set_configs_list
       description: |-
-        BSSセット設定 CRUD API
+        製品セット設定 CRUD API
 
         セットごとの設定情報（POS/PayPay/ネットワーク等）を管理。
         フィルタ: bss_set, config_group, key, is_secret
-      summary: BSSセット設定一覧取得
+      summary: 製品セット設定一覧取得
       parameters:
       - in: query
         name: bss_set
@@ -350,7 +350,7 @@ paths:
         schema:
           type: string
       tags:
-      - BSSセット設定
+      - 製品セット設定
       security:
       - jwtAuth: []
       - cookieAuth: []
@@ -364,13 +364,13 @@ paths:
     post:
       operationId: bss_set_configs_create
       description: |-
-        BSSセット設定 CRUD API
+        製品セット設定 CRUD API
 
         セットごとの設定情報（POS/PayPay/ネットワーク等）を管理。
         フィルタ: bss_set, config_group, key, is_secret
-      summary: BSSセット設定作成
+      summary: 製品セット設定作成
       tags:
-      - BSSセット設定
+      - 製品セット設定
       requestBody:
         content:
           application/json:
@@ -397,20 +397,20 @@ paths:
     get:
       operationId: bss_set_configs_retrieve
       description: |-
-        BSSセット設定 CRUD API
+        製品セット設定 CRUD API
 
         セットごとの設定情報（POS/PayPay/ネットワーク等）を管理。
         フィルタ: bss_set, config_group, key, is_secret
-      summary: BSSセット設定詳細取得
+      summary: 製品セット設定詳細取得
       parameters:
       - in: path
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this BSSセット設定.
+        description: A unique integer value identifying this 製品セット設定.
         required: true
       tags:
-      - BSSセット設定
+      - 製品セット設定
       security:
       - jwtAuth: []
       - cookieAuth: []
@@ -424,20 +424,20 @@ paths:
     put:
       operationId: bss_set_configs_update
       description: |-
-        BSSセット設定 CRUD API
+        製品セット設定 CRUD API
 
         セットごとの設定情報（POS/PayPay/ネットワーク等）を管理。
         フィルタ: bss_set, config_group, key, is_secret
-      summary: BSSセット設定更新
+      summary: 製品セット設定更新
       parameters:
       - in: path
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this BSSセット設定.
+        description: A unique integer value identifying this 製品セット設定.
         required: true
       tags:
-      - BSSセット設定
+      - 製品セット設定
       requestBody:
         content:
           application/json:
@@ -463,20 +463,20 @@ paths:
     patch:
       operationId: bss_set_configs_partial_update
       description: |-
-        BSSセット設定 CRUD API
+        製品セット設定 CRUD API
 
         セットごとの設定情報（POS/PayPay/ネットワーク等）を管理。
         フィルタ: bss_set, config_group, key, is_secret
-      summary: BSSセット設定部分更新
+      summary: 製品セット設定部分更新
       parameters:
       - in: path
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this BSSセット設定.
+        description: A unique integer value identifying this 製品セット設定.
         required: true
       tags:
-      - BSSセット設定
+      - 製品セット設定
       requestBody:
         content:
           application/json:
@@ -501,20 +501,20 @@ paths:
     delete:
       operationId: bss_set_configs_destroy
       description: |-
-        BSSセット設定 CRUD API
+        製品セット設定 CRUD API
 
         セットごとの設定情報（POS/PayPay/ネットワーク等）を管理。
         フィルタ: bss_set, config_group, key, is_secret
-      summary: BSSセット設定削除
+      summary: 製品セット設定削除
       parameters:
       - in: path
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this BSSセット設定.
+        description: A unique integer value identifying this 製品セット設定.
         required: true
       tags:
-      - BSSセット設定
+      - 製品セット設定
       security:
       - jwtAuth: []
       - cookieAuth: []
@@ -525,13 +525,21 @@ paths:
     get:
       operationId: bss_sets_list
       description: |-
-        BSSセット CRUD API
+        製品セット CRUD API
 
-        BAITEN STAND 実機を管理。
-        フィルタ: product_model, customer_site, status
+        完成品の実機（1台単位）を管理。
+        フィルタ: product_model, customer_site, customer, country, status
         検索: set_code
-      summary: BSSセット一覧取得
+      summary: 製品セット一覧取得
       parameters:
+      - in: query
+        name: country
+        schema:
+          type: string
+      - in: query
+        name: customer
+        schema:
+          type: integer
       - in: query
         name: customer_site
         schema:
@@ -586,7 +594,7 @@ paths:
           * `RECOVERED` - 回収済
           * `SCRAPPED` - 廃棄
       tags:
-      - BSSセット
+      - 製品セット
       security:
       - jwtAuth: []
       - cookieAuth: []
@@ -600,14 +608,14 @@ paths:
     post:
       operationId: bss_sets_create
       description: |-
-        BSSセット CRUD API
+        製品セット CRUD API
 
-        BAITEN STAND 実機を管理。
-        フィルタ: product_model, customer_site, status
+        完成品の実機（1台単位）を管理。
+        フィルタ: product_model, customer_site, customer, country, status
         検索: set_code
-      summary: BSSセット作成
+      summary: 製品セット作成
       tags:
-      - BSSセット
+      - 製品セット
       requestBody:
         content:
           application/json:
@@ -634,21 +642,21 @@ paths:
     get:
       operationId: bss_sets_retrieve
       description: |-
-        BSSセット CRUD API
+        製品セット CRUD API
 
-        BAITEN STAND 実機を管理。
-        フィルタ: product_model, customer_site, status
+        完成品の実機（1台単位）を管理。
+        フィルタ: product_model, customer_site, customer, country, status
         検索: set_code
-      summary: BSSセット詳細取得
+      summary: 製品セット詳細取得
       parameters:
       - in: path
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this BSSセット.
+        description: A unique integer value identifying this 製品セット.
         required: true
       tags:
-      - BSSセット
+      - 製品セット
       security:
       - jwtAuth: []
       - cookieAuth: []
@@ -662,21 +670,21 @@ paths:
     put:
       operationId: bss_sets_update
       description: |-
-        BSSセット CRUD API
+        製品セット CRUD API
 
-        BAITEN STAND 実機を管理。
-        フィルタ: product_model, customer_site, status
+        完成品の実機（1台単位）を管理。
+        フィルタ: product_model, customer_site, customer, country, status
         検索: set_code
-      summary: BSSセット更新
+      summary: 製品セット更新
       parameters:
       - in: path
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this BSSセット.
+        description: A unique integer value identifying this 製品セット.
         required: true
       tags:
-      - BSSセット
+      - 製品セット
       requestBody:
         content:
           application/json:
@@ -702,21 +710,21 @@ paths:
     patch:
       operationId: bss_sets_partial_update
       description: |-
-        BSSセット CRUD API
+        製品セット CRUD API
 
-        BAITEN STAND 実機を管理。
-        フィルタ: product_model, customer_site, status
+        完成品の実機（1台単位）を管理。
+        フィルタ: product_model, customer_site, customer, country, status
         検索: set_code
-      summary: BSSセット部分更新
+      summary: 製品セット部分更新
       parameters:
       - in: path
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this BSSセット.
+        description: A unique integer value identifying this 製品セット.
         required: true
       tags:
-      - BSSセット
+      - 製品セット
       requestBody:
         content:
           application/json:
@@ -741,21 +749,21 @@ paths:
     delete:
       operationId: bss_sets_destroy
       description: |-
-        BSSセット CRUD API
+        製品セット CRUD API
 
-        BAITEN STAND 実機を管理。
-        フィルタ: product_model, customer_site, status
+        完成品の実機（1台単位）を管理。
+        フィルタ: product_model, customer_site, customer, country, status
         検索: set_code
-      summary: BSSセット削除
+      summary: 製品セット削除
       parameters:
       - in: path
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this BSSセット.
+        description: A unique integer value identifying this 製品セット.
         required: true
       tags:
-      - BSSセット
+      - 製品セット
       security:
       - jwtAuth: []
       - cookieAuth: []
@@ -772,10 +780,10 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this BSSセット.
+        description: A unique integer value identifying this 製品セット.
         required: true
       tags:
-      - BSSセット
+      - 製品セット
       security:
       - jwtAuth: []
       - cookieAuth: []
@@ -793,6 +801,14 @@ paths:
       summary: 有効なコンフィグ一覧取得
       parameters:
       - in: query
+        name: country
+        schema:
+          type: string
+      - in: query
+        name: customer
+        schema:
+          type: integer
+      - in: query
         name: customer_site
         schema:
           type: integer
@@ -800,7 +816,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this BSSセット.
+        description: A unique integer value identifying this 製品セット.
         required: true
       - name: ordering
         required: false
@@ -852,7 +868,7 @@ paths:
           * `RECOVERED` - 回収済
           * `SCRAPPED` - 廃棄
       tags:
-      - BSSセット
+      - 製品セット
       security:
       - jwtAuth: []
       - cookieAuth: []
@@ -862,6 +878,85 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedEffectiveConfigList'
+          description: ''
+  /api/v1/bss-sets/location-summary/:
+    get:
+      operationId: bss_sets_location_summary_list
+      description: 製品セットの納品先階層ごとの件数を返す（一覧画面のカスケードボタン用）
+      summary: 国×顧客×拠点件数集計
+      parameters:
+      - in: query
+        name: country
+        schema:
+          type: string
+      - in: query
+        name: customer
+        schema:
+          type: integer
+      - in: query
+        name: customer_site
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: product_model
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: set_code
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          title: ステータス
+          enum:
+          - ASSEMBLED
+          - INSTALLED
+          - RECOVERED
+          - REPAIR
+          - SCRAPPED
+        description: |-
+          * `ASSEMBLED` - 組立完了
+          * `INSTALLED` - 設置済
+          * `REPAIR` - 修理中
+          * `RECOVERED` - 回収済
+          * `SCRAPPED` - 廃棄
+      tags:
+      - 製品セット
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBssSetLocationSummaryList'
           description: ''
   /api/v1/customer-sites/:
     get:
@@ -873,6 +968,10 @@ paths:
         フィルタ: customer
       summary: 顧客拠点一覧取得
       parameters:
+      - in: query
+        name: country
+        schema:
+          type: string
       - in: query
         name: customer
         schema:
@@ -3554,7 +3653,7 @@ components:
   schemas:
     BssSet:
       type: object
-      description: BSSセットシリアライザ
+      description: 製品セットシリアライザ
       properties:
         id:
           type: integer
@@ -3591,6 +3690,10 @@ components:
         customer_name:
           type: string
           readOnly: true
+        site_country:
+          type: string
+          readOnly: true
+          nullable: true
         installed_at:
           type: string
           format: date-time
@@ -3628,18 +3731,19 @@ components:
       - product_model_code
       - product_model_name
       - set_code
+      - site_country
       - status_display
       - updated_at
     BssSetComponent:
       type: object
-      description: BSSセット構成部品シリアライザ
+      description: 製品セット構成部品シリアライザ
       properties:
         id:
           type: integer
           readOnly: true
         bss_set:
           type: integer
-          title: BSSセット
+          title: 製品セット
         set_code:
           type: string
           readOnly: true
@@ -3701,11 +3805,11 @@ components:
       - updated_at
     BssSetComponentRequest:
       type: object
-      description: BSSセット構成部品シリアライザ
+      description: 製品セット構成部品シリアライザ
       properties:
         bss_set:
           type: integer
-          title: BSSセット
+          title: 製品セット
         part_unit:
           type: integer
           title: 部品実物
@@ -3753,14 +3857,14 @@ components:
       - set_id
     BssSetConfig:
       type: object
-      description: BSSセット設定シリアライザ
+      description: 製品セット設定シリアライザ
       properties:
         id:
           type: integer
           readOnly: true
         bss_set:
           type: integer
-          title: BSSセット
+          title: 製品セット
         set_code:
           type: string
           readOnly: true
@@ -3826,11 +3930,11 @@ components:
       - updated_at
     BssSetConfigRequest:
       type: object
-      description: BSSセット設定シリアライザ
+      description: 製品セット設定シリアライザ
       properties:
         bss_set:
           type: integer
-          title: BSSセット
+          title: 製品セット
         config_group:
           type: string
           minLength: 1
@@ -3869,9 +3973,37 @@ components:
       - bss_set
       - config_group
       - key
+    BssSetLocationSummary:
+      type: object
+      description: '製品セット: 国×顧客×拠点の件数集計（読み取り専用）'
+      properties:
+        country:
+          type: string
+          nullable: true
+        customer:
+          type: integer
+          nullable: true
+        customer_name:
+          type: string
+          nullable: true
+        site:
+          type: integer
+          nullable: true
+        site_name:
+          type: string
+          nullable: true
+        count:
+          type: integer
+      required:
+      - count
+      - country
+      - customer
+      - customer_name
+      - site
+      - site_name
     BssSetRequest:
       type: object
-      description: BSSセットシリアライザ
+      description: 製品セットシリアライザ
       properties:
         set_code:
           type: string
@@ -4046,6 +4178,11 @@ components:
           title: 拠点名
           description: '例: ○○工場売店'
           maxLength: 200
+        country:
+          type: string
+          title: 国コード
+          description: 'ISO 3166-1 alpha-2（例: JP / US）'
+          maxLength: 2
         address:
           type: string
           nullable: true
@@ -4097,6 +4234,12 @@ components:
           title: 拠点名
           description: '例: ○○工場売店'
           maxLength: 200
+        country:
+          type: string
+          minLength: 1
+          title: 国コード
+          description: 'ISO 3166-1 alpha-2（例: JP / US）'
+          maxLength: 2
         address:
           type: string
           nullable: true
@@ -4244,7 +4387,7 @@ components:
           readOnly: true
         bss_set:
           type: integer
-          title: BSSセット
+          title: 製品セット
         set_code:
           type: string
           readOnly: true
@@ -4287,7 +4430,7 @@ components:
       properties:
         bss_set:
           type: integer
-          title: BSSセット
+          title: 製品セット
         stage:
           allOf:
           - $ref: '#/components/schemas/StageEnum'
@@ -4473,7 +4616,7 @@ components:
           readOnly: true
         bss_set:
           type: integer
-          title: BSSセット
+          title: 製品セット
         set_code:
           type: string
           readOnly: true
@@ -4526,7 +4669,7 @@ components:
       properties:
         bss_set:
           type: integer
-          title: BSSセット
+          title: 製品セット
         part_unit:
           type: integer
           nullable: true
@@ -4615,6 +4758,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BssSet'
+    PaginatedBssSetLocationSummaryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BssSetLocationSummary'
     PaginatedCustomerList:
       type: object
       required:
@@ -5364,11 +5530,11 @@ components:
         * `SCRAPPED` - 廃棄
     PatchedBssSetComponentRequest:
       type: object
-      description: BSSセット構成部品シリアライザ
+      description: 製品セット構成部品シリアライザ
       properties:
         bss_set:
           type: integer
-          title: BSSセット
+          title: 製品セット
         part_unit:
           type: integer
           title: 部品実物
@@ -5394,11 +5560,11 @@ components:
           title: 備考
     PatchedBssSetConfigRequest:
       type: object
-      description: BSSセット設定シリアライザ
+      description: 製品セット設定シリアライザ
       properties:
         bss_set:
           type: integer
-          title: BSSセット
+          title: 製品セット
         config_group:
           type: string
           minLength: 1
@@ -5435,7 +5601,7 @@ components:
           title: 有効終了日時
     PatchedBssSetRequest:
       type: object
-      description: BSSセットシリアライザ
+      description: 製品セットシリアライザ
       properties:
         set_code:
           type: string
@@ -5516,6 +5682,12 @@ components:
           title: 拠点名
           description: '例: ○○工場売店'
           maxLength: 200
+        country:
+          type: string
+          minLength: 1
+          title: 国コード
+          description: 'ISO 3166-1 alpha-2（例: JP / US）'
+          maxLength: 2
         address:
           type: string
           nullable: true

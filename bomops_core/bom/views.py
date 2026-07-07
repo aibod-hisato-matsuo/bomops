@@ -38,6 +38,7 @@ from .serializers import (
     BssSetCompositionSerializer,
     BssSetComponentSerializer,
     BssSetConfigSerializer,
+    BssSetLocationSummarySerializer,
     BssSetSerializer,
     CustomerSerializer,
     CustomerSiteSerializer,
@@ -136,13 +137,14 @@ class CustomerSiteFilter(django_filters.FilterSet):
     """顧客拠点用フィルタ"""
 
     customer = django_filters.NumberFilter()
+    country = django_filters.CharFilter(lookup_expr="iexact")
     lifecycle_status = django_filters.ChoiceFilter(
         choices=CustomerSite.LifecycleStatus.choices
     )
 
     class Meta:
         model = CustomerSite
-        fields = ["customer", "lifecycle_status"]
+        fields = ["customer", "country", "lifecycle_status"]
 
 
 class SiteConfigFilter(django_filters.FilterSet):
@@ -202,20 +204,31 @@ class EquipmentRefFilter(django_filters.FilterSet):
 
 
 class BssSetFilter(django_filters.FilterSet):
-    """BSSセット用フィルタ"""
+    """製品セット用フィルタ"""
 
     product_model = django_filters.NumberFilter()
     customer_site = django_filters.NumberFilter()
+    customer = django_filters.NumberFilter(field_name="customer_site__customer")
+    country = django_filters.CharFilter(
+        field_name="customer_site__country", lookup_expr="iexact"
+    )
     status = django_filters.ChoiceFilter(choices=BssSet.Status.choices)
     set_code = django_filters.CharFilter(lookup_expr="icontains")
 
     class Meta:
         model = BssSet
-        fields = ["product_model", "customer_site", "status", "set_code"]
+        fields = [
+            "product_model",
+            "customer_site",
+            "customer",
+            "country",
+            "status",
+            "set_code",
+        ]
 
 
 class BssSetComponentFilter(django_filters.FilterSet):
-    """BSSセット構成部品用フィルタ"""
+    """製品セット構成部品用フィルタ"""
 
     bss_set = django_filters.NumberFilter()
     part_unit = django_filters.NumberFilter()
@@ -227,7 +240,7 @@ class BssSetComponentFilter(django_filters.FilterSet):
 
 
 class BssSetConfigFilter(django_filters.FilterSet):
-    """BSSセット設定用フィルタ"""
+    """製品セット設定用フィルタ"""
 
     bss_set = django_filters.NumberFilter()
     config_group = django_filters.CharFilter(lookup_expr="iexact")
@@ -553,19 +566,19 @@ class CustomerSiteViewSet(viewsets.ModelViewSet):
 
 
 @extend_schema_view(
-    list=extend_schema(summary="BSSセット一覧取得", tags=["BSSセット"]),
-    create=extend_schema(summary="BSSセット作成", tags=["BSSセット"]),
-    retrieve=extend_schema(summary="BSSセット詳細取得", tags=["BSSセット"]),
-    update=extend_schema(summary="BSSセット更新", tags=["BSSセット"]),
-    partial_update=extend_schema(summary="BSSセット部分更新", tags=["BSSセット"]),
-    destroy=extend_schema(summary="BSSセット削除", tags=["BSSセット"]),
+    list=extend_schema(summary="製品セット一覧取得", tags=["製品セット"]),
+    create=extend_schema(summary="製品セット作成", tags=["製品セット"]),
+    retrieve=extend_schema(summary="製品セット詳細取得", tags=["製品セット"]),
+    update=extend_schema(summary="製品セット更新", tags=["製品セット"]),
+    partial_update=extend_schema(summary="製品セット部分更新", tags=["製品セット"]),
+    destroy=extend_schema(summary="製品セット削除", tags=["製品セット"]),
 )
 class BssSetViewSet(viewsets.ModelViewSet):
     """
-    BSSセット CRUD API
+    製品セット CRUD API
 
-    BAITEN STAND 実機を管理。
-    フィルタ: product_model, customer_site, status
+    完成品の実機（1台単位）を管理。
+    フィルタ: product_model, customer_site, customer, country, status
     検索: set_code
     """
 
@@ -580,10 +593,44 @@ class BssSetViewSet(viewsets.ModelViewSet):
     ordering_fields = ["set_code", "status", "installed_at", "created_at"]
 
     @extend_schema(
+        summary="国×顧客×拠点件数集計",
+        description="製品セットの納品先階層ごとの件数を返す（一覧画面のカスケードボタン用）",
+        responses={200: BssSetLocationSummarySerializer(many=True)},
+        tags=["製品セット"],
+    )
+    @action(detail=False, methods=["get"], url_path="location-summary")
+    def location_summary(self, request: Request) -> Response:
+        """国×顧客×拠点の件数集計API（在庫中セットは全てnullの行に集計）"""
+        rows = (
+            BssSet.objects.values(
+                "customer_site__country",
+                "customer_site__customer",
+                "customer_site__customer__name",
+                "customer_site",
+                "customer_site__name",
+            )
+            .annotate(count=Count("id"))
+            .order_by("customer_site__country", "-count")
+        )
+        data = [
+            {
+                "country": row["customer_site__country"],
+                "customer": row["customer_site__customer"],
+                "customer_name": row["customer_site__customer__name"],
+                "site": row["customer_site"],
+                "site_name": row["customer_site__name"],
+                "count": row["count"],
+            }
+            for row in rows
+        ]
+        serializer = BssSetLocationSummarySerializer(data, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
         summary="セット構成ビュー取得",
         description="セットに搭載されている部品の構成情報を返す",
         responses={200: BssSetCompositionSerializer},
-        tags=["BSSセット"],
+        tags=["製品セット"],
     )
     @action(detail=True, methods=["get"], url_path="composition")
     def composition(self, request: Request, pk: int | None = None) -> Response:
@@ -623,7 +670,7 @@ class BssSetViewSet(viewsets.ModelViewSet):
         summary="有効なコンフィグ一覧取得",
         description="現在有効な設定情報の一覧を返す",
         responses={200: EffectiveConfigSerializer(many=True)},
-        tags=["BSSセット"],
+        tags=["製品セット"],
     )
     @action(detail=True, methods=["get"], url_path="effective-configs")
     def effective_configs(self, request: Request, pk: int | None = None) -> Response:
@@ -670,16 +717,16 @@ class BssSetViewSet(viewsets.ModelViewSet):
 
 
 @extend_schema_view(
-    list=extend_schema(summary="BSSセット構成部品一覧取得", tags=["BSSセット構成部品"]),
-    create=extend_schema(summary="BSSセット構成部品作成", tags=["BSSセット構成部品"]),
-    retrieve=extend_schema(summary="BSSセット構成部品詳細取得", tags=["BSSセット構成部品"]),
-    update=extend_schema(summary="BSSセット構成部品更新", tags=["BSSセット構成部品"]),
-    partial_update=extend_schema(summary="BSSセット構成部品部分更新", tags=["BSSセット構成部品"]),
-    destroy=extend_schema(summary="BSSセット構成部品削除", tags=["BSSセット構成部品"]),
+    list=extend_schema(summary="製品セット構成部品一覧取得", tags=["製品セット構成部品"]),
+    create=extend_schema(summary="製品セット構成部品作成", tags=["製品セット構成部品"]),
+    retrieve=extend_schema(summary="製品セット構成部品詳細取得", tags=["製品セット構成部品"]),
+    update=extend_schema(summary="製品セット構成部品更新", tags=["製品セット構成部品"]),
+    partial_update=extend_schema(summary="製品セット構成部品部分更新", tags=["製品セット構成部品"]),
+    destroy=extend_schema(summary="製品セット構成部品削除", tags=["製品セット構成部品"]),
 )
 class BssSetComponentViewSet(viewsets.ModelViewSet):
     """
-    BSSセット構成部品 CRUD API
+    製品セット構成部品 CRUD API
 
     セットに搭載されている部品を管理。
     フィルタ: bss_set, part_unit, role
@@ -696,16 +743,16 @@ class BssSetComponentViewSet(viewsets.ModelViewSet):
 
 
 @extend_schema_view(
-    list=extend_schema(summary="BSSセット設定一覧取得", tags=["BSSセット設定"]),
-    create=extend_schema(summary="BSSセット設定作成", tags=["BSSセット設定"]),
-    retrieve=extend_schema(summary="BSSセット設定詳細取得", tags=["BSSセット設定"]),
-    update=extend_schema(summary="BSSセット設定更新", tags=["BSSセット設定"]),
-    partial_update=extend_schema(summary="BSSセット設定部分更新", tags=["BSSセット設定"]),
-    destroy=extend_schema(summary="BSSセット設定削除", tags=["BSSセット設定"]),
+    list=extend_schema(summary="製品セット設定一覧取得", tags=["製品セット設定"]),
+    create=extend_schema(summary="製品セット設定作成", tags=["製品セット設定"]),
+    retrieve=extend_schema(summary="製品セット設定詳細取得", tags=["製品セット設定"]),
+    update=extend_schema(summary="製品セット設定更新", tags=["製品セット設定"]),
+    partial_update=extend_schema(summary="製品セット設定部分更新", tags=["製品セット設定"]),
+    destroy=extend_schema(summary="製品セット設定削除", tags=["製品セット設定"]),
 )
 class BssSetConfigViewSet(viewsets.ModelViewSet):
     """
-    BSSセット設定 CRUD API
+    製品セット設定 CRUD API
 
     セットごとの設定情報（POS/PayPay/ネットワーク等）を管理。
     フィルタ: bss_set, config_group, key, is_secret

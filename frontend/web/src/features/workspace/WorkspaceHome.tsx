@@ -114,7 +114,7 @@ export function WorkspaceHome() {
           <div className={styles.bandRow}>
             <EntityCard
               to="/workspace/sets"
-              title="BSSセット"
+              title="製品セット"
               desc="完成機の構成・設定・イベント履歴"
               count={fmt(summary?.sets.total)}
               countLabel="台"

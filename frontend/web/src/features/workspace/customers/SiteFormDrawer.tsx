@@ -19,6 +19,7 @@ const schema = z.object({
   customer: z.string().min(1, '顧客を選択してください'),
   name: z.string().min(1, '拠点名を入力してください'),
   lifecycle_status: z.string(),
+  country: z.string().regex(/^[A-Za-z]{2}$/, '2文字の国コード（例: JP）を入力してください'),
   address: z.string(),
   timezone: z.string().min(1),
   note: z.string(),
@@ -56,6 +57,7 @@ export function SiteFormDrawer({ item, onClose }: Props) {
       customer: item ? String(item.customer) : '',
       name: item?.name ?? '',
       lifecycle_status: item?.lifecycle_status ?? 'PREPARING',
+      country: item?.country ?? 'JP',
       address: item?.address ?? '',
       timezone: item?.timezone ?? 'Asia/Tokyo',
       note: item?.note ?? '',
@@ -63,7 +65,11 @@ export function SiteFormDrawer({ item, onClose }: Props) {
   })
 
   const onSubmit = async (values: FormValues) => {
-    const payload = cleanPayload({ ...values, customer: Number(values.customer) })
+    const payload = cleanPayload({
+      ...values,
+      customer: Number(values.customer),
+      country: values.country.toUpperCase(),
+    })
     try {
       if (item) {
         await update.mutateAsync({ id: item.id, payload })
@@ -116,6 +122,9 @@ export function SiteFormDrawer({ item, onClose }: Props) {
             </option>
           ))}
         </Select>
+      </Field>
+      <Field label="国コード" error={errors.country?.message}>
+        <TextInput placeholder="例: JP / US" {...register('country')} />
       </Field>
       <Field label="住所" error={errors.address?.message}>
         <TextInput {...register('address')} />

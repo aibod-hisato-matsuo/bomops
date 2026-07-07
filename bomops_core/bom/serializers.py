@@ -292,6 +292,7 @@ class CustomerSiteSerializer(serializers.ModelSerializer):
             "customer",
             "customer_name",
             "name",
+            "country",
             "address",
             "timezone",
             "lifecycle_status",
@@ -353,13 +354,30 @@ class SiteConfigSerializer(serializers.ModelSerializer):
 
 
 # =============================================================================
-# BSSセット
+# 製品セット
 # =============================================================================
 
 
-class BssSetSerializer(serializers.ModelSerializer):
-    """BSSセットシリアライザ"""
+class BssSetLocationSummarySerializer(serializers.Serializer):
+    """製品セット: 国×顧客×拠点の件数集計（読み取り専用）"""
 
+    country = serializers.CharField(allow_null=True)
+    customer = serializers.IntegerField(allow_null=True)
+    customer_name = serializers.CharField(allow_null=True)
+    site = serializers.IntegerField(allow_null=True)
+    site_name = serializers.CharField(allow_null=True)
+    count = serializers.IntegerField()
+
+
+class BssSetSerializer(serializers.ModelSerializer):
+    """製品セットシリアライザ"""
+
+    site_country = serializers.CharField(
+        source="customer_site.country",
+        read_only=True,
+        allow_null=True,
+        default=None,
+    )
     product_model_code = serializers.CharField(
         source="product_model.code",
         read_only=True,
@@ -398,6 +416,7 @@ class BssSetSerializer(serializers.ModelSerializer):
             "customer_site",
             "customer_site_name",
             "customer_name",
+            "site_country",
             "installed_at",
             "removed_at",
             "note",
@@ -409,7 +428,7 @@ class BssSetSerializer(serializers.ModelSerializer):
 
 
 class BssSetComponentSerializer(serializers.ModelSerializer):
-    """BSSセット構成部品シリアライザ"""
+    """製品セット構成部品シリアライザ"""
 
     set_code = serializers.CharField(
         source="bss_set.set_code",
@@ -451,7 +470,7 @@ class BssSetComponentSerializer(serializers.ModelSerializer):
 
 
 class BssSetConfigSerializer(serializers.ModelSerializer):
-    """BSSセット設定シリアライザ"""
+    """製品セット設定シリアライザ"""
 
     set_code = serializers.CharField(
         source="bss_set.set_code",

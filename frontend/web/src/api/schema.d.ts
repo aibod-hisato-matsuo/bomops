@@ -72,8 +72,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * BSSセット構成部品一覧取得
-         * @description BSSセット構成部品 CRUD API
+         * 製品セット構成部品一覧取得
+         * @description 製品セット構成部品 CRUD API
          *
          *     セットに搭載されている部品を管理。
          *     フィルタ: bss_set, part_unit, role
@@ -81,8 +81,8 @@ export interface paths {
         get: operations["bss_set_components_list"];
         put?: never;
         /**
-         * BSSセット構成部品作成
-         * @description BSSセット構成部品 CRUD API
+         * 製品セット構成部品作成
+         * @description 製品セット構成部品 CRUD API
          *
          *     セットに搭載されている部品を管理。
          *     フィルタ: bss_set, part_unit, role
@@ -102,16 +102,16 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * BSSセット構成部品詳細取得
-         * @description BSSセット構成部品 CRUD API
+         * 製品セット構成部品詳細取得
+         * @description 製品セット構成部品 CRUD API
          *
          *     セットに搭載されている部品を管理。
          *     フィルタ: bss_set, part_unit, role
          */
         get: operations["bss_set_components_retrieve"];
         /**
-         * BSSセット構成部品更新
-         * @description BSSセット構成部品 CRUD API
+         * 製品セット構成部品更新
+         * @description 製品セット構成部品 CRUD API
          *
          *     セットに搭載されている部品を管理。
          *     フィルタ: bss_set, part_unit, role
@@ -119,8 +119,8 @@ export interface paths {
         put: operations["bss_set_components_update"];
         post?: never;
         /**
-         * BSSセット構成部品削除
-         * @description BSSセット構成部品 CRUD API
+         * 製品セット構成部品削除
+         * @description 製品セット構成部品 CRUD API
          *
          *     セットに搭載されている部品を管理。
          *     フィルタ: bss_set, part_unit, role
@@ -129,8 +129,8 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * BSSセット構成部品部分更新
-         * @description BSSセット構成部品 CRUD API
+         * 製品セット構成部品部分更新
+         * @description 製品セット構成部品 CRUD API
          *
          *     セットに搭載されている部品を管理。
          *     フィルタ: bss_set, part_unit, role
@@ -146,8 +146,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * BSSセット設定一覧取得
-         * @description BSSセット設定 CRUD API
+         * 製品セット設定一覧取得
+         * @description 製品セット設定 CRUD API
          *
          *     セットごとの設定情報（POS/PayPay/ネットワーク等）を管理。
          *     フィルタ: bss_set, config_group, key, is_secret
@@ -155,8 +155,8 @@ export interface paths {
         get: operations["bss_set_configs_list"];
         put?: never;
         /**
-         * BSSセット設定作成
-         * @description BSSセット設定 CRUD API
+         * 製品セット設定作成
+         * @description 製品セット設定 CRUD API
          *
          *     セットごとの設定情報（POS/PayPay/ネットワーク等）を管理。
          *     フィルタ: bss_set, config_group, key, is_secret
@@ -176,16 +176,16 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * BSSセット設定詳細取得
-         * @description BSSセット設定 CRUD API
+         * 製品セット設定詳細取得
+         * @description 製品セット設定 CRUD API
          *
          *     セットごとの設定情報（POS/PayPay/ネットワーク等）を管理。
          *     フィルタ: bss_set, config_group, key, is_secret
          */
         get: operations["bss_set_configs_retrieve"];
         /**
-         * BSSセット設定更新
-         * @description BSSセット設定 CRUD API
+         * 製品セット設定更新
+         * @description 製品セット設定 CRUD API
          *
          *     セットごとの設定情報（POS/PayPay/ネットワーク等）を管理。
          *     フィルタ: bss_set, config_group, key, is_secret
@@ -193,8 +193,8 @@ export interface paths {
         put: operations["bss_set_configs_update"];
         post?: never;
         /**
-         * BSSセット設定削除
-         * @description BSSセット設定 CRUD API
+         * 製品セット設定削除
+         * @description 製品セット設定 CRUD API
          *
          *     セットごとの設定情報（POS/PayPay/ネットワーク等）を管理。
          *     フィルタ: bss_set, config_group, key, is_secret
@@ -203,8 +203,8 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * BSSセット設定部分更新
-         * @description BSSセット設定 CRUD API
+         * 製品セット設定部分更新
+         * @description 製品セット設定 CRUD API
          *
          *     セットごとの設定情報（POS/PayPay/ネットワーク等）を管理。
          *     フィルタ: bss_set, config_group, key, is_secret
@@ -220,21 +220,21 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * BSSセット一覧取得
-         * @description BSSセット CRUD API
+         * 製品セット一覧取得
+         * @description 製品セット CRUD API
          *
-         *     BAITEN STAND 実機を管理。
-         *     フィルタ: product_model, customer_site, status
+         *     完成品の実機（1台単位）を管理。
+         *     フィルタ: product_model, customer_site, customer, country, status
          *     検索: set_code
          */
         get: operations["bss_sets_list"];
         put?: never;
         /**
-         * BSSセット作成
-         * @description BSSセット CRUD API
+         * 製品セット作成
+         * @description 製品セット CRUD API
          *
-         *     BAITEN STAND 実機を管理。
-         *     フィルタ: product_model, customer_site, status
+         *     完成品の実機（1台単位）を管理。
+         *     フィルタ: product_model, customer_site, customer, country, status
          *     検索: set_code
          */
         post: operations["bss_sets_create"];
@@ -252,41 +252,41 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * BSSセット詳細取得
-         * @description BSSセット CRUD API
+         * 製品セット詳細取得
+         * @description 製品セット CRUD API
          *
-         *     BAITEN STAND 実機を管理。
-         *     フィルタ: product_model, customer_site, status
+         *     完成品の実機（1台単位）を管理。
+         *     フィルタ: product_model, customer_site, customer, country, status
          *     検索: set_code
          */
         get: operations["bss_sets_retrieve"];
         /**
-         * BSSセット更新
-         * @description BSSセット CRUD API
+         * 製品セット更新
+         * @description 製品セット CRUD API
          *
-         *     BAITEN STAND 実機を管理。
-         *     フィルタ: product_model, customer_site, status
+         *     完成品の実機（1台単位）を管理。
+         *     フィルタ: product_model, customer_site, customer, country, status
          *     検索: set_code
          */
         put: operations["bss_sets_update"];
         post?: never;
         /**
-         * BSSセット削除
-         * @description BSSセット CRUD API
+         * 製品セット削除
+         * @description 製品セット CRUD API
          *
-         *     BAITEN STAND 実機を管理。
-         *     フィルタ: product_model, customer_site, status
+         *     完成品の実機（1台単位）を管理。
+         *     フィルタ: product_model, customer_site, customer, country, status
          *     検索: set_code
          */
         delete: operations["bss_sets_destroy"];
         options?: never;
         head?: never;
         /**
-         * BSSセット部分更新
-         * @description BSSセット CRUD API
+         * 製品セット部分更新
+         * @description 製品セット CRUD API
          *
-         *     BAITEN STAND 実機を管理。
-         *     フィルタ: product_model, customer_site, status
+         *     完成品の実機（1台単位）を管理。
+         *     フィルタ: product_model, customer_site, customer, country, status
          *     検索: set_code
          */
         patch: operations["bss_sets_partial_update"];
@@ -324,6 +324,26 @@ export interface paths {
          * @description 現在有効な設定情報の一覧を返す
          */
         get: operations["bss_sets_effective_configs_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/bss-sets/location-summary/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 国×顧客×拠点件数集計
+         * @description 製品セットの納品先階層ごとの件数を返す（一覧画面のカスケードボタン用）
+         */
+        get: operations["bss_sets_location_summary_list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1308,7 +1328,7 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** @description BSSセットシリアライザ */
+        /** @description 製品セットシリアライザ */
         BssSet: {
             readonly id: number;
             /**
@@ -1330,6 +1350,7 @@ export interface components {
             customer_site?: number | null;
             readonly customer_site_name: string;
             readonly customer_name: string;
+            readonly site_country: string | null;
             /**
              * 設置日時
              * Format: date-time
@@ -1354,10 +1375,10 @@ export interface components {
              */
             readonly updated_at: string;
         };
-        /** @description BSSセット構成部品シリアライザ */
+        /** @description 製品セット構成部品シリアライザ */
         BssSetComponent: {
             readonly id: number;
-            /** BSSセット */
+            /** 製品セット */
             bss_set: number;
             readonly set_code: string;
             /** 部品実物 */
@@ -1394,9 +1415,9 @@ export interface components {
              */
             readonly updated_at: string;
         };
-        /** @description BSSセット構成部品シリアライザ */
+        /** @description 製品セット構成部品シリアライザ */
         BssSetComponentRequest: {
-            /** BSSセット */
+            /** 製品セット */
             bss_set: number;
             /** 部品実物 */
             part_unit: number;
@@ -1425,10 +1446,10 @@ export interface components {
             product_model: string;
             components: components["schemas"]["ComponentDetail"][];
         };
-        /** @description BSSセット設定シリアライザ */
+        /** @description 製品セット設定シリアライザ */
         BssSetConfig: {
             readonly id: number;
-            /** BSSセット */
+            /** 製品セット */
             bss_set: number;
             readonly set_code: string;
             /**
@@ -1477,9 +1498,9 @@ export interface components {
              */
             readonly updated_at: string;
         };
-        /** @description BSSセット設定シリアライザ */
+        /** @description 製品セット設定シリアライザ */
         BssSetConfigRequest: {
-            /** BSSセット */
+            /** 製品セット */
             bss_set: number;
             /**
              * 設定グループ
@@ -1514,7 +1535,16 @@ export interface components {
              */
             valid_to?: string | null;
         };
-        /** @description BSSセットシリアライザ */
+        /** @description 製品セット: 国×顧客×拠点の件数集計（読み取り専用） */
+        BssSetLocationSummary: {
+            country: string | null;
+            customer: number | null;
+            customer_name: string | null;
+            site: number | null;
+            site_name: string | null;
+            count: number;
+        };
+        /** @description 製品セットシリアライザ */
         BssSetRequest: {
             /**
              * セットコード
@@ -1617,6 +1647,11 @@ export interface components {
              * @description 例: ○○工場売店
              */
             name: string;
+            /**
+             * 国コード
+             * @description ISO 3166-1 alpha-2（例: JP / US）
+             */
+            country?: string;
             /** 住所 */
             address?: string | null;
             /** タイムゾーン */
@@ -1646,6 +1681,11 @@ export interface components {
              * @description 例: ○○工場売店
              */
             name: string;
+            /**
+             * 国コード
+             * @description ISO 3166-1 alpha-2（例: JP / US）
+             */
+            country?: string;
             /** 住所 */
             address?: string | null;
             /** タイムゾーン */
@@ -1711,7 +1751,7 @@ export interface components {
         /** @description 導入イベントシリアライザ（追記型） */
         DeployEvent: {
             readonly id: number;
-            /** BSSセット */
+            /** 製品セット */
             bss_set: number;
             readonly set_code: string;
             /** ステージ */
@@ -1737,7 +1777,7 @@ export interface components {
         };
         /** @description 導入イベントシリアライザ（追記型） */
         DeployEventRequest: {
-            /** BSSセット */
+            /** 製品セット */
             bss_set: number;
             /** ステージ */
             stage: components["schemas"]["StageEnum"];
@@ -1837,7 +1877,7 @@ export interface components {
         /** @description 保守イベントシリアライザ（追記型） */
         MaintenanceEvent: {
             readonly id: number;
-            /** BSSセット */
+            /** 製品セット */
             bss_set: number;
             readonly set_code: string;
             /** 対象部品実物 */
@@ -1867,7 +1907,7 @@ export interface components {
         };
         /** @description 保守イベントシリアライザ（追記型） */
         MaintenanceEventRequest: {
-            /** BSSセット */
+            /** 製品セット */
             bss_set: number;
             /** 対象部品実物 */
             part_unit?: number | null;
@@ -1925,6 +1965,21 @@ export interface components {
              */
             previous?: string | null;
             results: components["schemas"]["BssSet"][];
+        };
+        PaginatedBssSetLocationSummaryList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["BssSetLocationSummary"][];
         };
         PaginatedCustomerList: {
             /** @example 123 */
@@ -2370,9 +2425,9 @@ export interface components {
          * @enum {string}
          */
         PartUnitStatusEnum: "IN_STOCK" | "ASSIGNED" | "BROKEN" | "SCRAPPED";
-        /** @description BSSセット構成部品シリアライザ */
+        /** @description 製品セット構成部品シリアライザ */
         PatchedBssSetComponentRequest: {
-            /** BSSセット */
+            /** 製品セット */
             bss_set?: number;
             /** 部品実物 */
             part_unit?: number;
@@ -2394,9 +2449,9 @@ export interface components {
             /** 備考 */
             note?: string | null;
         };
-        /** @description BSSセット設定シリアライザ */
+        /** @description 製品セット設定シリアライザ */
         PatchedBssSetConfigRequest: {
-            /** BSSセット */
+            /** 製品セット */
             bss_set?: number;
             /**
              * 設定グループ
@@ -2431,7 +2486,7 @@ export interface components {
              */
             valid_to?: string | null;
         };
-        /** @description BSSセットシリアライザ */
+        /** @description 製品セットシリアライザ */
         PatchedBssSetRequest: {
             /**
              * セットコード
@@ -2487,6 +2542,11 @@ export interface components {
              * @description 例: ○○工場売店
              */
             name?: string;
+            /**
+             * 国コード
+             * @description ISO 3166-1 alpha-2（例: JP / US）
+             */
+            country?: string;
             /** 住所 */
             address?: string | null;
             /** タイムゾーン */
@@ -3066,7 +3126,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description A unique integer value identifying this BSSセット構成部品. */
+                /** @description A unique integer value identifying this 製品セット構成部品. */
                 id: number;
             };
             cookie?: never;
@@ -3088,7 +3148,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description A unique integer value identifying this BSSセット構成部品. */
+                /** @description A unique integer value identifying this 製品セット構成部品. */
                 id: number;
             };
             cookie?: never;
@@ -3116,7 +3176,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description A unique integer value identifying this BSSセット構成部品. */
+                /** @description A unique integer value identifying this 製品セット構成部品. */
                 id: number;
             };
             cookie?: never;
@@ -3137,7 +3197,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description A unique integer value identifying this BSSセット構成部品. */
+                /** @description A unique integer value identifying this 製品セット構成部品. */
                 id: number;
             };
             cookie?: never;
@@ -3222,7 +3282,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description A unique integer value identifying this BSSセット設定. */
+                /** @description A unique integer value identifying this 製品セット設定. */
                 id: number;
             };
             cookie?: never;
@@ -3244,7 +3304,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description A unique integer value identifying this BSSセット設定. */
+                /** @description A unique integer value identifying this 製品セット設定. */
                 id: number;
             };
             cookie?: never;
@@ -3272,7 +3332,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description A unique integer value identifying this BSSセット設定. */
+                /** @description A unique integer value identifying this 製品セット設定. */
                 id: number;
             };
             cookie?: never;
@@ -3293,7 +3353,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description A unique integer value identifying this BSSセット設定. */
+                /** @description A unique integer value identifying this 製品セット設定. */
                 id: number;
             };
             cookie?: never;
@@ -3319,6 +3379,8 @@ export interface operations {
     bss_sets_list: {
         parameters: {
             query?: {
+                country?: string;
+                customer?: number;
                 customer_site?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
@@ -3385,7 +3447,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description A unique integer value identifying this BSSセット. */
+                /** @description A unique integer value identifying this 製品セット. */
                 id: number;
             };
             cookie?: never;
@@ -3407,7 +3469,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description A unique integer value identifying this BSSセット. */
+                /** @description A unique integer value identifying this 製品セット. */
                 id: number;
             };
             cookie?: never;
@@ -3435,7 +3497,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description A unique integer value identifying this BSSセット. */
+                /** @description A unique integer value identifying this 製品セット. */
                 id: number;
             };
             cookie?: never;
@@ -3456,7 +3518,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description A unique integer value identifying this BSSセット. */
+                /** @description A unique integer value identifying this 製品セット. */
                 id: number;
             };
             cookie?: never;
@@ -3484,7 +3546,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description A unique integer value identifying this BSSセット. */
+                /** @description A unique integer value identifying this 製品セット. */
                 id: number;
             };
             cookie?: never;
@@ -3504,6 +3566,8 @@ export interface operations {
     bss_sets_effective_configs_list: {
         parameters: {
             query?: {
+                country?: string;
+                customer?: number;
                 customer_site?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
@@ -3526,7 +3590,7 @@ export interface operations {
             };
             header?: never;
             path: {
-                /** @description A unique integer value identifying this BSSセット. */
+                /** @description A unique integer value identifying this 製品セット. */
                 id: number;
             };
             cookie?: never;
@@ -3543,9 +3607,51 @@ export interface operations {
             };
         };
     };
+    bss_sets_location_summary_list: {
+        parameters: {
+            query?: {
+                country?: string;
+                customer?: number;
+                customer_site?: number;
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                product_model?: number;
+                /** @description A search term. */
+                search?: string;
+                set_code?: string;
+                /**
+                 * @description * `ASSEMBLED` - 組立完了
+                 *     * `INSTALLED` - 設置済
+                 *     * `REPAIR` - 修理中
+                 *     * `RECOVERED` - 回収済
+                 *     * `SCRAPPED` - 廃棄
+                 */
+                status?: "ASSEMBLED" | "INSTALLED" | "RECOVERED" | "REPAIR" | "SCRAPPED";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedBssSetLocationSummaryList"];
+                };
+            };
+        };
+    };
     customer_sites_list: {
         parameters: {
             query?: {
+                country?: string;
                 customer?: number;
                 /**
                  * @description * `PREPARING` - 準備中

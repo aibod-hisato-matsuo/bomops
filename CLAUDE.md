@@ -115,9 +115,9 @@ ruff check . && ruff format .
 | 正準スキーマ | 実装モデル | 備考 |
 |------|------|------|
 | `Organization` | `Customer` | `entity_num` は未実装 |
-| `Site` | `CustomerSite` | `lifecycle_status` 実装済み |
+| `Site` | `CustomerSite` | `lifecycle_status` 実装済み。`country`（ISO 3166-1 alpha-2・既定JP）実装済み — 納品エリアは 国→顧客(`Customer`)→拠点(`CustomerSite`) の既存関係で表現（タグ複製しない） |
 | `SiteConfig` | `SiteConfig` | 1:1、secret系は `EncryptedTextField` で暗号化・APIマスク |
-| `DeviceSet` | `BssSet` | 実装は `ProductModel`/`ProductBOM`（型番・レシピ層）を追加で持つ。ProductModel は **ファミリ（`ProductFamily`マスタFK・nullable）→ グレード → バリエーション → モデル** の4層分類（grade/variation は暫定的に自由文字列。整備後にマスタ昇格を検討） |
+| `DeviceSet` | `BssSet` | **UI表示名は「製品セット」**（コード識別子・API は `BssSet`/`bss-sets` のまま）。実装は `ProductModel`/`ProductBOM`（型番・レシピ層）を追加で持つ。ProductModel は **ファミリ（`ProductFamily`マスタFK・nullable）→ グレード → バリエーション → モデル** の4層分類（grade/variation は暫定的に自由文字列。整備後にマスタ昇格を検討） |
 | `Unit` | `PartUnit` | Identity = `serial_number` |
 | `PartMaster` | `PartMaster` | 正準の category（本体構成品/オプション品/組立部品/その他）は `part_group`（主要/周辺/組立/その他）として実装。正準の type（種別）は `category` = **`PartCategory` マスタへのFK**（画面から追加可能・使用中削除はPROTECT）。「どの製品で使うか」は旧 `used_in_ai`/`used_in_mini` フラグを廃止し **`ProductBOM` 関係から導出**（API: `used_in` / フィルタ: `used_in_model`・`used_in_family`・`used_in_grade`） |
 | `MaintenanceEvent` | `MaintenanceEvent` | 追記型（API/Adminとも更新・削除不可） |
@@ -146,6 +146,7 @@ erDiagram
     Site {
         uuid id PK
         string location "拠点/店舗名"
+        string country "ISO 3166-1 alpha-2 (JP/US...)"
         enum  lifecycle_status "準備中/稼働中/撤退済/拠点/貸出中"
         fk    organization_id FK
     }

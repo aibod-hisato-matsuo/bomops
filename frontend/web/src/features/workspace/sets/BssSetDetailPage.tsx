@@ -1,5 +1,5 @@
 /**
- * BSSセット詳細（W-7 / W-8）
+ * 製品セット詳細（W-7 / W-8）
  *
  * 基本情報・搭載部品（搭載/取外し）・コンフィグ・イベント履歴（追記）を扱う。
  * イベントは追記型のため編集・削除UIを置かない。
@@ -146,7 +146,7 @@ export function BssSetDetailPage() {
   return (
     <div>
       <PageHeader
-        title={set ? `BSSセット: ${set.set_code}` : 'BSSセット'}
+        title={set ? `製品セット: ${set.set_code}` : '製品セット'}
         description={set?.product_model_name}
         actions={
           <>

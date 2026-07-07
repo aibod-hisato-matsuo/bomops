@@ -503,6 +503,71 @@ class DashboardSummaryAPITest(APITestCase):
         self.assertEqual(row["bottleneck_required"], 2)
 
 
+class SetLocationAPITest(APITestCase):
+    """製品セットの国×顧客×拠点集計・フィルタのテスト"""
+
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(
+            username="testuser",
+            password="testpass123",
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+        model = ProductModel.objects.create(code="M-1", name="Model")
+        aibod = Customer.objects.create(code="C-1", name="AIBOD")
+        tohoku = Customer.objects.create(code="C-2", name="東北技研")
+        site_jp = CustomerSite.objects.create(
+            customer=aibod, name="豊前工場", country="JP",
+        )
+        site_us = CustomerSite.objects.create(
+            customer=tohoku, name="US Lab", country="US",
+        )
+        BssSet.objects.create(
+            set_code="S-1", product_model=model, customer_site=site_jp,
+        )
+        BssSet.objects.create(
+            set_code="S-2", product_model=model, customer_site=site_jp,
+        )
+        BssSet.objects.create(
+            set_code="S-3", product_model=model, customer_site=site_us,
+        )
+        BssSet.objects.create(set_code="S-4", product_model=model)  # 在庫
+
+    def test_country_defaults_to_jp(self) -> None:
+        """country の既定値が JP であることのテスト"""
+        site = CustomerSite.objects.create(
+            customer=Customer.objects.get(code="C-1"), name="新拠点",
+        )
+        self.assertEqual(site.country, "JP")
+
+    def test_location_summary(self) -> None:
+        """国×顧客×拠点集計のテスト（在庫は null 行）"""
+        url = reverse("bom:bss-set-location-summary")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        rows = {
+            (r["country"], r["customer_name"], r["site_name"]): r["count"]
+            for r in response.data
+        }
+        self.assertEqual(rows[("JP", "AIBOD", "豊前工場")], 2)
+        self.assertEqual(rows[("US", "東北技研", "US Lab")], 1)
+        self.assertEqual(rows[(None, None, None)], 1)  # 在庫中
+
+    def test_filter_by_country_and_customer(self) -> None:
+        """country / customer フィルタのテスト"""
+        url = reverse("bom:bss-set-list")
+        response = self.client.get(url, {"country": "jp"})  # iexact
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 2)
+
+        aibod_id = Customer.objects.get(name="AIBOD").id
+        response = self.client.get(url, {"customer": aibod_id})
+        self.assertEqual(response.data["count"], 2)
+        self.assertEqual(response.data["results"][0]["site_country"], "JP")
+
+
 class ProductHierarchyAPITest(APITestCase):
     """製品ファミリ・階層集計APIのテスト"""
 

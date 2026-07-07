@@ -406,6 +406,12 @@ class CustomerSite(TimestampMixin):
         verbose_name="拠点名",
         help_text="例: ○○工場売店",
     )
+    country = models.CharField(
+        max_length=2,
+        default="JP",
+        verbose_name="国コード",
+        help_text="ISO 3166-1 alpha-2（例: JP / US）",
+    )
     lifecycle_status = models.CharField(
         max_length=20,
         choices=LifecycleStatus.choices,
@@ -557,7 +563,7 @@ class SiteConfig(TimestampMixin):
 
 class BssSet(TimestampMixin):
     """
-    BSSセット（BAITEN STAND 実機1台）
+    製品セット（BAITEN STAND 実機1台）
 
     実際に組み立てられた装置1台を管理。
     どの部品が搭載されているかは BssSetComponent で管理。
@@ -617,8 +623,8 @@ class BssSet(TimestampMixin):
 
     class Meta:
         db_table = "bss_set"
-        verbose_name = "BSSセット"
-        verbose_name_plural = "BSSセット"
+        verbose_name = "製品セット"
+        verbose_name_plural = "製品セット"
         ordering = ["-created_at"]
 
     def __str__(self) -> str:
@@ -627,7 +633,7 @@ class BssSet(TimestampMixin):
 
 class BssSetComponent(TimestampMixin):
     """
-    BSSセット構成部品
+    製品セット構成部品
 
     セットに搭載されている部品実物を管理。
     部品の搭載・取り外し履歴も管理可能。
@@ -637,7 +643,7 @@ class BssSetComponent(TimestampMixin):
         BssSet,
         on_delete=models.CASCADE,
         related_name="components",
-        verbose_name="BSSセット",
+        verbose_name="製品セット",
     )
     part_unit = models.ForeignKey(
         PartUnit,
@@ -671,8 +677,8 @@ class BssSetComponent(TimestampMixin):
 
     class Meta:
         db_table = "bss_set_component"
-        verbose_name = "BSSセット構成部品"
-        verbose_name_plural = "BSSセット構成部品"
+        verbose_name = "製品セット構成部品"
+        verbose_name_plural = "製品セット構成部品"
         ordering = ["bss_set", "role"]
 
     def __str__(self) -> str:
@@ -691,7 +697,7 @@ class BssSetComponent(TimestampMixin):
 
 class BssSetConfig(TimestampMixin):
     """
-    BSSセット設定情報
+    製品セット設定情報
 
     POS / PayPay / ネットワークなど、セットごとの設定情報を管理。
     """
@@ -700,7 +706,7 @@ class BssSetConfig(TimestampMixin):
         BssSet,
         on_delete=models.CASCADE,
         related_name="configs",
-        verbose_name="BSSセット",
+        verbose_name="製品セット",
     )
     config_group = models.CharField(
         max_length=50,
@@ -741,8 +747,8 @@ class BssSetConfig(TimestampMixin):
 
     class Meta:
         db_table = "bss_set_config"
-        verbose_name = "BSSセット設定"
-        verbose_name_plural = "BSSセット設定"
+        verbose_name = "製品セット設定"
+        verbose_name_plural = "製品セット設定"
         ordering = ["bss_set", "config_group", "key"]
         indexes = [
             models.Index(fields=["bss_set", "config_group"]),
@@ -788,7 +794,7 @@ class MaintenanceEvent(TimestampMixin):
         BssSet,
         on_delete=models.PROTECT,
         related_name="maintenance_events",
-        verbose_name="BSSセット",
+        verbose_name="製品セット",
     )
     part_unit = models.ForeignKey(
         PartUnit,
@@ -847,7 +853,7 @@ class DeployEvent(TimestampMixin):
         BssSet,
         on_delete=models.PROTECT,
         related_name="deploy_events",
-        verbose_name="BSSセット",
+        verbose_name="製品セット",
     )
     stage = models.CharField(
         max_length=20,

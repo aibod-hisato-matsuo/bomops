@@ -1,7 +1,7 @@
 /**
  * 横断検索（W-9）
  *
- * シリアル番号逆引き＋部品実物・BSSセット・拠点・顧客の横断検索。
+ * シリアル番号逆引き＋部品実物・製品セット・拠点・顧客の横断検索。
  */
 
 import { useState } from 'react'
@@ -177,7 +177,7 @@ export function SearchPage() {
               emptyText="該当なし"
             />
           </Section>
-          <Section title={`BSSセット（${sets.data?.count ?? 0}件）`}>
+          <Section title={`製品セット（${sets.data?.count ?? 0}件）`}>
             <DataTable
               columns={setColumns}
               rows={sets.data?.results}

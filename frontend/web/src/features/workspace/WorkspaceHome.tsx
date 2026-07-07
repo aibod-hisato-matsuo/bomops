@@ -128,16 +128,23 @@ export function WorkspaceHome() {
               countLabel="点"
             />
           </div>
-          <div className={styles.bandRow}>
-            <ArrowVertical label="設置 1:N" up />
-            <div />
-            <div />
-          </div>
+        </section>
+
+        {/* ===== 運用⇔導入先の関係 ===== */}
+        <div className={styles.connectorRow}>
+          <ArrowVertical label="設置 1:N" up />
+          <div />
+          <div />
+        </div>
+
+        {/* ===== 導入先層（準静的） ===== */}
+        <section className={`${styles.band} ${styles.bandDest}`}>
+          <span className={styles.bandLabel}>導入先（準静的）</span>
           <div className={styles.bandRow}>
             <EntityCard
               to="/workspace/customers"
               title="顧客・拠点"
-              desc="設置先顧客と拠点・拠点設定"
+              desc="国 → 顧客 → 拠点の導入先階層・拠点設定"
               count={`${fmt(summary?.customers.total)} 社 / ${fmt(summary?.sites.total)}`}
               countLabel="拠点"
             />

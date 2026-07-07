@@ -76,6 +76,10 @@
   color: var(--aibod-sky);
 }
 
+.toneDest .subGroupLabel {
+  color: rgba(255, 255, 255, 0.92);
+}
+
 .treeChildren {
   margin-left: 28px;
   border-left: 2px solid rgba(191, 228, 248, 0.35);
@@ -83,6 +87,10 @@
 
 .toneOps .treeChildren {
   border-left-color: rgba(0, 179, 236, 0.55);
+}
+
+.toneDest .treeChildren {
+  border-left-color: rgba(255, 255, 255, 0.35);
 }
 
 /* ツリー内のリンクはインデントを詰め、アクティブ罫線がガイド線に重なるようにする */

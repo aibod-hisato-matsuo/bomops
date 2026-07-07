@@ -115,7 +115,7 @@ ruff check . && ruff format .
 | 正準スキーマ | 実装モデル | 備考 |
 |------|------|------|
 | `Organization` | `Customer` | `entity_num` は未実装 |
-| `Site` | `CustomerSite` | `lifecycle_status` 実装済み。`country`（ISO 3166-1 alpha-2・既定JP）実装済み — 納品エリアは 国→顧客(`Customer`)→拠点(`CustomerSite`) の既存関係で表現（タグ複製しない） |
+| `Site` | `CustomerSite` | `lifecycle_status` 実装済み。`country`（ISO 3166-1 alpha-2・既定JP）実装済み — 納品エリアは 国→顧客(`Customer`)→拠点(`CustomerSite`) の既存関係で表現（タグ複製しない）。UIグループは正準 Configuration 層に対応する **「導入先（準静的）」**（マスタ/運用とは別の第3グループ） |
 | `SiteConfig` | `SiteConfig` | 1:1、secret系は `EncryptedTextField` で暗号化・APIマスク |
 | `DeviceSet` | `BssSet` | **UI表示名は「製品セット」**（コード識別子・API は `BssSet`/`bss-sets` のまま）。実装は `ProductModel`/`ProductBOM`（型番・レシピ層）を追加で持つ。ProductModel は **ファミリ（`ProductFamily`マスタFK・nullable）→ グレード → バリエーション → モデル** の4層分類（grade/variation は暫定的に自由文字列。整備後にマスタ昇格を検討） |
 | `Unit` | `PartUnit` | Identity = `serial_number` |

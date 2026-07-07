@@ -20,6 +20,11 @@
   border: 1px solid rgba(0, 179, 236, 0.25);
 }
 
+.bandDest {
+  background: rgba(0, 104, 182, 0.05);
+  border: 1px solid rgba(0, 104, 182, 0.22);
+}
+
 .bandLabel {
   position: absolute;
   top: -10px;
@@ -38,6 +43,14 @@
 
 .bandOps .bandLabel {
   background: var(--aibod-sky);
+}
+
+.bandDest .bandLabel {
+  background: var(--aibod-blue);
+}
+
+.bandDest .card {
+  border-top-color: var(--aibod-blue);
 }
 
 /* カード / 矢印を同じ3カラムグリッドに乗せて縦位置を揃える */

@@ -40,10 +40,15 @@ function NavTree({
   children,
 }: {
   label: string
-  tone: 'master' | 'ops'
+  tone: 'master' | 'ops' | 'dest'
   children: React.ReactNode
 }) {
-  const toneClass = tone === 'master' ? styles.toneMaster : styles.toneOps
+  const toneClass =
+    tone === 'master'
+      ? styles.toneMaster
+      : tone === 'ops'
+        ? styles.toneOps
+        : styles.toneDest
   return (
     <div className={`${styles.subGroup} ${toneClass}`}>
       <div className={styles.subGroupLabel}>{label}</div>
@@ -81,6 +86,9 @@ export function AppLayout() {
           <NavTree label="運用（動的）" tone="ops">
             <NavItem to="/workspace/sets" label="製品セット" />
             <NavItem to="/workspace/part-units" label="部品実物" />
+          </NavTree>
+
+          <NavTree label="導入先（準静的）" tone="dest">
             <NavItem to="/workspace/customers" label="顧客・拠点" />
           </NavTree>
 

@@ -1062,7 +1062,7 @@ export interface paths {
         patch: operations["product_boms_partial_update"];
         trace?: never;
     };
-    "/api/v1/product-models/": {
+    "/api/v1/product-families/": {
         parameters: {
             query?: never;
             header?: never;
@@ -1071,17 +1071,91 @@ export interface paths {
         };
         /**
          * 製品モデル一覧取得
+         * @description 製品ファミリ CRUD API
+         *
+         *     製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
+         *     使用中ファミリの削除は 409 を返す（PROTECT）。
+         */
+        get: operations["product_families_list"];
+        put?: never;
+        /**
+         * 製品モデル作成
+         * @description 製品ファミリ CRUD API
+         *
+         *     製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
+         *     使用中ファミリの削除は 409 を返す（PROTECT）。
+         */
+        post: operations["product_families_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/product-families/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 製品モデル詳細取得
+         * @description 製品ファミリ CRUD API
+         *
+         *     製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
+         *     使用中ファミリの削除は 409 を返す（PROTECT）。
+         */
+        get: operations["product_families_retrieve"];
+        /**
+         * 製品モデル更新
+         * @description 製品ファミリ CRUD API
+         *
+         *     製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
+         *     使用中ファミリの削除は 409 を返す（PROTECT）。
+         */
+        put: operations["product_families_update"];
+        post?: never;
+        /**
+         * 製品モデル削除
+         * @description 製品ファミリ CRUD API
+         *
+         *     製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
+         *     使用中ファミリの削除は 409 を返す（PROTECT）。
+         */
+        delete: operations["product_families_destroy"];
+        options?: never;
+        head?: never;
+        /**
+         * 製品モデル部分更新
+         * @description 製品ファミリ CRUD API
+         *
+         *     製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
+         *     使用中ファミリの削除は 409 を返す（PROTECT）。
+         */
+        patch: operations["product_families_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/product-models/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
          * @description 製品モデル CRUD API
          *
          *     BAITEN STAND などの製品型番・バージョンを管理。
+         *     分類は ファミリ → グレード → バリエーション の3軸フィルタ。
          */
         get: operations["product_models_list"];
         put?: never;
         /**
-         * 製品モデル作成
          * @description 製品モデル CRUD API
          *
          *     BAITEN STAND などの製品型番・バージョンを管理。
+         *     分類は ファミリ → グレード → バリエーション の3軸フィルタ。
          */
         post: operations["product_models_create"];
         delete?: never;
@@ -1098,36 +1172,56 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * 製品モデル詳細取得
          * @description 製品モデル CRUD API
          *
          *     BAITEN STAND などの製品型番・バージョンを管理。
+         *     分類は ファミリ → グレード → バリエーション の3軸フィルタ。
          */
         get: operations["product_models_retrieve"];
         /**
-         * 製品モデル更新
          * @description 製品モデル CRUD API
          *
          *     BAITEN STAND などの製品型番・バージョンを管理。
+         *     分類は ファミリ → グレード → バリエーション の3軸フィルタ。
          */
         put: operations["product_models_update"];
         post?: never;
         /**
-         * 製品モデル削除
          * @description 製品モデル CRUD API
          *
          *     BAITEN STAND などの製品型番・バージョンを管理。
+         *     分類は ファミリ → グレード → バリエーション の3軸フィルタ。
          */
         delete: operations["product_models_destroy"];
         options?: never;
         head?: never;
         /**
-         * 製品モデル部分更新
          * @description 製品モデル CRUD API
          *
          *     BAITEN STAND などの製品型番・バージョンを管理。
+         *     分類は ファミリ → グレード → バリエーション の3軸フィルタ。
          */
         patch: operations["product_models_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/product-models/hierarchy-summary/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * ファミリ×グレード×バリエーション件数集計
+         * @description 製品モデルの分類階層ごとの件数を返す（一覧画面のカスケードボタン用）
+         */
+        get: operations["product_models_hierarchy_summary_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/site-configs/": {
@@ -1997,6 +2091,36 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["ProductBOM"][];
         };
+        PaginatedProductFamilyList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["ProductFamily"][];
+        };
+        PaginatedProductModelHierarchySummaryList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["ProductModelHierarchySummary"][];
+        };
         PaginatedProductModelList: {
             /** @example 123 */
             count: number;
@@ -2474,6 +2598,13 @@ export interface components {
              */
             is_optional?: boolean;
         };
+        /** @description 製品ファミリシリアライザ */
+        PatchedProductFamilyRequest: {
+            /** ファミリ名 */
+            name?: string;
+            /** 説明 */
+            description?: string | null;
+        };
         /** @description 製品モデルシリアライザ */
         PatchedProductModelRequest: {
             /**
@@ -2483,6 +2614,18 @@ export interface components {
             code?: string;
             /** 製品名 */
             name?: string;
+            /** 製品ファミリ */
+            family?: number | null;
+            /**
+             * グレード
+             * @description 例: AI / Mini / Pro
+             */
+            grade?: string | null;
+            /**
+             * バリエーション
+             * @description 例: 8GB / LTE / 屋外用
+             */
+            variation?: string | null;
             /** 説明 */
             description?: string | null;
         };
@@ -2576,15 +2719,10 @@ export interface components {
              */
             is_optional?: boolean;
         };
-        /** @description 製品モデルシリアライザ */
-        ProductModel: {
+        /** @description 製品ファミリシリアライザ */
+        ProductFamily: {
             readonly id: number;
-            /**
-             * 製品コード
-             * @description 例: BSTAND-V1.2
-             */
-            code: string;
-            /** 製品名 */
+            /** ファミリ名 */
             name: string;
             /** 説明 */
             description?: string | null;
@@ -2599,6 +2737,56 @@ export interface components {
              */
             readonly updated_at: string;
         };
+        /** @description 製品ファミリシリアライザ */
+        ProductFamilyRequest: {
+            /** ファミリ名 */
+            name: string;
+            /** 説明 */
+            description?: string | null;
+        };
+        /** @description 製品モデルシリアライザ */
+        ProductModel: {
+            readonly id: number;
+            /**
+             * 製品コード
+             * @description 例: BSTAND-V1.2
+             */
+            code: string;
+            /** 製品名 */
+            name: string;
+            /** 製品ファミリ */
+            family?: number | null;
+            readonly family_name: string | null;
+            /**
+             * グレード
+             * @description 例: AI / Mini / Pro
+             */
+            grade?: string | null;
+            /**
+             * バリエーション
+             * @description 例: 8GB / LTE / 屋外用
+             */
+            variation?: string | null;
+            /** 説明 */
+            description?: string | null;
+            /**
+             * 作成日時
+             * Format: date-time
+             */
+            readonly created_at: string;
+            /**
+             * 更新日時
+             * Format: date-time
+             */
+            readonly updated_at: string;
+        };
+        /** @description 製品モデル: ファミリ×グレード×バリエーションの件数集計（読み取り専用） */
+        ProductModelHierarchySummary: {
+            family: string | null;
+            grade: string | null;
+            variation: string | null;
+            count: number;
+        };
         /** @description 製品モデルシリアライザ */
         ProductModelRequest: {
             /**
@@ -2608,6 +2796,18 @@ export interface components {
             code: string;
             /** 製品名 */
             name: string;
+            /** 製品ファミリ */
+            family?: number | null;
+            /**
+             * グレード
+             * @description 例: AI / Mini / Pro
+             */
+            grade?: string | null;
+            /**
+             * バリエーション
+             * @description 例: 8GB / LTE / 屋外用
+             */
+            variation?: string | null;
             /** 説明 */
             description?: string | null;
         };
@@ -4747,7 +4947,7 @@ export interface operations {
             };
         };
     };
-    product_models_list: {
+    product_families_list: {
         parameters: {
             query?: {
                 /** @description Which field to use when ordering the results. */
@@ -4758,6 +4958,162 @@ export interface operations {
                 page_size?: number;
                 /** @description A search term. */
                 search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedProductFamilyList"];
+                };
+            };
+        };
+    };
+    product_families_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductFamilyRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ProductFamilyRequest"];
+                "multipart/form-data": components["schemas"]["ProductFamilyRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductFamily"];
+                };
+            };
+        };
+    };
+    product_families_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this 製品ファミリ. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductFamily"];
+                };
+            };
+        };
+    };
+    product_families_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this 製品ファミリ. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductFamilyRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ProductFamilyRequest"];
+                "multipart/form-data": components["schemas"]["ProductFamilyRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductFamily"];
+                };
+            };
+        };
+    };
+    product_families_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this 製品ファミリ. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    product_families_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this 製品ファミリ. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedProductFamilyRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedProductFamilyRequest"];
+                "multipart/form-data": components["schemas"]["PatchedProductFamilyRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductFamily"];
+                };
+            };
+        };
+    };
+    product_models_list: {
+        parameters: {
+            query?: {
+                code?: string;
+                family?: string;
+                grade?: string;
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description A search term. */
+                search?: string;
+                variation?: string;
             };
             header?: never;
             path?: never;
@@ -4895,6 +5251,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProductModel"];
+                };
+            };
+        };
+    };
+    product_models_hierarchy_summary_list: {
+        parameters: {
+            query?: {
+                code?: string;
+                family?: string;
+                grade?: string;
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description A search term. */
+                search?: string;
+                variation?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedProductModelHierarchySummaryList"];
                 };
             };
         };

@@ -208,11 +208,42 @@ class PartUnit(TimestampMixin):
 # =============================================================================
 
 
+class ProductFamily(TimestampMixin):
+    """
+    製品ファミリマスタ
+
+    製品ライン（BAITEN STAND / RISC-V Board 等）。
+    プラットフォーム構想（DOC-PF-001）の Domain Gateway 単位に対応する。
+    """
+
+    name = models.CharField(
+        max_length=100,
+        unique=True,
+        verbose_name="ファミリ名",
+    )
+    description = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name="説明",
+    )
+
+    class Meta:
+        db_table = "product_family"
+        verbose_name = "製品ファミリ"
+        verbose_name_plural = "製品ファミリ"
+        ordering = ["id"]
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class ProductModel(TimestampMixin):
     """
     製品モデル（セットの型番/バージョン）
 
     BAITEN STAND などの製品型番・バージョンを管理。
+    分類は ファミリ → グレード → バリエーション → モデル の4層
+    （grade / variation は暫定的に自由文字列。整備が進んだらマスタ昇格を検討）。
     どの部品を何個使うかは ProductBOM で定義する。
     """
 
@@ -225,6 +256,28 @@ class ProductModel(TimestampMixin):
     name = models.CharField(
         max_length=200,
         verbose_name="製品名",
+    )
+    family = models.ForeignKey(
+        ProductFamily,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="product_models",
+        verbose_name="製品ファミリ",
+    )
+    grade = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name="グレード",
+        help_text="例: AI / Mini / Pro",
+    )
+    variation = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name="バリエーション",
+        help_text="例: 8GB / LTE / 屋外用",
     )
     description = models.TextField(
         null=True,

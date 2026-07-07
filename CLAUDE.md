@@ -117,7 +117,7 @@ ruff check . && ruff format .
 | `Organization` | `Customer` | `entity_num` は未実装 |
 | `Site` | `CustomerSite` | `lifecycle_status` 実装済み |
 | `SiteConfig` | `SiteConfig` | 1:1、secret系は `EncryptedTextField` で暗号化・APIマスク |
-| `DeviceSet` | `BssSet` | 実装は `ProductModel`/`ProductBOM`（型番・レシピ層）を追加で持つ |
+| `DeviceSet` | `BssSet` | 実装は `ProductModel`/`ProductBOM`（型番・レシピ層）を追加で持つ。ProductModel は **ファミリ（`ProductFamily`マスタFK・nullable）→ グレード → バリエーション → モデル** の4層分類（grade/variation は暫定的に自由文字列。整備後にマスタ昇格を検討） |
 | `Unit` | `PartUnit` | Identity = `serial_number` |
 | `PartMaster` | `PartMaster` | `used_in_ai` / `used_in_mini` / `size` 実装済み。正準の category（本体構成品/オプション品/組立部品/その他）は `part_group`（主要/周辺/組立/その他）として実装。正準の type（種別）は `category` = **`PartCategory` マスタへのFK**（ユーザーが画面から追加可能・使用中削除はPROTECT） |
 | `MaintenanceEvent` | `MaintenanceEvent` | 追記型（API/Adminとも更新・削除不可） |

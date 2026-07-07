@@ -21,6 +21,7 @@ from .models import (
     PartMaster,
     PartUnit,
     ProductBOM,
+    ProductFamily,
     ProductModel,
     SiteConfig,
 )
@@ -136,6 +137,19 @@ class ProductBOMInline(admin.TabularInline):
     model = ProductBOM
     extra = 1
     autocomplete_fields = ["part_master"]
+
+
+@admin.register(ProductFamily)
+class ProductFamilyAdmin(admin.ModelAdmin):
+    """製品ファミリ管理"""
+
+    list_display = ["name", "model_count", "created_at"]
+    search_fields = ["name"]
+    readonly_fields = ["created_at", "updated_at"]
+
+    @admin.display(description="モデル数")
+    def model_count(self, obj: ProductFamily) -> int:
+        return obj.product_models.count()
 
 
 @admin.register(ProductModel)

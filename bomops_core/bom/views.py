@@ -30,6 +30,7 @@ from .models import (
     PartMaster,
     PartUnit,
     ProductBOM,
+    ProductFamily,
     ProductModel,
     SiteConfig,
 )
@@ -52,6 +53,8 @@ from .serializers import (
     PartUnitHistorySerializer,
     PartUnitSerializer,
     ProductBOMSerializer,
+    ProductFamilySerializer,
+    ProductModelHierarchySummarySerializer,
     ProductModelSerializer,
     SiteConfigSerializer,
 )
@@ -86,6 +89,19 @@ class PartUnitFilter(django_filters.FilterSet):
     class Meta:
         model = PartUnit
         fields = ["part_master", "status", "serial_number", "category"]
+
+
+class ProductModelFilter(django_filters.FilterSet):
+    """製品モデル用フィルタ"""
+
+    code = django_filters.CharFilter(lookup_expr="icontains")
+    family = django_filters.CharFilter(field_name="family__name")
+    grade = django_filters.CharFilter()
+    variation = django_filters.CharFilter()
+
+    class Meta:
+        model = ProductModel
+        fields = ["code", "family", "grade", "variation"]
 
 
 class ProductBOMFilter(django_filters.FilterSet):
@@ -396,17 +412,58 @@ class PartUnitViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(summary="製品モデル部分更新", tags=["製品モデル"]),
     destroy=extend_schema(summary="製品モデル削除", tags=["製品モデル"]),
 )
+class ProductFamilyViewSet(viewsets.ModelViewSet):
+    """
+    製品ファミリ CRUD API
+
+    製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
+    使用中ファミリの削除は 409 を返す（PROTECT）。
+    """
+
+    queryset = ProductFamily.objects.all()
+    serializer_class = ProductFamilySerializer
+    search_fields = ["name"]
+
+
 class ProductModelViewSet(viewsets.ModelViewSet):
     """
     製品モデル CRUD API
 
     BAITEN STAND などの製品型番・バージョンを管理。
+    分類は ファミリ → グレード → バリエーション の3軸フィルタ。
     """
 
     queryset = ProductModel.objects.all()
     serializer_class = ProductModelSerializer
+    filterset_class = ProductModelFilter
     search_fields = ["code", "name"]
     ordering_fields = ["code", "name", "created_at"]
+
+    @extend_schema(
+        summary="ファミリ×グレード×バリエーション件数集計",
+        description="製品モデルの分類階層ごとの件数を返す（一覧画面のカスケードボタン用）",
+        responses={200: ProductModelHierarchySummarySerializer(many=True)},
+        tags=["製品モデル"],
+    )
+    @action(detail=False, methods=["get"], url_path="hierarchy-summary")
+    def hierarchy_summary(self, request: Request) -> Response:
+        """ファミリ×グレード×バリエーションの件数集計API"""
+        rows = (
+            ProductModel.objects.values("family__name", "grade", "variation")
+            .annotate(count=Count("id"))
+            .order_by("family__name", "-count", "grade", "variation")
+        )
+        data = [
+            {
+                "family": row["family__name"],
+                "grade": row["grade"],
+                "variation": row["variation"],
+                "count": row["count"],
+            }
+            for row in rows
+        ]
+        serializer = ProductModelHierarchySummarySerializer(data, many=True)
+        return Response(serializer.data)
 
 
 @extend_schema_view(

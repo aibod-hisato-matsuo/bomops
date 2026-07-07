@@ -503,6 +503,68 @@ class DashboardSummaryAPITest(APITestCase):
         self.assertEqual(row["bottleneck_required"], 2)
 
 
+class ProductHierarchyAPITest(APITestCase):
+    """製品ファミリ・階層集計APIのテスト"""
+
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(
+            username="testuser",
+            password="testpass123",
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+        from .models import ProductFamily
+
+        # マイグレーション0004のシードで "BAITEN STAND" は既に存在する
+        self.baiten, _ = ProductFamily.objects.get_or_create(name="BAITEN STAND")
+        self.riscv, _ = ProductFamily.objects.get_or_create(name="RISC-V Board")
+        ProductModel.objects.create(
+            code="BSTAND-AI", name="AI", family=self.baiten, grade="AI",
+        )
+        ProductModel.objects.create(
+            code="BSTAND-MINI", name="Mini", family=self.baiten, grade="Mini",
+        )
+        ProductModel.objects.create(
+            code="RV-01-8G", name="RV Board 8GB",
+            family=self.riscv, grade="Pro", variation="8GB",
+        )
+        # family 未設定のモデル
+        ProductModel.objects.create(code="LEGACY-01", name="Legacy")
+
+    def test_hierarchy_summary(self) -> None:
+        """ファミリ×グレード×バリエーション集計のテスト"""
+        url = reverse("bom:product-model-hierarchy-summary")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        rows = {
+            (r["family"], r["grade"], r["variation"]): r["count"]
+            for r in response.data
+        }
+        self.assertEqual(rows[("BAITEN STAND", "AI", None)], 1)
+        self.assertEqual(rows[("BAITEN STAND", "Mini", None)], 1)
+        self.assertEqual(rows[("RISC-V Board", "Pro", "8GB")], 1)
+        self.assertEqual(rows[(None, None, None)], 1)  # family未設定
+
+    def test_filter_by_family_and_grade(self) -> None:
+        """family / grade フィルタのテスト"""
+        url = reverse("bom:product-model-list")
+        response = self.client.get(url, {"family": "BAITEN STAND", "grade": "AI"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.data["results"][0]["code"], "BSTAND-AI")
+        self.assertEqual(response.data["results"][0]["family_name"], "BAITEN STAND")
+
+    def test_delete_family_in_use_returns_409(self) -> None:
+        """使用中ファミリの削除が409（PROTECT）になることのテスト"""
+        url = reverse("bom:product-family-detail", kwargs={"pk": self.baiten.pk})
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+
+
 class PartCategoryAPITest(APITestCase):
     """部品カテゴリAPIのテスト"""
 

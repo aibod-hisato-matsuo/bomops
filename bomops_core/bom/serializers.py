@@ -21,6 +21,7 @@ from .models import (
     PartMaster,
     PartUnit,
     ProductBOM,
+    ProductFamily,
     ProductModel,
     SiteConfig,
 )
@@ -123,8 +124,33 @@ class PartUnitSerializer(serializers.ModelSerializer):
 # =============================================================================
 
 
+class ProductFamilySerializer(serializers.ModelSerializer):
+    """製品ファミリシリアライザ"""
+
+    class Meta:
+        model = ProductFamily
+        fields = ["id", "name", "description", "created_at", "updated_at"]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+
+class ProductModelHierarchySummarySerializer(serializers.Serializer):
+    """製品モデル: ファミリ×グレード×バリエーションの件数集計（読み取り専用）"""
+
+    family = serializers.CharField(allow_null=True)
+    grade = serializers.CharField(allow_null=True)
+    variation = serializers.CharField(allow_null=True)
+    count = serializers.IntegerField()
+
+
 class ProductModelSerializer(serializers.ModelSerializer):
     """製品モデルシリアライザ"""
+
+    family_name = serializers.CharField(
+        source="family.name",
+        read_only=True,
+        allow_null=True,
+        default=None,
+    )
 
     class Meta:
         model = ProductModel
@@ -132,6 +158,10 @@ class ProductModelSerializer(serializers.ModelSerializer):
             "id",
             "code",
             "name",
+            "family",
+            "family_name",
+            "grade",
+            "variation",
             "description",
             "created_at",
             "updated_at",

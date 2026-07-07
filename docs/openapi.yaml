@@ -2830,13 +2830,14 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/v1/product-models/:
+  /api/v1/product-families/:
     get:
-      operationId: product_models_list
+      operationId: product_families_list
       description: |-
-        製品モデル CRUD API
+        製品ファミリ CRUD API
 
-        BAITEN STAND などの製品型番・バージョンを管理。
+        製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
+        使用中ファミリの削除は 409 を返す（PROTECT）。
       summary: 製品モデル一覧取得
       parameters:
       - name: ordering
@@ -2873,6 +2874,227 @@ paths:
           content:
             application/json:
               schema:
+                $ref: '#/components/schemas/PaginatedProductFamilyList'
+          description: ''
+    post:
+      operationId: product_families_create
+      description: |-
+        製品ファミリ CRUD API
+
+        製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
+        使用中ファミリの削除は 409 を返す（PROTECT）。
+      summary: 製品モデル作成
+      tags:
+      - 製品モデル
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductFamilyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProductFamilyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProductFamilyRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductFamily'
+          description: ''
+  /api/v1/product-families/{id}/:
+    get:
+      operationId: product_families_retrieve
+      description: |-
+        製品ファミリ CRUD API
+
+        製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
+        使用中ファミリの削除は 409 を返す（PROTECT）。
+      summary: 製品モデル詳細取得
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 製品ファミリ.
+        required: true
+      tags:
+      - 製品モデル
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductFamily'
+          description: ''
+    put:
+      operationId: product_families_update
+      description: |-
+        製品ファミリ CRUD API
+
+        製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
+        使用中ファミリの削除は 409 を返す（PROTECT）。
+      summary: 製品モデル更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 製品ファミリ.
+        required: true
+      tags:
+      - 製品モデル
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductFamilyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProductFamilyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProductFamilyRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductFamily'
+          description: ''
+    patch:
+      operationId: product_families_partial_update
+      description: |-
+        製品ファミリ CRUD API
+
+        製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
+        使用中ファミリの削除は 409 を返す（PROTECT）。
+      summary: 製品モデル部分更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 製品ファミリ.
+        required: true
+      tags:
+      - 製品モデル
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProductFamilyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProductFamilyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProductFamilyRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductFamily'
+          description: ''
+    delete:
+      operationId: product_families_destroy
+      description: |-
+        製品ファミリ CRUD API
+
+        製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
+        使用中ファミリの削除は 409 を返す（PROTECT）。
+      summary: 製品モデル削除
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 製品ファミリ.
+        required: true
+      tags:
+      - 製品モデル
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/product-models/:
+    get:
+      operationId: product_models_list
+      description: |-
+        製品モデル CRUD API
+
+        BAITEN STAND などの製品型番・バージョンを管理。
+        分類は ファミリ → グレード → バリエーション の3軸フィルタ。
+      parameters:
+      - in: query
+        name: code
+        schema:
+          type: string
+      - in: query
+        name: family
+        schema:
+          type: string
+      - in: query
+        name: grade
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: variation
+        schema:
+          type: string
+      tags:
+      - product-models
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
                 $ref: '#/components/schemas/PaginatedProductModelList'
           description: ''
     post:
@@ -2881,9 +3103,9 @@ paths:
         製品モデル CRUD API
 
         BAITEN STAND などの製品型番・バージョンを管理。
-      summary: 製品モデル作成
+        分類は ファミリ → グレード → バリエーション の3軸フィルタ。
       tags:
-      - 製品モデル
+      - product-models
       requestBody:
         content:
           application/json:
@@ -2913,7 +3135,7 @@ paths:
         製品モデル CRUD API
 
         BAITEN STAND などの製品型番・バージョンを管理。
-      summary: 製品モデル詳細取得
+        分類は ファミリ → グレード → バリエーション の3軸フィルタ。
       parameters:
       - in: path
         name: id
@@ -2922,7 +3144,7 @@ paths:
         description: A unique integer value identifying this 製品モデル.
         required: true
       tags:
-      - 製品モデル
+      - product-models
       security:
       - jwtAuth: []
       - cookieAuth: []
@@ -2939,7 +3161,7 @@ paths:
         製品モデル CRUD API
 
         BAITEN STAND などの製品型番・バージョンを管理。
-      summary: 製品モデル更新
+        分類は ファミリ → グレード → バリエーション の3軸フィルタ。
       parameters:
       - in: path
         name: id
@@ -2948,7 +3170,7 @@ paths:
         description: A unique integer value identifying this 製品モデル.
         required: true
       tags:
-      - 製品モデル
+      - product-models
       requestBody:
         content:
           application/json:
@@ -2977,7 +3199,7 @@ paths:
         製品モデル CRUD API
 
         BAITEN STAND などの製品型番・バージョンを管理。
-      summary: 製品モデル部分更新
+        分類は ファミリ → グレード → バリエーション の3軸フィルタ。
       parameters:
       - in: path
         name: id
@@ -2986,7 +3208,7 @@ paths:
         description: A unique integer value identifying this 製品モデル.
         required: true
       tags:
-      - 製品モデル
+      - product-models
       requestBody:
         content:
           application/json:
@@ -3014,7 +3236,7 @@ paths:
         製品モデル CRUD API
 
         BAITEN STAND などの製品型番・バージョンを管理。
-      summary: 製品モデル削除
+        分類は ファミリ → グレード → バリエーション の3軸フィルタ。
       parameters:
       - in: path
         name: id
@@ -3023,13 +3245,71 @@ paths:
         description: A unique integer value identifying this 製品モデル.
         required: true
       tags:
-      - 製品モデル
+      - product-models
       security:
       - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
           description: No response body
+  /api/v1/product-models/hierarchy-summary/:
+    get:
+      operationId: product_models_hierarchy_summary_list
+      description: 製品モデルの分類階層ごとの件数を返す（一覧画面のカスケードボタン用）
+      summary: ファミリ×グレード×バリエーション件数集計
+      parameters:
+      - in: query
+        name: code
+        schema:
+          type: string
+      - in: query
+        name: family
+        schema:
+          type: string
+      - in: query
+        name: grade
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: variation
+        schema:
+          type: string
+      tags:
+      - 製品モデル
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProductModelHierarchySummaryList'
+          description: ''
   /api/v1/site-configs/:
     get:
       operationId: site_configs_list
@@ -4564,6 +4844,52 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ProductBOM'
+    PaginatedProductFamilyList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductFamily'
+    PaginatedProductModelHierarchySummaryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductModelHierarchySummary'
     PaginatedProductModelList:
       type: object
       required:
@@ -5290,6 +5616,19 @@ components:
           type: boolean
           title: オプション部品
           description: 代替・オプション部品の場合はTrue
+    PatchedProductFamilyRequest:
+      type: object
+      description: 製品ファミリシリアライザ
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: ファミリ名
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          title: 説明
     PatchedProductModelRequest:
       type: object
       description: 製品モデルシリアライザ
@@ -5305,6 +5644,22 @@ components:
           minLength: 1
           title: 製品名
           maxLength: 200
+        family:
+          type: integer
+          nullable: true
+          title: 製品ファミリ
+        grade:
+          type: string
+          nullable: true
+          title: グレード
+          description: '例: AI / Mini / Pro'
+          maxLength: 100
+        variation:
+          type: string
+          nullable: true
+          title: バリエーション
+          description: '例: 8GB / LTE / 屋外用'
+          maxLength: 100
         description:
           type: string
           nullable: true
@@ -5453,6 +5808,51 @@ components:
       required:
       - part_master
       - product_model
+    ProductFamily:
+      type: object
+      description: 製品ファミリシリアライザ
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: ファミリ名
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          title: 説明
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 作成日時
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新日時
+      required:
+      - created_at
+      - id
+      - name
+      - updated_at
+    ProductFamilyRequest:
+      type: object
+      description: 製品ファミリシリアライザ
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: ファミリ名
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          title: 説明
+      required:
+      - name
     ProductModel:
       type: object
       description: 製品モデルシリアライザ
@@ -5469,6 +5869,26 @@ components:
           type: string
           title: 製品名
           maxLength: 200
+        family:
+          type: integer
+          nullable: true
+          title: 製品ファミリ
+        family_name:
+          type: string
+          readOnly: true
+          nullable: true
+        grade:
+          type: string
+          nullable: true
+          title: グレード
+          description: '例: AI / Mini / Pro'
+          maxLength: 100
+        variation:
+          type: string
+          nullable: true
+          title: バリエーション
+          description: '例: 8GB / LTE / 屋外用'
+          maxLength: 100
         description:
           type: string
           nullable: true
@@ -5486,9 +5906,30 @@ components:
       required:
       - code
       - created_at
+      - family_name
       - id
       - name
       - updated_at
+    ProductModelHierarchySummary:
+      type: object
+      description: '製品モデル: ファミリ×グレード×バリエーションの件数集計（読み取り専用）'
+      properties:
+        family:
+          type: string
+          nullable: true
+        grade:
+          type: string
+          nullable: true
+        variation:
+          type: string
+          nullable: true
+        count:
+          type: integer
+      required:
+      - count
+      - family
+      - grade
+      - variation
     ProductModelRequest:
       type: object
       description: 製品モデルシリアライザ
@@ -5504,6 +5945,22 @@ components:
           minLength: 1
           title: 製品名
           maxLength: 200
+        family:
+          type: integer
+          nullable: true
+          title: 製品ファミリ
+        grade:
+          type: string
+          nullable: true
+          title: グレード
+          description: '例: AI / Mini / Pro'
+          maxLength: 100
+        variation:
+          type: string
+          nullable: true
+          title: バリエーション
+          description: '例: 8GB / LTE / 屋外用'
+          maxLength: 100
         description:
           type: string
           nullable: true

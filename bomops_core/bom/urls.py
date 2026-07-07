@@ -21,6 +21,9 @@ router.register(
 )
 router.register(r"part-masters", views.PartMasterViewSet, basename="part-master")
 router.register(r"part-units", views.PartUnitViewSet, basename="part-unit")
+router.register(
+    r"product-families", views.ProductFamilyViewSet, basename="product-family"
+)
 router.register(r"product-models", views.ProductModelViewSet, basename="product-model")
 router.register(r"product-boms", views.ProductBOMViewSet, basename="product-bom")
 router.register(r"customers", views.CustomerViewSet, basename="customer")

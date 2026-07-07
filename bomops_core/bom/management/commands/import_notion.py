@@ -34,6 +34,7 @@ from bom.models import (
     PartCategory,
     PartMaster,
     PartUnit,
+    ProductFamily,
     ProductModel,
     SiteConfig,
 )
@@ -316,13 +317,18 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------
 
     def _import_product_models(self) -> None:
-        for code, name in [
-            ("BSTAND-AI", "BAITEN AI"),
-            ("BSTAND-MINI", "BAITEN Mini"),
-            ("BSTAND-UNKNOWN", "モデル不明（Notion移行）"),
+        family, _ = ProductFamily.objects.get_or_create(
+            name="BAITEN STAND",
+            defaults={"description": "無人決済機 BAITEN STAND シリーズ"},
+        )
+        for code, name, grade in [
+            ("BSTAND-AI", "BAITEN AI", "AI"),
+            ("BSTAND-MINI", "BAITEN Mini", "Mini"),
+            ("BSTAND-UNKNOWN", "モデル不明（Notion移行）", "不明"),
         ]:
             _, created = ProductModel.objects.get_or_create(
-                code=code, defaults={"name": name}
+                code=code,
+                defaults={"name": name, "family": family, "grade": grade},
             )
             self._count("ProductModel", "created" if created else "updated")
 

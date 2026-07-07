@@ -2111,6 +2111,18 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: used_in_family
+        schema:
+          type: string
+      - in: query
+        name: used_in_grade
+        schema:
+          type: string
+      - in: query
+        name: used_in_model
+        schema:
+          type: integer
       tags:
       - 部品マスタ
       security:
@@ -2347,6 +2359,18 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: used_in_family
+        schema:
+          type: string
+      - in: query
+        name: used_in_grade
+        schema:
+          type: string
+      - in: query
+        name: used_in_model
+        schema:
+          type: integer
       tags:
       - 部品マスタ
       security:
@@ -5041,14 +5065,11 @@ components:
           nullable: true
           title: サイズ
           maxLength: 100
-        used_in_ai:
-          type: boolean
-          title: AI使用
-          description: BAITEN AI モデルで使用する部品
-        used_in_mini:
-          type: boolean
-          title: Mini使用
-          description: BAITEN Mini モデルで使用する部品
+        used_in:
+          type: array
+          items:
+            $ref: '#/components/schemas/PartMasterUsedIn'
+          readOnly: true
         is_active:
           type: boolean
           title: 有効フラグ
@@ -5071,6 +5092,7 @@ components:
       - part_code
       - part_group_display
       - updated_at
+      - used_in
     PartMasterCategorySummary:
       type: object
       description: '部品マスタ: グループ×カテゴリの件数集計（読み取り専用）'
@@ -5134,14 +5156,6 @@ components:
           nullable: true
           title: サイズ
           maxLength: 100
-        used_in_ai:
-          type: boolean
-          title: AI使用
-          description: BAITEN AI モデルで使用する部品
-        used_in_mini:
-          type: boolean
-          title: Mini使用
-          description: BAITEN Mini モデルで使用する部品
         is_active:
           type: boolean
           title: 有効フラグ
@@ -5149,6 +5163,50 @@ components:
       - category
       - name
       - part_code
+    PartMasterUsedIn:
+      type: object
+      description: '部品マスタ: 使用先製品モデル（ProductBOM 由来・読み取り専用）'
+      properties:
+        product_model:
+          type: integer
+          readOnly: true
+          title: 製品モデル
+        code:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        family:
+          type: string
+          readOnly: true
+          nullable: true
+        grade:
+          type: string
+          readOnly: true
+          nullable: true
+        variation:
+          type: string
+          readOnly: true
+          nullable: true
+        quantity:
+          type: integer
+          readOnly: true
+          title: 数量
+        is_optional:
+          type: boolean
+          readOnly: true
+          title: オプション部品
+          description: 代替・オプション部品の場合はTrue
+      required:
+      - code
+      - family
+      - grade
+      - is_optional
+      - name
+      - product_model
+      - quantity
+      - variation
     PartUnit:
       type: object
       description: 部品実物シリアライザ
@@ -5555,14 +5613,6 @@ components:
           nullable: true
           title: サイズ
           maxLength: 100
-        used_in_ai:
-          type: boolean
-          title: AI使用
-          description: BAITEN AI モデルで使用する部品
-        used_in_mini:
-          type: boolean
-          title: Mini使用
-          description: BAITEN Mini モデルで使用する部品
         is_active:
           type: boolean
           title: 有効フラグ

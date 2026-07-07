@@ -49,11 +49,53 @@ class PartMasterCategorySummarySerializer(serializers.Serializer):
     count = serializers.IntegerField()
 
 
+class PartMasterUsedInSerializer(serializers.ModelSerializer):
+    """部品マスタ: 使用先製品モデル（ProductBOM 由来・読み取り専用）"""
+
+    code = serializers.CharField(source="product_model.code", read_only=True)
+    name = serializers.CharField(source="product_model.name", read_only=True)
+    family = serializers.CharField(
+        source="product_model.family.name",
+        read_only=True,
+        allow_null=True,
+        default=None,
+    )
+    grade = serializers.CharField(
+        source="product_model.grade",
+        read_only=True,
+        allow_null=True,
+    )
+    variation = serializers.CharField(
+        source="product_model.variation",
+        read_only=True,
+        allow_null=True,
+    )
+
+    class Meta:
+        model = ProductBOM
+        fields = [
+            "product_model",
+            "code",
+            "name",
+            "family",
+            "grade",
+            "variation",
+            "quantity",
+            "is_optional",
+        ]
+        read_only_fields = fields
+
+
 class PartMasterSerializer(serializers.ModelSerializer):
     """部品マスタシリアライザ"""
 
     category_display = serializers.CharField(
         source="category.name",
+        read_only=True,
+    )
+    used_in = PartMasterUsedInSerializer(
+        source="bom_usages",
+        many=True,
         read_only=True,
     )
     part_group_display = serializers.CharField(
@@ -75,8 +117,7 @@ class PartMasterSerializer(serializers.ModelSerializer):
             "model_number",
             "spec_json",
             "size",
-            "used_in_ai",
-            "used_in_mini",
+            "used_in",
             "is_active",
             "created_at",
             "updated_at",

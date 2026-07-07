@@ -9,7 +9,11 @@
 import { useState } from 'react'
 
 import { useGet, useList } from '../../../api/hooks'
-import type { PartMaster, PartMasterCategorySummary } from '../../../api/types'
+import type {
+  PartMaster,
+  PartMasterCategorySummary,
+  ProductModel,
+} from '../../../api/types'
 import { Badge } from '../../../components/Badge'
 import type { BadgeVariant } from '../../../components/Badge'
 import { Button } from '../../../components/Button'
@@ -65,14 +69,21 @@ const columns: Column<PartMaster>[] = [
   { key: 'model_number', header: '型番', render: (r) => r.model_number ?? '-' },
   {
     key: 'usage',
-    header: '使用モデル',
-    render: (r) => (
-      <>
-        {r.used_in_ai && <Badge variant="sky">AI</Badge>}{' '}
-        {r.used_in_mini && <Badge variant="pale">Mini</Badge>}
-        {!r.used_in_ai && !r.used_in_mini && '-'}
-      </>
-    ),
+    header: '使用製品',
+    render: (r) =>
+      r.used_in.length === 0 ? (
+        '-'
+      ) : (
+        <>
+          {r.used_in.map((u) => (
+            <span key={u.product_model}>
+              <Badge variant={u.is_optional ? 'pale' : 'sky'}>
+                {u.grade ?? u.code}
+              </Badge>{' '}
+            </span>
+          ))}
+        </>
+      ),
   },
   {
     key: 'is_active',
@@ -97,6 +108,14 @@ export function PartMasterListPage() {
 
   const activeGroup = getFilter('part_group')
   const activeCategory = getFilter('category')
+
+  const productModels = useList<ProductModel>('/product-models/', {
+    page_size: 200,
+  })
+  const usedInOptions = (productModels.data?.results ?? []).map((m) => ({
+    value: String(m.id),
+    label: m.grade ? `${m.code}（${m.grade}）` : m.code,
+  }))
 
   const groupCount = (group: string) =>
     summary.data === undefined
@@ -205,6 +224,12 @@ export function PartMasterListPage() {
           value={text}
           onChange={setText}
           placeholder="部品コード・部品名・型番で検索"
+        />
+        <SelectFilter
+          value={getFilter('used_in_model')}
+          onChange={(v) => setFilter('used_in_model', v)}
+          options={usedInOptions}
+          allLabel="全使用製品"
         />
         <SelectFilter
           value={getFilter('is_active')}

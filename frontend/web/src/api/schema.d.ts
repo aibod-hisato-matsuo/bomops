@@ -2218,16 +2218,7 @@ export interface components {
             spec_json?: unknown;
             /** サイズ */
             size?: string | null;
-            /**
-             * AI使用
-             * @description BAITEN AI モデルで使用する部品
-             */
-            used_in_ai?: boolean;
-            /**
-             * Mini使用
-             * @description BAITEN Mini モデルで使用する部品
-             */
-            used_in_mini?: boolean;
+            readonly used_in: components["schemas"]["PartMasterUsedIn"][];
             /** 有効フラグ */
             is_active?: boolean;
             /**
@@ -2282,18 +2273,25 @@ export interface components {
             spec_json?: unknown;
             /** サイズ */
             size?: string | null;
-            /**
-             * AI使用
-             * @description BAITEN AI モデルで使用する部品
-             */
-            used_in_ai?: boolean;
-            /**
-             * Mini使用
-             * @description BAITEN Mini モデルで使用する部品
-             */
-            used_in_mini?: boolean;
             /** 有効フラグ */
             is_active?: boolean;
+        };
+        /** @description 部品マスタ: 使用先製品モデル（ProductBOM 由来・読み取り専用） */
+        PartMasterUsedIn: {
+            /** 製品モデル */
+            readonly product_model: number;
+            readonly code: string;
+            readonly name: string;
+            readonly family: string | null;
+            readonly grade: string | null;
+            readonly variation: string | null;
+            /** 数量 */
+            readonly quantity: number;
+            /**
+             * オプション部品
+             * @description 代替・オプション部品の場合はTrue
+             */
+            readonly is_optional: boolean;
         };
         /** @description 部品実物シリアライザ */
         PartUnit: {
@@ -2550,16 +2548,6 @@ export interface components {
             spec_json?: unknown;
             /** サイズ */
             size?: string | null;
-            /**
-             * AI使用
-             * @description BAITEN AI モデルで使用する部品
-             */
-            used_in_ai?: boolean;
-            /**
-             * Mini使用
-             * @description BAITEN Mini モデルで使用する部品
-             */
-            used_in_mini?: boolean;
             /** 有効フラグ */
             is_active?: boolean;
         };
@@ -4428,6 +4416,9 @@ export interface operations {
                 part_group?: "ASSEMBLY" | "MAIN" | "OTHER" | "PERIPHERAL";
                 /** @description A search term. */
                 search?: string;
+                used_in_family?: string;
+                used_in_grade?: string;
+                used_in_model?: number;
             };
             header?: never;
             path?: never;
@@ -4592,6 +4583,9 @@ export interface operations {
                 part_group?: "ASSEMBLY" | "MAIN" | "OTHER" | "PERIPHERAL";
                 /** @description A search term. */
                 search?: string;
+                used_in_family?: string;
+                used_in_grade?: string;
+                used_in_model?: number;
             };
             header?: never;
             path?: never;

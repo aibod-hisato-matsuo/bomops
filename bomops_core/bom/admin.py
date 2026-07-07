@@ -72,9 +72,6 @@ class PartMasterAdmin(admin.ModelAdmin):
         ("製品情報", {
             "fields": ["maker", "model_number", "spec_json", "size"],
         }),
-        ("使用モデル", {
-            "fields": ["used_in_ai", "used_in_mini"],
-        }),
         ("システム情報", {
             "fields": ["created_at", "updated_at"],
             "classes": ["collapse"],

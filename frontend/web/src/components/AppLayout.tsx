@@ -74,13 +74,13 @@ export function AppLayout() {
           <NavItem to="/workspace" label="ホーム（関係マップ）" end />
 
           <NavTree label="マスタ（静的）" tone="master">
-            <NavItem to="/workspace/part-masters" label="部品マスタ" />
             <NavItem to="/workspace/product-models" label="製品モデル" />
+            <NavItem to="/workspace/part-masters" label="部品マスタ" />
           </NavTree>
 
           <NavTree label="運用（動的）" tone="ops">
-            <NavItem to="/workspace/part-units" label="部品実物" />
             <NavItem to="/workspace/sets" label="BSSセット" />
+            <NavItem to="/workspace/part-units" label="部品実物" />
             <NavItem to="/workspace/customers" label="顧客・拠点" />
           </NavTree>
 

@@ -119,16 +119,6 @@ class PartMaster(TimestampMixin):
         blank=True,
         verbose_name="サイズ",
     )
-    used_in_ai = models.BooleanField(
-        default=False,
-        verbose_name="AI使用",
-        help_text="BAITEN AI モデルで使用する部品",
-    )
-    used_in_mini = models.BooleanField(
-        default=False,
-        verbose_name="Mini使用",
-        help_text="BAITEN Mini モデルで使用する部品",
-    )
     is_active = models.BooleanField(
         default=True,
         verbose_name="有効フラグ",

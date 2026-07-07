@@ -72,10 +72,27 @@ class PartMasterFilter(django_filters.FilterSet):
     category = django_filters.CharFilter(field_name="category__name")
     part_group = django_filters.ChoiceFilter(choices=PartMaster.PartGroup.choices)
     is_active = django_filters.BooleanFilter()
+    used_in_model = django_filters.NumberFilter(
+        field_name="bom_usages__product_model", distinct=True
+    )
+    used_in_family = django_filters.CharFilter(
+        field_name="bom_usages__product_model__family__name", distinct=True
+    )
+    used_in_grade = django_filters.CharFilter(
+        field_name="bom_usages__product_model__grade", distinct=True
+    )
 
     class Meta:
         model = PartMaster
-        fields = ["part_code", "category", "part_group", "is_active"]
+        fields = [
+            "part_code",
+            "category",
+            "part_group",
+            "is_active",
+            "used_in_model",
+            "used_in_family",
+            "used_in_grade",
+        ]
 
 
 class PartUnitFilter(django_filters.FilterSet):
@@ -265,7 +282,9 @@ class PartMasterViewSet(viewsets.ModelViewSet):
     検索: part_code, name, model_number
     """
 
-    queryset = PartMaster.objects.all()
+    queryset = PartMaster.objects.prefetch_related(
+        "bom_usages__product_model__family"
+    )
     serializer_class = PartMasterSerializer
     filterset_class = PartMasterFilter
     search_fields = ["part_code", "name", "model_number"]

@@ -75,7 +75,7 @@ pytest                              # or: python bomops_core/manage.py test bom
 pytest --ds=config.settings_sqlite
 # Notion 実データ取り込み（冪等・自然キーで upsert）
 python bomops_core/manage.py import_notion --dir ../from_notion/extracts --dry-run
-# 実セット構成＋used_in_ai/miniフラグから製品BOMレシピを導出（冪等）
+# 実セット構成から製品BOMレシピを導出（冪等）
 python bomops_core/manage.py derive_bom --dry-run
 # lint / format
 ruff check . && ruff format .
@@ -119,7 +119,7 @@ ruff check . && ruff format .
 | `SiteConfig` | `SiteConfig` | 1:1、secret系は `EncryptedTextField` で暗号化・APIマスク |
 | `DeviceSet` | `BssSet` | 実装は `ProductModel`/`ProductBOM`（型番・レシピ層）を追加で持つ。ProductModel は **ファミリ（`ProductFamily`マスタFK・nullable）→ グレード → バリエーション → モデル** の4層分類（grade/variation は暫定的に自由文字列。整備後にマスタ昇格を検討） |
 | `Unit` | `PartUnit` | Identity = `serial_number` |
-| `PartMaster` | `PartMaster` | `used_in_ai` / `used_in_mini` / `size` 実装済み。正準の category（本体構成品/オプション品/組立部品/その他）は `part_group`（主要/周辺/組立/その他）として実装。正準の type（種別）は `category` = **`PartCategory` マスタへのFK**（ユーザーが画面から追加可能・使用中削除はPROTECT） |
+| `PartMaster` | `PartMaster` | 正準の category（本体構成品/オプション品/組立部品/その他）は `part_group`（主要/周辺/組立/その他）として実装。正準の type（種別）は `category` = **`PartCategory` マスタへのFK**（画面から追加可能・使用中削除はPROTECT）。「どの製品で使うか」は旧 `used_in_ai`/`used_in_mini` フラグを廃止し **`ProductBOM` 関係から導出**（API: `used_in` / フィルタ: `used_in_model`・`used_in_family`・`used_in_grade`） |
 | `MaintenanceEvent` | `MaintenanceEvent` | 追記型（API/Adminとも更新・削除不可） |
 | `DeployEvent` | `DeployEvent` | 追記型（API/Adminとも更新・削除不可） |
 | `EquipmentRef` | `EquipmentRef` | `PartUnit` と N:M |

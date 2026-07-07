@@ -79,18 +79,10 @@ export function WorkspaceHome() {
       />
 
       <div className={styles.map}>
-        {/* ===== マスタ層（静的） ===== */}
+        {/* ===== マスタ層（静的）: 製品モデルが起点（BOMで部品を参照） ===== */}
         <section className={`${styles.band} ${styles.bandMaster}`}>
           <span className={styles.bandLabel}>マスタ（静的）</span>
           <div className={styles.bandRow}>
-            <EntityCard
-              to="/workspace/part-masters"
-              title="部品マスタ"
-              desc="型番レベルの部品仕様"
-              count={fmt(summary?.part_masters.total)}
-              countLabel="種"
-            />
-            <ArrowRight label="BOMで使用" />
             <EntityCard
               to="/workspace/product-models"
               title="製品モデル"
@@ -98,14 +90,22 @@ export function WorkspaceHome() {
               count={fmt(summary?.product_models.total)}
               countLabel="型"
             />
+            <ArrowRight label="BOMで部品を参照" />
+            <EntityCard
+              to="/workspace/part-masters"
+              title="部品マスタ"
+              desc="型番レベルの部品仕様"
+              count={fmt(summary?.part_masters.total)}
+              countLabel="種"
+            />
           </div>
         </section>
 
         {/* ===== 層間の派生関係 ===== */}
         <div className={styles.connectorRow}>
-          <ArrowVertical label="実物化 1:N（シリアル採番）" />
-          <div />
           <ArrowVertical label="型番を選択" />
+          <div />
+          <ArrowVertical label="実物化 1:N（シリアル採番）" />
         </div>
 
         {/* ===== 運用層（動的） ===== */}
@@ -113,29 +113,27 @@ export function WorkspaceHome() {
           <span className={styles.bandLabel}>運用（動的）</span>
           <div className={styles.bandRow}>
             <EntityCard
-              to="/workspace/part-units"
-              title="部品実物"
-              desc="シリアル番号付き実物の在庫・状態"
-              count={fmt(summary?.part_units.total)}
-              countLabel="点"
-            />
-            <ArrowRight label="搭載" />
-            <EntityCard
               to="/workspace/sets"
               title="BSSセット"
               desc="完成機の構成・設定・イベント履歴"
               count={fmt(summary?.sets.total)}
               countLabel="台"
             />
+            <ArrowRight label="実物を搭載" />
+            <EntityCard
+              to="/workspace/part-units"
+              title="部品実物"
+              desc="シリアル番号付き実物の在庫・状態"
+              count={fmt(summary?.part_units.total)}
+              countLabel="点"
+            />
           </div>
           <div className={styles.bandRow}>
-            <div />
-            <div />
             <ArrowVertical label="設置 1:N" up />
+            <div />
+            <div />
           </div>
           <div className={styles.bandRow}>
-            <div />
-            <div />
             <EntityCard
               to="/workspace/customers"
               title="顧客・拠点"
@@ -143,6 +141,8 @@ export function WorkspaceHome() {
               count={`${fmt(summary?.customers.total)} 社 / ${fmt(summary?.sites.total)}`}
               countLabel="拠点"
             />
+            <div />
+            <div />
           </div>
         </section>
 

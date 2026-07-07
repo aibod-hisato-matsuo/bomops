@@ -223,6 +223,12 @@ class Command(BaseCommand):
                 "type_label": type_label,
                 "spec": clean(row.get("仕様")),
                 "description": clean(row.get("商品説明")),
+                # 旧 AI使用/Mini使用 フラグ（現在は ProductBOM 関係が正）
+                "notion_used_in": [
+                    label
+                    for label, col in (("AI", "AI使用"), ("Mini", "Mini使用"))
+                    if row.get(col) == "Yes"
+                ],
             }
             category_name = TYPE_TO_CATEGORY.get(
                 clean(row.get("Type")) or "", "その他"
@@ -232,8 +238,6 @@ class Command(BaseCommand):
                 "maker": clean(row.get("Provider")),
                 "size": clean(row.get("サイズ")),
                 "spec_json": {k: v for k, v in spec_json.items() if v},
-                "used_in_ai": row.get("AI使用") == "Yes",
-                "used_in_mini": row.get("Mini使用") == "Yes",
                 "is_active": clean(row.get("Category")) != "古い部品",
             }
             obj, created = PartMaster.objects.update_or_create(

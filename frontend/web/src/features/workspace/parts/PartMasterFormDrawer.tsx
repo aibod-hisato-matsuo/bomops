@@ -36,8 +36,6 @@ const schema = z
     maker: z.string(),
     model_number: z.string(),
     size: z.string(),
-    used_in_ai: z.boolean(),
-    used_in_mini: z.boolean(),
     is_active: z.boolean(),
   })
   .refine(
@@ -88,8 +86,6 @@ export function PartMasterFormDrawer({ item, onClose }: Props) {
       maker: item?.maker ?? '',
       model_number: item?.model_number ?? '',
       size: item?.size ?? '',
-      used_in_ai: item?.used_in_ai ?? false,
-      used_in_mini: item?.used_in_mini ?? false,
       is_active: item?.is_active ?? true,
     },
   })
@@ -194,10 +190,6 @@ export function PartMasterFormDrawer({ item, onClose }: Props) {
       </Field>
       <Field label="サイズ" error={errors.size?.message}>
         <TextInput {...register('size')} />
-      </Field>
-      <Field label="使用モデル">
-        <CheckboxLabel label="BAITEN AI で使用" {...register('used_in_ai')} />
-        <CheckboxLabel label="BAITEN Mini で使用" {...register('used_in_mini')} />
       </Field>
       <Field label="有効フラグ">
         <CheckboxLabel label="有効" {...register('is_active')} />

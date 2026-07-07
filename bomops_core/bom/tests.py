@@ -697,18 +697,12 @@ class DeriveBomCommandTest(TestCase):
         self.pm_pc2 = PartMaster.objects.create(
             part_code="MPC-M002", name="MiniPC B", category=make_category("PC"),
         )
-        self.pm_cam = PartMaster.objects.create(
-            part_code="CAM-M001",
-            name="Camera",
-            category=make_category("カメラ"),
-            used_in_ai=True,
-        )
         self.pm_enc = PartMaster.objects.create(
             part_code="ENC-M001", name="Enclosure", category=make_category("その他"),
         )
 
         # 4台とも MPC 搭載（3台は M001, 1台は M002）→ MPCファミリ100%・代表はM001
-        # ENC は1台のみ（25%）→ 任意 / CAM は未搭載だがフラグ付き → 必須追加
+        # ENC は1台のみ（25%）→ 任意
         serial = 0
         for i in range(4):
             bss = BssSet.objects.create(
@@ -734,19 +728,17 @@ class DeriveBomCommandTest(TestCase):
 
         call_command("derive_bom", *args, stdout=StringIO())
 
-    def test_derives_required_optional_and_flagged_lines(self) -> None:
-        """観測100%→必須 / 25%→任意 / フラグのみ→必須 が導出されることのテスト"""
+    def test_derives_required_and_optional_lines(self) -> None:
+        """観測100%→必須 / 25%→任意 が導出されることのテスト"""
         self._run()
 
         lines = {
             line.part_master.part_code: line
             for line in ProductBOM.objects.filter(product_model=self.model)
         }
-        self.assertEqual(set(lines), {"MPC-M001", "ENC-M001", "CAM-M001"})
+        self.assertEqual(set(lines), {"MPC-M001", "ENC-M001"})
         self.assertFalse(lines["MPC-M001"].is_optional)  # 観測100%・代表品番
         self.assertTrue(lines["ENC-M001"].is_optional)  # 観測25%
-        self.assertFalse(lines["CAM-M001"].is_optional)  # フラグ由来
-        self.assertEqual(lines["CAM-M001"].quantity, 1)
 
     def test_idempotent_and_dry_run(self) -> None:
         """再実行で重複せず、dry-run では書き込まれないことのテスト"""

@@ -40,6 +40,14 @@ class PartCategorySerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
 
+class PartMasterCategorySummarySerializer(serializers.Serializer):
+    """部品マスタ: グループ×カテゴリの件数集計（読み取り専用）"""
+
+    part_group = serializers.CharField()
+    category = serializers.CharField()
+    count = serializers.IntegerField()
+
+
 class PartMasterSerializer(serializers.ModelSerializer):
     """部品マスタシリアライザ"""
 

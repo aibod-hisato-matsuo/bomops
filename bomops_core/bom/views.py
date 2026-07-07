@@ -47,6 +47,7 @@ from .serializers import (
     LookupBySerialSerializer,
     MaintenanceEventSerializer,
     PartCategorySerializer,
+    PartMasterCategorySummarySerializer,
     PartMasterSerializer,
     PartUnitHistorySerializer,
     PartUnitSerializer,
@@ -253,6 +254,31 @@ class PartMasterViewSet(viewsets.ModelViewSet):
     filterset_class = PartMasterFilter
     search_fields = ["part_code", "name", "model_number"]
     ordering_fields = ["part_code", "name", "created_at"]
+
+    @extend_schema(
+        summary="グループ×カテゴリ件数集計",
+        description="部品グループごとのカテゴリ内訳件数を返す（一覧画面のボタン用）",
+        responses={200: PartMasterCategorySummarySerializer(many=True)},
+        tags=["部品マスタ"],
+    )
+    @action(detail=False, methods=["get"], url_path="category-summary")
+    def category_summary(self, request: Request) -> Response:
+        """グループ×カテゴリの件数集計API"""
+        rows = (
+            PartMaster.objects.values("part_group", "category__name")
+            .annotate(count=Count("id"))
+            .order_by("part_group", "-count", "category__name")
+        )
+        data = [
+            {
+                "part_group": row["part_group"],
+                "category": row["category__name"],
+                "count": row["count"],
+            }
+            for row in rows
+        ]
+        serializer = PartMasterCategorySummarySerializer(data, many=True)
+        return Response(serializer.data)
 
 
 @extend_schema_view(

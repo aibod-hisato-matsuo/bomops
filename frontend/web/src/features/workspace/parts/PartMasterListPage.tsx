@@ -1,14 +1,15 @@
 /**
- * 部品マスタ一覧（W-2 / 2層構成）
+ * 部品マスタ一覧（W-2 / 3層構成）
  *
  * 上段: 部品グループ（主要/周辺/組立/その他）のボタン（件数付き）。
- * 下段: 選択グループで絞り込んだ部品一覧テーブル。
+ * 中段: グループ選択時、その配下カテゴリのボタン（件数付き）。
+ * 下段: グループ×カテゴリで絞り込んだ部品一覧テーブル。
  */
 
 import { useState } from 'react'
 
-import { useList } from '../../../api/hooks'
-import type { PartCategory, PartMaster } from '../../../api/types'
+import { useGet, useList } from '../../../api/hooks'
+import type { PartMaster, PartMasterCategorySummary } from '../../../api/types'
 import { Badge } from '../../../components/Badge'
 import type { BadgeVariant } from '../../../components/Badge'
 import { Button } from '../../../components/Button'
@@ -81,43 +82,49 @@ const columns: Column<PartMaster>[] = [
   },
 ]
 
-/** グループごとの件数を取得する（page_size=1 で count のみ利用） */
-function useGroupCount(group: string): number | undefined {
-  const { data } = useList<PartMaster>('/part-masters/', {
-    part_group: group,
-    page_size: 1,
-  })
-  return data?.count
-}
-
 export function PartMasterListPage() {
-  const { params, page, setPage, setFilter, getFilter } = useListParams()
+  const { params, page, setPage, setFilter, setFilters, getFilter } =
+    useListParams()
   const { text, setText } = useSearchFilter(getFilter, setFilter)
   const { data, isPending } = useList<PartMaster>('/part-masters/', params)
   const [editing, setEditing] = useState<PartMaster | 'new' | null>(null)
 
-  const categories = useList<PartCategory>('/part-categories/', { page_size: 200 })
-  const categoryOptions = (categories.data?.results ?? []).map((c) => ({
-    value: c.name,
-    label: c.name,
-  }))
+  // グループ×カテゴリの件数集計（グループボタン・カテゴリボタン両方の件数に使う）
+  const summary = useGet<PartMasterCategorySummary[]>(
+    '/part-masters/category-summary/',
+  )
+  const summaryRows = summary.data ?? []
 
   const activeGroup = getFilter('part_group')
-  const counts: Record<string, number | undefined> = {
-    MAIN: useGroupCount('MAIN'),
-    PERIPHERAL: useGroupCount('PERIPHERAL'),
-    ASSEMBLY: useGroupCount('ASSEMBLY'),
-    OTHER: useGroupCount('OTHER'),
+  const activeCategory = getFilter('category')
+
+  const groupCount = (group: string) =>
+    summary.data === undefined
+      ? undefined
+      : summaryRows
+          .filter((r) => r.part_group === group)
+          .reduce((a, r) => a + r.count, 0)
+  const totalCount =
+    summary.data === undefined
+      ? undefined
+      : summaryRows.reduce((a, r) => a + r.count, 0)
+
+  // 選択中グループ配下のカテゴリ内訳（件数降順はAPI側で整列済み）
+  const activeGroupCategories = summaryRows.filter(
+    (r) => r.part_group === activeGroup,
+  )
+  const activeGroupTotal = groupCount(activeGroup)
+
+  const selectGroup = (group: string) => {
+    // グループを切り替えたらカテゴリ絞り込みは解除する
+    setFilters({ part_group: group, category: '' })
   }
-  const totalCount = Object.values(counts).every((c) => c !== undefined)
-    ? Object.values(counts).reduce((a, b) => (a ?? 0) + (b ?? 0), 0)
-    : undefined
 
   return (
     <div>
       <PageHeader
         title="部品マスタ"
-        description="グループを選ぶと下に該当部品の一覧が表示されます（行クリックで編集）"
+        description="グループ → カテゴリの順にタップすると一覧が絞り込まれます（行クリックで編集）"
         actions={<Button onClick={() => setEditing('new')}>新規作成</Button>}
       />
 
@@ -129,7 +136,7 @@ export function PartMasterListPage() {
               ? `${styles.groupButton} ${styles.groupButtonActive}`
               : styles.groupButton
           }
-          onClick={() => setFilter('part_group', '')}
+          onClick={() => selectGroup('')}
         >
           <span className={styles.groupCount}>{totalCount ?? '…'}</span>
           <span className={styles.groupLabel}>全て</span>
@@ -144,28 +151,60 @@ export function PartMasterListPage() {
                 ? `${styles.groupButton} ${styles.groupButtonActive}`
                 : styles.groupButton
             }
-            onClick={() =>
-              setFilter('part_group', activeGroup === g.value ? '' : g.value)
-            }
+            onClick={() => selectGroup(activeGroup === g.value ? '' : g.value)}
           >
-            <span className={styles.groupCount}>{counts[g.value] ?? '…'}</span>
+            <span className={styles.groupCount}>
+              {groupCount(g.value) ?? '…'}
+            </span>
             <span className={styles.groupLabel}>{g.label}</span>
             <span className={styles.groupDesc}>{g.desc}</span>
           </button>
         ))}
       </div>
 
+      {activeGroup !== '' && (
+        <div className={styles.categoryRow}>
+          <span className={styles.categoryRowLabel}>カテゴリ:</span>
+          <button
+            type="button"
+            className={
+              activeCategory === ''
+                ? `${styles.categoryButton} ${styles.categoryButtonActive}`
+                : styles.categoryButton
+            }
+            onClick={() => setFilter('category', '')}
+          >
+            全て
+            <span className={styles.categoryCount}>{activeGroupTotal}</span>
+          </button>
+          {activeGroupCategories.map((c) => (
+            <button
+              key={c.category}
+              type="button"
+              className={
+                activeCategory === c.category
+                  ? `${styles.categoryButton} ${styles.categoryButtonActive}`
+                  : styles.categoryButton
+              }
+              onClick={() =>
+                setFilter(
+                  'category',
+                  activeCategory === c.category ? '' : c.category,
+                )
+              }
+            >
+              {c.category}
+              <span className={styles.categoryCount}>{c.count}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       <FilterBar>
         <SearchInput
           value={text}
           onChange={setText}
           placeholder="部品コード・部品名・型番で検索"
-        />
-        <SelectFilter
-          value={getFilter('category')}
-          onChange={(v) => setFilter('category', v)}
-          options={categoryOptions}
-          allLabel="全カテゴリ"
         />
         <SelectFilter
           value={getFilter('is_active')}

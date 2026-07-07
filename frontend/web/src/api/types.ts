@@ -11,6 +11,7 @@ type Schemas = components['schemas']
 
 export type PartCategory = Schemas['PartCategory']
 export type PartMaster = Schemas['PartMaster']
+export type PartMasterCategorySummary = Schemas['PartMasterCategorySummary']
 export type PartUnit = Schemas['PartUnit']
 export type ProductModel = Schemas['ProductModel']
 export type ProductBOM = Schemas['ProductBOM']

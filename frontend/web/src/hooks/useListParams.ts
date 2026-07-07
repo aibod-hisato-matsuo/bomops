@@ -55,10 +55,29 @@ export function useListParams() {
     [setSearchParams],
   )
 
+  /** 複数フィルタの一括変更（ページは1に戻す・履歴は1件） */
+  const setFilters = useCallback(
+    (entries: Record<string, string>) => {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev)
+        for (const [key, value] of Object.entries(entries)) {
+          if (value === '') {
+            next.delete(key)
+          } else {
+            next.set(key, value)
+          }
+        }
+        next.delete('page')
+        return next
+      })
+    },
+    [setSearchParams],
+  )
+
   const getFilter = useCallback(
     (key: string) => searchParams.get(key) ?? '',
     [searchParams],
   )
 
-  return { params, page, setPage, setFilter, getFilter }
+  return { params, page, setPage, setFilter, setFilters, getFilter }
 }

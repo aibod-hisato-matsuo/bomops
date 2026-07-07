@@ -605,6 +605,23 @@ class PartGroupTest(APITestCase):
             codes = {r["part_code"] for r in response.data["results"]}
             self.assertIn("LTE-M001", codes, f"search={term}")
 
+    def test_category_summary(self) -> None:
+        """グループ×カテゴリ件数集計APIのテスト"""
+        # MAIN グループに PC カテゴリをもう1件追加（PC=2件にする）
+        PartMaster.objects.create(
+            part_code="MPC-M999", name="MiniPC C",
+            category=make_category("PC"),
+            part_group=PartMaster.PartGroup.MAIN,
+        )
+        url = reverse("bom:part-master-category-summary")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        rows = {(r["part_group"], r["category"]): r["count"] for r in response.data}
+        self.assertEqual(rows[("MAIN", "PC")], 2)
+        self.assertEqual(rows[("PERIPHERAL", "その他")], 1)
+        self.assertEqual(rows[("ASSEMBLY", "その他")], 1)
+
 
 class DeriveBomCommandTest(TestCase):
     """derive_bom 管理コマンドのテスト"""

@@ -954,6 +954,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/part-masters/product-summary/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 製品ファミリ別部品数集計
+         * @description ProductBOM から導出した、製品ファミリごとの部品マスタ数を返す（一覧画面のボタン用）
+         */
+        get: operations["part_masters_product_summary_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/part-units/": {
         parameters: {
             query?: never;
@@ -2218,6 +2238,21 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["PartMaster"][];
         };
+        PaginatedPartMasterProductSummaryList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["PartMasterProductSummary"][];
+        };
         PaginatedPartUnitList: {
             /** @example 123 */
             count: number;
@@ -2393,6 +2428,11 @@ export interface components {
         PartMasterCategorySummary: {
             part_group: string;
             category: string;
+            count: number;
+        };
+        /** @description 部品マスタ: 製品ファミリ別の部品数集計（ProductBOM 由来・読み取り専用） */
+        PartMasterProductSummary: {
+            family: string;
             count: number;
         };
         /** @description 部品マスタシリアライザ */
@@ -4894,6 +4934,49 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedPartMasterCategorySummaryList"];
+                };
+            };
+        };
+    };
+    part_masters_product_summary_list: {
+        parameters: {
+            query?: {
+                category?: string;
+                is_active?: boolean;
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                part_code?: string;
+                /**
+                 * @description 主要部品/周辺部品/組立部品/その他 の大分類
+                 *
+                 *     * `MAIN` - 主要部品
+                 *     * `PERIPHERAL` - 周辺部品
+                 *     * `ASSEMBLY` - 組立部品
+                 *     * `OTHER` - その他
+                 */
+                part_group?: "ASSEMBLY" | "MAIN" | "OTHER" | "PERIPHERAL";
+                /** @description A search term. */
+                search?: string;
+                used_in_family?: string;
+                used_in_grade?: string;
+                used_in_model?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedPartMasterProductSummaryList"];
                 };
             };
         };

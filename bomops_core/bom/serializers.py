@@ -50,6 +50,13 @@ class PartMasterCategorySummarySerializer(serializers.Serializer):
     count = serializers.IntegerField()
 
 
+class PartMasterProductSummarySerializer(serializers.Serializer):
+    """部品マスタ: 製品ファミリ別の部品数集計（ProductBOM 由来・読み取り専用）"""
+
+    family = serializers.CharField()
+    count = serializers.IntegerField()
+
+
 class PartMasterUsedInSerializer(serializers.ModelSerializer):
     """部品マスタ: 使用先製品モデル（ProductBOM 由来・読み取り専用）"""
 

@@ -51,6 +51,7 @@ from .serializers import (
     MaintenanceEventSerializer,
     PartCategorySerializer,
     PartMasterCategorySummarySerializer,
+    PartMasterProductSummarySerializer,
     PartMasterSerializer,
     PartUnitHistorySerializer,
     PartUnitSerializer,
@@ -347,6 +348,28 @@ class PartMasterViewSet(viewsets.ModelViewSet):
             for row in rows
         ]
         serializer = PartMasterCategorySummarySerializer(data, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        summary="製品ファミリ別部品数集計",
+        description="ProductBOM から導出した、製品ファミリごとの部品マスタ数を返す（一覧画面のボタン用）",
+        responses={200: PartMasterProductSummarySerializer(many=True)},
+        tags=["部品マスタ"],
+    )
+    @action(detail=False, methods=["get"], url_path="product-summary")
+    def product_summary(self, request: Request) -> Response:
+        """製品ファミリ×部品数の集計API（ProductBOM 由来）"""
+        rows = (
+            ProductBOM.objects.exclude(product_model__family=None)
+            .values("product_model__family__name")
+            .annotate(count=Count("part_master", distinct=True))
+            .order_by("-count", "product_model__family__name")
+        )
+        data = [
+            {"family": row["product_model__family__name"], "count": row["count"]}
+            for row in rows
+        ]
+        serializer = PartMasterProductSummarySerializer(data, many=True)
         return Response(serializer.data)
 
 

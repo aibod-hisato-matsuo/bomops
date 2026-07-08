@@ -2607,6 +2607,89 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedPartMasterCategorySummaryList'
           description: ''
+  /api/v1/part-masters/product-summary/:
+    get:
+      operationId: part_masters_product_summary_list
+      description: ProductBOM から導出した、製品ファミリごとの部品マスタ数を返す（一覧画面のボタン用）
+      summary: 製品ファミリ別部品数集計
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: part_code
+        schema:
+          type: string
+      - in: query
+        name: part_group
+        schema:
+          type: string
+          title: 部品グループ
+          enum:
+          - ASSEMBLY
+          - MAIN
+          - OTHER
+          - PERIPHERAL
+        description: |-
+          主要部品/周辺部品/組立部品/その他 の大分類
+
+          * `MAIN` - 主要部品
+          * `PERIPHERAL` - 周辺部品
+          * `ASSEMBLY` - 組立部品
+          * `OTHER` - その他
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: used_in_family
+        schema:
+          type: string
+      - in: query
+        name: used_in_grade
+        schema:
+          type: string
+      - in: query
+        name: used_in_model
+        schema:
+          type: integer
+      tags:
+      - 部品マスタ
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPartMasterProductSummaryList'
+          description: ''
   /api/v1/part-units/:
     get:
       operationId: part_units_list
@@ -5207,6 +5290,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PartMaster'
+    PaginatedPartMasterProductSummaryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PartMasterProductSummary'
     PaginatedPartUnitList:
       type: object
       required:
@@ -5492,6 +5598,17 @@ components:
       - category
       - count
       - part_group
+    PartMasterProductSummary:
+      type: object
+      description: '部品マスタ: 製品ファミリ別の部品数集計（ProductBOM 由来・読み取り専用）'
+      properties:
+        family:
+          type: string
+        count:
+          type: integer
+      required:
+      - count
+      - family
     PartMasterRequest:
       type: object
       description: 部品マスタシリアライザ

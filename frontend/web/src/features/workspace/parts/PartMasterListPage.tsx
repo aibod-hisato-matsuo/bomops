@@ -12,11 +12,12 @@ import { useGet, useList } from '../../../api/hooks'
 import type {
   PartMaster,
   PartMasterCategorySummary,
-  ProductModel,
+  PartMasterProductSummary,
 } from '../../../api/types'
 import { Badge } from '../../../components/Badge'
 import type { BadgeVariant } from '../../../components/Badge'
 import { Button } from '../../../components/Button'
+import { CascadeRow } from '../../../components/CascadeRow'
 import { DataTable, type Column } from '../../../components/DataTable'
 import { FilterBar, SearchInput, SelectFilter } from '../../../components/FilterBar'
 import { PageHeader } from '../../../components/PageHeader'
@@ -109,12 +110,14 @@ export function PartMasterListPage() {
   const activeGroup = getFilter('part_group')
   const activeCategory = getFilter('category')
 
-  const productModels = useList<ProductModel>('/product-models/', {
-    page_size: 200,
-  })
-  const usedInOptions = (productModels.data?.results ?? []).map((m) => ({
-    value: String(m.id),
-    label: m.grade ? `${m.code}（${m.grade}）` : m.code,
+  // 製品ファミリ別の部品数（ProductBOM 由来）。製品フィルタのピルボタン用
+  const productSummary = useGet<PartMasterProductSummary[]>(
+    '/part-masters/product-summary/',
+  )
+  const productOptions = (productSummary.data ?? []).map((r) => ({
+    value: r.family,
+    label: r.family,
+    count: r.count,
   }))
 
   const groupCount = (group: string) =>
@@ -146,6 +149,16 @@ export function PartMasterListPage() {
         description="グループ → カテゴリの順にタップすると一覧が絞り込まれます（行クリックで編集）"
         actions={<Button onClick={() => setEditing('new')}>新規作成</Button>}
       />
+
+      {productOptions.length > 0 && (
+        <CascadeRow
+          label="製品:"
+          options={productOptions}
+          active={getFilter('used_in_family')}
+          allCount={totalCount}
+          onChange={(v) => setFilter('used_in_family', v)}
+        />
+      )}
 
       <div className={styles.groupRow}>
         <button
@@ -224,12 +237,6 @@ export function PartMasterListPage() {
           value={text}
           onChange={setText}
           placeholder="部品コード・部品名・型番で検索"
-        />
-        <SelectFilter
-          value={getFilter('used_in_model')}
-          onChange={(v) => setFilter('used_in_model', v)}
-          options={usedInOptions}
-          allLabel="全使用製品"
         />
         <SelectFilter
           value={getFilter('is_active')}

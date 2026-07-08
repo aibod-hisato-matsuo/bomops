@@ -915,6 +915,62 @@ class PartGroupTest(APITestCase):
         self.assertEqual(rows[("ASSEMBLY", "その他")], 1)
 
 
+class PartMasterProductRelationAPITest(APITestCase):
+    """部品マスタ×製品ファミリ（ProductBOM 由来）のフィルタ・集計テスト"""
+
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(
+            username="testuser",
+            password="testpass123",
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+        from .models import ProductBOM, ProductFamily
+
+        baiten, _ = ProductFamily.objects.get_or_create(name="BAITEN STAND")
+        riscv, _ = ProductFamily.objects.get_or_create(name="RISC-V Board")
+        m_baiten = ProductModel.objects.create(code="B-1", name="B", family=baiten)
+        m_riscv = ProductModel.objects.create(code="R-1", name="R", family=riscv)
+
+        cat = make_category("PC")
+        self.pc = PartMaster.objects.create(part_code="PC-1", name="PC", category=cat)
+        self.cam = PartMaster.objects.create(
+            part_code="CAM-1", name="Cam", category=cat
+        )
+        self.board = PartMaster.objects.create(
+            part_code="BRD-1", name="Board", category=cat
+        )
+        self.unused = PartMaster.objects.create(
+            part_code="UNU-1", name="Unused", category=cat
+        )
+        # PC は両製品で共用 / CAM は BAITEN のみ / Board は RISC-V のみ / Unused はBOM無し
+        ProductBOM.objects.create(product_model=m_baiten, part_master=self.pc)
+        ProductBOM.objects.create(product_model=m_baiten, part_master=self.cam)
+        ProductBOM.objects.create(product_model=m_riscv, part_master=self.pc)
+        ProductBOM.objects.create(product_model=m_riscv, part_master=self.board)
+
+    def test_product_summary(self) -> None:
+        """製品ファミリ別部品数集計のテスト（共用部品は各ファミリでカウント）"""
+        url = reverse("bom:part-master-product-summary")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        rows = {r["family"]: r["count"] for r in response.data}
+        self.assertEqual(rows["BAITEN STAND"], 2)  # PC + CAM
+        self.assertEqual(rows["RISC-V Board"], 2)  # PC + Board
+
+    def test_filter_by_used_in_family(self) -> None:
+        """used_in_family フィルタのテスト（共用部品の重複行が出ないこと）"""
+        url = reverse("bom:part-master-list")
+        response = self.client.get(url, {"used_in_family": "RISC-V Board"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        codes = sorted(r["part_code"] for r in response.data["results"])
+        self.assertEqual(codes, ["BRD-1", "PC-1"])
+        self.assertEqual(response.data["count"], 2)
+
+
 class DeriveBomCommandTest(TestCase):
     """derive_bom 管理コマンドのテスト"""
 

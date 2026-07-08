@@ -38,9 +38,11 @@ const lifecycleOptions = [
 interface Props {
   item: CustomerSite | null
   onClose: () => void
+  /** 新規作成成功時に、作成された拠点を呼び出し元へ返す（インライン作成用） */
+  onCreated?: (created: CustomerSite) => void
 }
 
-export function SiteFormDrawer({ item, onClose }: Props) {
+export function SiteFormDrawer({ item, onClose, onCreated }: Props) {
   const toast = useToast()
   const create = useCreate<CustomerSite>('/customer-sites/')
   const update = useUpdate<CustomerSite>('/customer-sites/')
@@ -75,8 +77,9 @@ export function SiteFormDrawer({ item, onClose }: Props) {
         await update.mutateAsync({ id: item.id, payload })
         toast.success('拠点を更新しました')
       } else {
-        await create.mutateAsync(payload)
+        const created = await create.mutateAsync(payload)
         toast.success('拠点を作成しました')
+        onCreated?.(created)
       }
       onClose()
     } catch (err) {

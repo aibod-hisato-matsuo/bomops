@@ -3,7 +3,8 @@
  */
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
+import { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { parseApiErrors } from '../../../api/errors'
@@ -13,12 +14,15 @@ import { Button } from '../../../components/Button'
 import { Drawer } from '../../../components/Drawer'
 import { Field, Select, TextArea, TextInput } from '../../../components/form/Field'
 import { useToast } from '../../../components/toast/toast-context'
+import { SiteFormDrawer } from '../customers/SiteFormDrawer'
 import {
   applyServerErrors,
   cleanPayload,
   dtLocalToIso,
   isoToDtLocal,
 } from '../../../lib/form-utils'
+
+const NEW_SITE = '__new__'
 
 const schema = z.object({
   set_code: z.string().min(1, 'セットコードを入力してください'),
@@ -52,10 +56,16 @@ export function BssSetFormDrawer({ item, onClose }: Props) {
   const models = useList<ProductModel>('/product-models/', { page_size: 200 })
   const sites = useList<CustomerSite>('/customer-sites/', { page_size: 200 })
 
+  const [creatingSite, setCreatingSite] = useState(false)
+  // インラインで作成した拠点。拠点一覧の再取得を待たずに選択肢へ即反映する
+  const [createdSites, setCreatedSites] = useState<CustomerSite[]>([])
+
   const {
     register,
     handleSubmit,
     setError,
+    setValue,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -69,6 +79,12 @@ export function BssSetFormDrawer({ item, onClose }: Props) {
       note: item?.note ?? '',
     },
   })
+
+  const siteList = sites.data?.results ?? []
+  const siteOptions = [
+    ...createdSites.filter((c) => !siteList.some((s) => s.id === c.id)),
+    ...siteList,
+  ]
 
   const onSubmit = async (values: FormValues) => {
     const payload = cleanPayload({
@@ -136,14 +152,30 @@ export function BssSetFormDrawer({ item, onClose }: Props) {
         hint="在庫・出張中の場合は未選択のまま"
         error={errors.customer_site?.message}
       >
-        <Select {...register('customer_site')}>
-          <option value="">未設置（在庫）</option>
-          {sites.data?.results.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.customer_name} - {s.name}
-            </option>
-          ))}
-        </Select>
+        <Controller
+          name="customer_site"
+          control={control}
+          render={({ field }) => (
+            <Select
+              {...field}
+              onChange={(e) => {
+                if (e.target.value === NEW_SITE) {
+                  setCreatingSite(true)
+                  return
+                }
+                field.onChange(e)
+              }}
+            >
+              <option value="">未設置（在庫）</option>
+              {siteOptions.map((s) => (
+                <option key={s.id} value={String(s.id)}>
+                  {s.customer_name} - {s.name}
+                </option>
+              ))}
+              <option value={NEW_SITE}>＋ 新規拠点を作成…</option>
+            </Select>
+          )}
+        />
       </Field>
       <Field label="設置日時" error={errors.installed_at?.message}>
         <TextInput type="datetime-local" {...register('installed_at')} />
@@ -154,6 +186,19 @@ export function BssSetFormDrawer({ item, onClose }: Props) {
       <Field label="備考" error={errors.note?.message}>
         <TextArea {...register('note')} />
       </Field>
+
+      {creatingSite && (
+        <SiteFormDrawer
+          item={null}
+          onClose={() => setCreatingSite(false)}
+          onCreated={(created) => {
+            setCreatedSites((prev) => [created, ...prev])
+            setValue('customer_site', String(created.id), {
+              shouldValidate: true,
+            })
+          }}
+        />
+      )}
     </Drawer>
   )
 }

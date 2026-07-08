@@ -7,7 +7,8 @@
  */
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
+import { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { parseApiErrors } from '../../../api/errors'
@@ -23,6 +24,9 @@ import {
 } from '../../../components/form/Field'
 import { useToast } from '../../../components/toast/toast-context'
 import { applyServerErrors } from '../../../lib/form-utils'
+import { PartMasterFormDrawer } from '../parts/PartMasterFormDrawer'
+
+const NEW_PART = '__new__'
 
 const schema = z.object({
   part_master: z.string().min(1, '部品マスタを選択してください'),
@@ -58,10 +62,16 @@ export function BomLineFormDrawer({
   const isEdit = item !== null && !duplicate
   const title = isEdit ? 'BOM行を編集' : duplicate ? 'BOM行を複製' : 'BOM行を追加'
 
+  const [creatingPart, setCreatingPart] = useState(false)
+  // インラインで作成した部品。マスタ一覧の再取得を待たずに選択肢へ即反映する
+  const [createdParts, setCreatedParts] = useState<PartMaster[]>([])
+
   const {
     register,
     handleSubmit,
     setError,
+    setValue,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -71,6 +81,13 @@ export function BomLineFormDrawer({
       is_optional: item?.is_optional ?? false,
     },
   })
+
+  // 作成直後の部品（createdParts）を先頭に、マスタ一覧を続ける（id重複は除く）
+  const masterList = masters.data?.results ?? []
+  const partOptions = [
+    ...createdParts.filter((c) => !masterList.some((m) => m.id === c.id)),
+    ...masterList,
+  ]
 
   const onSubmit = async (values: FormValues) => {
     const payload = {
@@ -111,14 +128,31 @@ export function BomLineFormDrawer({
       }
     >
       <Field label="部品マスタ" required error={errors.part_master?.message}>
-        <Select {...register('part_master')}>
-          <option value="">選択してください</option>
-          {masters.data?.results.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.part_code}: {m.name}
-            </option>
-          ))}
-        </Select>
+        <Controller
+          name="part_master"
+          control={control}
+          render={({ field }) => (
+            <Select
+              {...field}
+              onChange={(e) => {
+                if (e.target.value === NEW_PART) {
+                  // 「＋新規部品」選択時は値を確定せずサブドロワーを開く
+                  setCreatingPart(true)
+                  return
+                }
+                field.onChange(e)
+              }}
+            >
+              <option value="">選択してください</option>
+              {partOptions.map((m) => (
+                <option key={m.id} value={String(m.id)}>
+                  {m.part_code}: {m.name}
+                </option>
+              ))}
+              <option value={NEW_PART}>＋ 新規部品を作成…</option>
+            </Select>
+          )}
+        />
       </Field>
       <Field label="数量" required error={errors.quantity?.message}>
         <TextInput type="number" min={1} {...register('quantity')} />
@@ -130,6 +164,19 @@ export function BomLineFormDrawer({
         <p style={{ fontSize: 12, color: 'var(--color-text-sub)' }}>
           ※ 同じ部品のまま追加すると重複エラーになります。部品マスタを変更してください。
         </p>
+      )}
+
+      {creatingPart && (
+        <PartMasterFormDrawer
+          item={null}
+          onClose={() => setCreatingPart(false)}
+          onCreated={(created) => {
+            setCreatedParts((prev) => [created, ...prev])
+            setValue('part_master', String(created.id), {
+              shouldValidate: true,
+            })
+          }}
+        />
       )}
     </Drawer>
   )

@@ -58,9 +58,11 @@ const partGroupOptions = [
 interface Props {
   item: PartMaster | null
   onClose: () => void
+  /** 新規作成成功時に、作成された部品を呼び出し元へ返す（インライン作成用） */
+  onCreated?: (created: PartMaster) => void
 }
 
-export function PartMasterFormDrawer({ item, onClose }: Props) {
+export function PartMasterFormDrawer({ item, onClose, onCreated }: Props) {
   const toast = useToast()
   const create = useCreate<PartMaster>('/part-masters/')
   const update = useUpdate<PartMaster>('/part-masters/')
@@ -113,8 +115,9 @@ export function PartMasterFormDrawer({ item, onClose }: Props) {
         await update.mutateAsync({ id: item.id, payload })
         toast.success('部品マスタを更新しました')
       } else {
-        await create.mutateAsync(payload)
+        const created = await create.mutateAsync(payload)
         toast.success('部品マスタを作成しました')
+        onCreated?.(created)
       }
       onClose()
     } catch (err) {

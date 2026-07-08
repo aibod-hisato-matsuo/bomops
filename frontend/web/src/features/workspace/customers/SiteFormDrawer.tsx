@@ -131,7 +131,11 @@ export function SiteFormDrawer({
       <Field label="拠点名" required error={errors.name?.message}>
         <TextInput placeholder="例: ○○工場売店" {...register('name')} />
       </Field>
-      <Field label="ライフサイクル状態" error={errors.lifecycle_status?.message}>
+      <Field
+        label="ライフサイクル状態"
+        hint="「拠点」＝AIBOD自社の倉庫（部品保管先）。取外し部品の置き先に使える"
+        error={errors.lifecycle_status?.message}
+      >
         <Select {...register('lifecycle_status')}>
           {lifecycleOptions.map((o) => (
             <option key={o.value} value={o.value}>

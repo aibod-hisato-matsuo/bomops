@@ -20,6 +20,7 @@ export type ProductModelHierarchySummary = Schemas['ProductModelHierarchySummary
 export type ProductBOM = Schemas['ProductBOM']
 export type Customer = Schemas['Customer']
 export type CustomerProductSummary = Schemas['CustomerProductSummary']
+export type CustomerSiteStatusSummary = Schemas['CustomerSiteStatusSummary']
 export type CustomerSite = Schemas['CustomerSite']
 export type SiteConfig = Schemas['SiteConfig']
 export type BssSet = Schemas['BssSet']

@@ -48,6 +48,7 @@ from .serializers import (
     EquipmentRefSerializer,
     LookupBySerialSerializer,
     CustomerProductSummarySerializer,
+    CustomerSiteStatusSummarySerializer,
     MaintenanceEventSerializer,
     PartCategorySerializer,
     PartMasterCategorySummarySerializer,
@@ -673,6 +674,27 @@ class CustomerSiteViewSet(viewsets.ModelViewSet):
             for row in rows
         ]
         serializer = CustomerProductSummarySerializer(data, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        summary="ライフサイクル状態別拠点数集計",
+        description="拠点をライフサイクル状態ごとに集計する（一覧画面のボタン用）",
+        responses={200: CustomerSiteStatusSummarySerializer(many=True)},
+        tags=["顧客拠点"],
+    )
+    @action(detail=False, methods=["get"], url_path="status-summary")
+    def status_summary(self, request: Request) -> Response:
+        """ライフサイクル状態×拠点数の集計API"""
+        rows = (
+            CustomerSite.objects.values("lifecycle_status")
+            .annotate(count=Count("id"))
+            .order_by("lifecycle_status")
+        )
+        data = [
+            {"status": row["lifecycle_status"], "count": row["count"]}
+            for row in rows
+        ]
+        serializer = CustomerSiteStatusSummarySerializer(data, many=True)
         return Response(serializer.data)
 
 

@@ -12,13 +12,14 @@ import type {
   Customer,
   CustomerProductSummary,
   CustomerSite,
+  CustomerSiteStatusSummary,
 } from '../../../api/types'
 import { Badge } from '../../../components/Badge'
 import { lifecycleStatusVariant } from '../../../components/badge-variants'
 import { Button } from '../../../components/Button'
 import { CascadeRow } from '../../../components/CascadeRow'
 import { DataTable, type Column } from '../../../components/DataTable'
-import { FilterBar, SearchInput, SelectFilter } from '../../../components/FilterBar'
+import { FilterBar, SearchInput } from '../../../components/FilterBar'
 import { PageHeader } from '../../../components/PageHeader'
 import { Pagination } from '../../../components/Pagination'
 import { Tabs } from '../../../components/Tabs'
@@ -99,6 +100,19 @@ export function CustomersPage() {
       : toOptions(siteProductSummary.data)
   const productTotalCount =
     tab === 'customers' ? customerTotal.data?.count : siteTotal.data?.count
+
+  // 拠点タブ: ライフサイクル状態別の件数（製品フィルタの下のピル行）
+  const siteStatusSummary = useGet<CustomerSiteStatusSummary[]>(
+    '/customer-sites/status-summary/',
+  )
+  const lifecycleLabelMap = Object.fromEntries(
+    lifecycleOptions.map((o) => [o.value, o.label]),
+  )
+  const statusOptions = (siteStatusSummary.data ?? []).map((r) => ({
+    value: r.status,
+    label: lifecycleLabelMap[r.status] ?? r.status,
+    count: r.count,
+  }))
 
   const siteColumns: Column<CustomerSite>[] = [
     { key: 'name', header: '拠点名', render: (r) => r.name },
@@ -181,20 +195,22 @@ export function CustomersPage() {
         />
       )}
 
+      {tab === 'sites' && statusOptions.length > 0 && (
+        <CascadeRow
+          label="状態:"
+          options={statusOptions}
+          active={getFilter('lifecycle_status')}
+          allCount={siteTotal.data?.count}
+          onChange={(v) => setFilter('lifecycle_status', v)}
+        />
+      )}
+
       <FilterBar>
         <SearchInput
           value={text}
           onChange={setText}
           placeholder={tab === 'customers' ? '顧客名・コードで検索' : '拠点名・住所で検索'}
         />
-        {tab === 'sites' && (
-          <SelectFilter
-            value={getFilter('lifecycle_status')}
-            onChange={(v) => setFilter('lifecycle_status', v)}
-            options={lifecycleOptions}
-            allLabel="全状態"
-          />
-        )}
       </FilterBar>
 
       {tab === 'customers' ? (

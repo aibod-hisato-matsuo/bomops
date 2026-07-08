@@ -336,6 +336,13 @@ class CustomerProductSummarySerializer(serializers.Serializer):
     count = serializers.IntegerField()
 
 
+class CustomerSiteStatusSummarySerializer(serializers.Serializer):
+    """拠点: ライフサイクル状態別の拠点数集計（読み取り専用）"""
+
+    status = serializers.CharField()
+    count = serializers.IntegerField()
+
+
 class CustomerProductSerializer(serializers.Serializer):
     """顧客: 取扱製品1件（実績/手動の由来付き・読み取り専用）"""
 

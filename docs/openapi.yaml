@@ -1264,6 +1264,77 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedCustomerProductSummaryList'
           description: ''
+  /api/v1/customer-sites/status-summary/:
+    get:
+      operationId: customer_sites_status_summary_list
+      description: 拠点をライフサイクル状態ごとに集計する（一覧画面のボタン用）
+      summary: ライフサイクル状態別拠点数集計
+      parameters:
+      - in: query
+        name: country
+        schema:
+          type: string
+      - in: query
+        name: customer
+        schema:
+          type: integer
+      - in: query
+        name: lifecycle_status
+        schema:
+          type: string
+          title: ライフサイクル状態
+          enum:
+          - ACTIVE
+          - BASE
+          - LOANED
+          - PREPARING
+          - WITHDRAWN
+        description: |-
+          * `PREPARING` - 準備中
+          * `ACTIVE` - 稼働中
+          * `WITHDRAWN` - 撤退済
+          * `BASE` - 拠点
+          * `LOANED` - 貸出中
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: product_family
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 顧客拠点
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCustomerSiteStatusSummaryList'
+          description: ''
   /api/v1/customers/:
     get:
       operationId: customers_list
@@ -4540,6 +4611,17 @@ components:
       required:
       - customer
       - name
+    CustomerSiteStatusSummary:
+      type: object
+      description: '拠点: ライフサイクル状態別の拠点数集計（読み取り専用）'
+      properties:
+        status:
+          type: string
+        count:
+          type: integer
+      required:
+      - count
+      - status
     DashboardCustomersSummary:
       type: object
       description: 'ダッシュボード: 顧客集計'
@@ -5129,6 +5211,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CustomerSite'
+    PaginatedCustomerSiteStatusSummaryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerSiteStatusSummary'
     PaginatedDeployEventList:
       type: object
       required:

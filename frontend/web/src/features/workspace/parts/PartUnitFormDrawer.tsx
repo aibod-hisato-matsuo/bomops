@@ -8,7 +8,7 @@ import { z } from 'zod'
 
 import { parseApiErrors } from '../../../api/errors'
 import { useCreate, useList, useUpdate } from '../../../api/hooks'
-import type { PartMaster, PartUnit } from '../../../api/types'
+import type { CustomerSite, PartMaster, PartUnit } from '../../../api/types'
 import { Button } from '../../../components/Button'
 import { Drawer } from '../../../components/Drawer'
 import { Field, Select, TextArea, TextInput } from '../../../components/form/Field'
@@ -19,6 +19,7 @@ const schema = z.object({
   part_master: z.string().min(1, '部品マスタを選択してください'),
   serial_number: z.string().min(1, 'シリアル番号を入力してください'),
   status: z.string(),
+  storage_site: z.string(),
   purchase_date: z.string(),
   purchase_order_no: z.string(),
   note: z.string(),
@@ -48,6 +49,10 @@ export function PartUnitFormDrawer({ item, onClose, defaultPartMasterId }: Props
     page_size: 200,
     is_active: true,
   })
+  const warehouses = useList<CustomerSite>('/customer-sites/', {
+    lifecycle_status: 'BASE',
+    page_size: 200,
+  })
 
   const {
     register,
@@ -64,6 +69,7 @@ export function PartUnitFormDrawer({ item, onClose, defaultPartMasterId }: Props
           : '',
       serial_number: item?.serial_number ?? '',
       status: item?.status ?? 'IN_STOCK',
+      storage_site: item?.storage_site ? String(item.storage_site) : '',
       purchase_date: item?.purchase_date ?? '',
       purchase_order_no: item?.purchase_order_no ?? '',
       note: item?.note ?? '',
@@ -71,7 +77,11 @@ export function PartUnitFormDrawer({ item, onClose, defaultPartMasterId }: Props
   })
 
   const onSubmit = async (values: FormValues) => {
-    const payload = cleanPayload({ ...values, part_master: Number(values.part_master) })
+    const payload = cleanPayload({
+      ...values,
+      part_master: Number(values.part_master),
+      storage_site: values.storage_site ? Number(values.storage_site) : null,
+    })
     try {
       if (item) {
         await update.mutateAsync({ id: item.id, payload })
@@ -121,6 +131,16 @@ export function PartUnitFormDrawer({ item, onClose, defaultPartMasterId }: Props
           {statusOptions.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
+            </option>
+          ))}
+        </Select>
+      </Field>
+      <Field label="保管先倉庫" hint="未搭載時の置き先（AIBOD拠点＝倉庫）">
+        <Select {...register('storage_site')}>
+          <option value="">未選択</option>
+          {(warehouses.data?.results ?? []).map((w) => (
+            <option key={w.id} value={String(w.id)}>
+              {w.customer_name} - {w.name}
             </option>
           ))}
         </Select>

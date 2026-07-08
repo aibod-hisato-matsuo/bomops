@@ -8,15 +8,13 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
-import { parseApiErrors } from '../../../api/errors'
-import { useDetail, useGet, useList, useUpdate } from '../../../api/hooks'
+import { useDetail, useGet, useList } from '../../../api/hooks'
 import type {
   BssSet,
   BssSetComponent,
   DeployEvent,
   EffectiveConfig,
   MaintenanceEvent,
-  PartUnit,
 } from '../../../api/types'
 import { Badge } from '../../../components/Badge'
 import { bssSetStatusVariant } from '../../../components/badge-variants'
@@ -24,11 +22,11 @@ import { Button } from '../../../components/Button'
 import { DataTable, type Column } from '../../../components/DataTable'
 import { DescList, Section } from '../../../components/DescList'
 import { PageHeader } from '../../../components/PageHeader'
-import { useToast } from '../../../components/toast/toast-context'
 import { BssSetFormDrawer } from './BssSetFormDrawer'
 import { EventFormDrawer } from './EventFormDrawer'
 import { MountComponentDrawer } from './MountComponentDrawer'
 import { SetConfigFormDrawer } from './SetConfigFormDrawer'
+import { UnmountComponentDrawer } from './UnmountComponentDrawer'
 
 const configColumns: Column<EffectiveConfig>[] = [
   { key: 'config_group', header: 'グループ', render: (r) => r.config_group },
@@ -65,6 +63,7 @@ const deployColumns: Column<DeployEvent>[] = [
 type DrawerState =
   | { kind: 'edit' }
   | { kind: 'mount' }
+  | { kind: 'unmount'; component: BssSetComponent }
   | { kind: 'maintenance' }
   | { kind: 'deploy' }
   | { kind: 'config' }
@@ -72,7 +71,6 @@ type DrawerState =
 
 export function BssSetDetailPage() {
   const { id } = useParams()
-  const toast = useToast()
   const { data: set, isPending } = useDetail<BssSet>('/bss-sets/', id)
   const components = useList<BssSetComponent>('/bss-set-components/', { bss_set: id })
   const configs = useGet<EffectiveConfig[]>(
@@ -81,27 +79,7 @@ export function BssSetDetailPage() {
   const maintenance = useList<MaintenanceEvent>('/maintenance-events/', { bss_set: id })
   const deploys = useList<DeployEvent>('/deploy-events/', { bss_set: id })
 
-  const updateComponent = useUpdate<BssSetComponent>('/bss-set-components/')
-  const updateUnit = useUpdate<PartUnit>('/part-units/')
   const [drawer, setDrawer] = useState<DrawerState>(null)
-
-  const handleUnmount = async (component: BssSetComponent) => {
-    if (!window.confirm(`「${component.serial_number}」を取り外しますか？`)) return
-    try {
-      await updateComponent.mutateAsync({
-        id: component.id,
-        payload: { unmounted_at: new Date().toISOString() },
-      })
-      await updateUnit.mutateAsync({
-        id: component.part_unit,
-        payload: { status: 'IN_STOCK' },
-      })
-      toast.success('部品を取り外しました')
-    } catch (err) {
-      const { message } = parseApiErrors(err)
-      toast.error(message ?? '取り外しに失敗しました')
-    }
-  }
 
   const componentColumns: Column<BssSetComponent>[] = [
     { key: 'role', header: '役割', render: (r) => r.role ?? '-' },
@@ -134,7 +112,11 @@ export function BssSetDetailPage() {
       width: '90px',
       render: (r) =>
         r.is_mounted ? (
-          <Button variant="danger" size="sm" onClick={() => handleUnmount(r)}>
+          <Button
+            variant="danger"
+            size="sm"
+            onClick={() => setDrawer({ kind: 'unmount', component: r })}
+          >
             取外し
           </Button>
         ) : (
@@ -249,6 +231,13 @@ export function BssSetDetailPage() {
       )}
       {drawer?.kind === 'mount' && set && (
         <MountComponentDrawer bssSetId={set.id} onClose={() => setDrawer(null)} />
+      )}
+      {drawer?.kind === 'unmount' && set && (
+        <UnmountComponentDrawer
+          bssSetId={set.id}
+          component={drawer.component}
+          onClose={() => setDrawer(null)}
+        />
       )}
       {(drawer?.kind === 'maintenance' || drawer?.kind === 'deploy') && set && (
         <EventFormDrawer

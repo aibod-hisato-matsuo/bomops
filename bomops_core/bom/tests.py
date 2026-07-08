@@ -1175,6 +1175,21 @@ class PartUnitCurrentSetAPITest(APITestCase):
         url = reverse("bom:part-unit-detail", kwargs={"pk": self.stock.pk})
         self.assertIsNone(self.client.get(url).data["current_set"])
 
+    def test_storage_site_set_and_displayed(self) -> None:
+        """保管先倉庫（storage_site）を設定でき、名称が返ることのテスト"""
+        warehouse = CustomerSite.objects.create(
+            customer=Customer.objects.get(code="C-1"),
+            name="AIBOD大名",
+            lifecycle_status="BASE",
+        )
+        url = reverse("bom:part-unit-detail", kwargs={"pk": self.stock.pk})
+        resp = self.client.patch(
+            url, {"storage_site": warehouse.id}, format="json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(resp.data["storage_site"], warehouse.id)
+        self.assertEqual(resp.data["storage_site_name"], "AIBOD大名")
+
 
 class BssSetConfigAPITest(APITestCase):
     """BSSセット設定APIのテスト"""

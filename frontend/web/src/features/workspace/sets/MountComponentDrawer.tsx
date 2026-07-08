@@ -59,7 +59,8 @@ export function MountComponentDrawer({ bssSetId, onClose }: Props) {
       })
       await updateUnit.mutateAsync({
         id: Number(values.part_unit),
-        payload: { status: 'ASSIGNED' },
+        // セットに入るので状態は割当済、倉庫の保管先はクリアする
+        payload: { status: 'ASSIGNED', storage_site: null },
       })
       toast.success('部品を搭載しました')
       onClose()

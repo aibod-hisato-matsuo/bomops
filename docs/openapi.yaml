@@ -5758,6 +5758,15 @@ components:
         status_display:
           type: string
           readOnly: true
+        storage_site:
+          type: integer
+          nullable: true
+          title: 保管先倉庫
+          description: 未搭載時の物理的な保管場所。倉庫は lifecycle_status=拠点(BASE) の拠点を使う
+        storage_site_name:
+          type: string
+          readOnly: true
+          nullable: true
         current_set:
           allOf:
           - $ref: '#/components/schemas/PartUnitCurrentSet'
@@ -5786,6 +5795,7 @@ components:
       - part_master_name
       - serial_number
       - status_display
+      - storage_site_name
       - updated_at
     PartUnitCurrentSet:
       type: object
@@ -5886,6 +5896,11 @@ components:
           allOf:
           - $ref: '#/components/schemas/PartUnitStatusEnum'
           title: ステータス
+        storage_site:
+          type: integer
+          nullable: true
+          title: 保管先倉庫
+          description: 未搭載時の物理的な保管場所。倉庫は lifecycle_status=拠点(BASE) の拠点を使う
         note:
           type: string
           nullable: true
@@ -6208,6 +6223,11 @@ components:
           allOf:
           - $ref: '#/components/schemas/PartUnitStatusEnum'
           title: ステータス
+        storage_site:
+          type: integer
+          nullable: true
+          title: 保管先倉庫
+          description: 未搭載時の物理的な保管場所。倉庫は lifecycle_status=拠点(BASE) の拠点を使う
         note:
           type: string
           nullable: true

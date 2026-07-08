@@ -188,6 +188,12 @@ class PartUnitSerializer(serializers.ModelSerializer):
         source="get_status_display",
         read_only=True,
     )
+    storage_site_name = serializers.CharField(
+        source="storage_site.name",
+        read_only=True,
+        allow_null=True,
+        default=None,
+    )
     current_set = serializers.SerializerMethodField()
 
     @extend_schema_field(PartUnitCurrentSetSerializer(allow_null=True))
@@ -225,6 +231,8 @@ class PartUnitSerializer(serializers.ModelSerializer):
             "purchase_order_no",
             "status",
             "status_display",
+            "storage_site",
+            "storage_site_name",
             "current_set",
             "note",
             "created_at",

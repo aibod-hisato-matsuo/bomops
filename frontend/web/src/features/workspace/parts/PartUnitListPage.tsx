@@ -134,8 +134,8 @@ export function PartUnitListPage() {
       ),
     },
     {
-      key: 'current_set',
-      header: '使用中セット',
+      key: 'location',
+      header: '現在の場所',
       render: (r) =>
         r.current_set ? (
           <button
@@ -161,8 +161,10 @@ export function PartUnitListPage() {
             {r.current_set.set_code}
             {r.current_set.role ? `（${r.current_set.role}）` : ''}
           </button>
+        ) : r.storage_site_name ? (
+          <span>🏭 {r.storage_site_name}</span>
         ) : (
-          <span style={{ color: 'var(--color-text-sub)' }}>未搭載</span>
+          <span style={{ color: 'var(--color-text-sub)' }}>未登録</span>
         ),
     },
     { key: 'purchase_date', header: '購入日', render: (r) => r.purchase_date ?? '-' },

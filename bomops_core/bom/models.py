@@ -177,6 +177,15 @@ class PartUnit(TimestampMixin):
         default=Status.IN_STOCK,
         verbose_name="ステータス",
     )
+    storage_site = models.ForeignKey(
+        "CustomerSite",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="stored_units",
+        verbose_name="保管先倉庫",
+        help_text="未搭載時の物理的な保管場所。倉庫は lifecycle_status=拠点(BASE) の拠点を使う",
+    )
     note = models.TextField(
         null=True,
         blank=True,

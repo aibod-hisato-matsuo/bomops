@@ -2512,6 +2512,12 @@ export interface components {
             /** ステータス */
             status?: components["schemas"]["PartUnitStatusEnum"];
             readonly status_display: string;
+            /**
+             * 保管先倉庫
+             * @description 未搭載時の物理的な保管場所。倉庫は lifecycle_status=拠点(BASE) の拠点を使う
+             */
+            storage_site?: number | null;
+            readonly storage_site_name: string | null;
             readonly current_set: components["schemas"]["PartUnitCurrentSet"] | null;
             /** 備考 */
             note?: string | null;
@@ -2568,6 +2574,11 @@ export interface components {
             purchase_order_no?: string | null;
             /** ステータス */
             status?: components["schemas"]["PartUnitStatusEnum"];
+            /**
+             * 保管先倉庫
+             * @description 未搭載時の物理的な保管場所。倉庫は lifecycle_status=拠点(BASE) の拠点を使う
+             */
+            storage_site?: number | null;
             /** 備考 */
             note?: string | null;
         };
@@ -2797,6 +2808,11 @@ export interface components {
             purchase_order_no?: string | null;
             /** ステータス */
             status?: components["schemas"]["PartUnitStatusEnum"];
+            /**
+             * 保管先倉庫
+             * @description 未搭載時の物理的な保管場所。倉庫は lifecycle_status=拠点(BASE) の拠点を使う
+             */
+            storage_site?: number | null;
             /** 備考 */
             note?: string | null;
         };

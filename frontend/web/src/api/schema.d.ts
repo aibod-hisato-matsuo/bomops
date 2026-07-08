@@ -2411,6 +2411,9 @@ export interface components {
             /** サイズ */
             size?: string | null;
             readonly used_in: components["schemas"]["PartMasterUsedIn"][];
+            readonly unit_count: number;
+            readonly in_stock_count: number;
+            readonly broken_count: number;
             /** 有効フラグ */
             is_active?: boolean;
             /**
@@ -2509,6 +2512,7 @@ export interface components {
             /** ステータス */
             status?: components["schemas"]["PartUnitStatusEnum"];
             readonly status_display: string;
+            readonly current_set: components["schemas"]["PartUnitCurrentSet"] | null;
             /** 備考 */
             note?: string | null;
             /**
@@ -2521,6 +2525,14 @@ export interface components {
              * Format: date-time
              */
             readonly updated_at: string;
+        };
+        /** @description 部品実物の現在の搭載先セット（読み取り専用） */
+        PartUnitCurrentSet: {
+            set_id: number;
+            set_code: string;
+            role: string | null;
+            site_name: string | null;
+            customer_name: string | null;
         };
         /** @description 部品使用履歴レスポンスのシリアライザ（読み取り専用） */
         PartUnitHistory: {

@@ -5561,6 +5561,15 @@ components:
           items:
             $ref: '#/components/schemas/PartMasterUsedIn'
           readOnly: true
+        unit_count:
+          type: integer
+          readOnly: true
+        in_stock_count:
+          type: integer
+          readOnly: true
+        broken_count:
+          type: integer
+          readOnly: true
         is_active:
           type: boolean
           title: 有効フラグ
@@ -5575,13 +5584,16 @@ components:
           readOnly: true
           title: 更新日時
       required:
+      - broken_count
       - category
       - category_display
       - created_at
       - id
+      - in_stock_count
       - name
       - part_code
       - part_group_display
+      - unit_count
       - updated_at
       - used_in
     PartMasterCategorySummary:
@@ -5746,6 +5758,11 @@ components:
         status_display:
           type: string
           readOnly: true
+        current_set:
+          allOf:
+          - $ref: '#/components/schemas/PartUnitCurrentSet'
+          nullable: true
+          readOnly: true
         note:
           type: string
           nullable: true
@@ -5762,6 +5779,7 @@ components:
           title: 更新日時
       required:
       - created_at
+      - current_set
       - id
       - part_master
       - part_master_code
@@ -5769,6 +5787,29 @@ components:
       - serial_number
       - status_display
       - updated_at
+    PartUnitCurrentSet:
+      type: object
+      description: 部品実物の現在の搭載先セット（読み取り専用）
+      properties:
+        set_id:
+          type: integer
+        set_code:
+          type: string
+        role:
+          type: string
+          nullable: true
+        site_name:
+          type: string
+          nullable: true
+        customer_name:
+          type: string
+          nullable: true
+      required:
+      - customer_name
+      - role
+      - set_code
+      - set_id
+      - site_name
     PartUnitHistory:
       type: object
       description: 部品使用履歴レスポンスのシリアライザ（読み取り専用）

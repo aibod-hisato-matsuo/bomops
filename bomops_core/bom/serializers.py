@@ -110,6 +110,33 @@ class PartMasterSerializer(serializers.ModelSerializer):
         source="get_part_group_display",
         read_only=True,
     )
+    # 実物カウント（ViewSet で annotate。作成レスポンス等 未注釈時は実数を数える）
+    unit_count = serializers.SerializerMethodField()
+    in_stock_count = serializers.SerializerMethodField()
+    broken_count = serializers.SerializerMethodField()
+
+    @extend_schema_field(serializers.IntegerField())
+    def get_unit_count(self, obj: PartMaster) -> int:
+        n = getattr(obj, "unit_count", None)
+        return n if n is not None else obj.units.count()
+
+    @extend_schema_field(serializers.IntegerField())
+    def get_in_stock_count(self, obj: PartMaster) -> int:
+        n = getattr(obj, "in_stock_count", None)
+        return (
+            n
+            if n is not None
+            else obj.units.filter(status=PartUnit.Status.IN_STOCK).count()
+        )
+
+    @extend_schema_field(serializers.IntegerField())
+    def get_broken_count(self, obj: PartMaster) -> int:
+        n = getattr(obj, "broken_count", None)
+        return (
+            n
+            if n is not None
+            else obj.units.filter(status=PartUnit.Status.BROKEN).count()
+        )
 
     class Meta:
         model = PartMaster
@@ -126,11 +153,24 @@ class PartMasterSerializer(serializers.ModelSerializer):
             "spec_json",
             "size",
             "used_in",
+            "unit_count",
+            "in_stock_count",
+            "broken_count",
             "is_active",
             "created_at",
             "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
+
+
+class PartUnitCurrentSetSerializer(serializers.Serializer):
+    """部品実物の現在の搭載先セット（読み取り専用）"""
+
+    set_id = serializers.IntegerField()
+    set_code = serializers.CharField()
+    role = serializers.CharField(allow_null=True)
+    site_name = serializers.CharField(allow_null=True)
+    customer_name = serializers.CharField(allow_null=True)
 
 
 class PartUnitSerializer(serializers.ModelSerializer):
@@ -148,6 +188,30 @@ class PartUnitSerializer(serializers.ModelSerializer):
         source="get_status_display",
         read_only=True,
     )
+    current_set = serializers.SerializerMethodField()
+
+    @extend_schema_field(PartUnitCurrentSetSerializer(allow_null=True))
+    def get_current_set(self, obj: PartUnit) -> dict | None:
+        """現在搭載中（unmounted_at が空）のセット。未搭載なら None"""
+        comp = next(
+            (
+                c
+                for c in obj.set_assignments.all()
+                if c.unmounted_at is None
+            ),
+            None,
+        )
+        if comp is None:
+            return None
+        bss_set = comp.bss_set
+        site = bss_set.customer_site
+        return {
+            "set_id": bss_set.id,
+            "set_code": bss_set.set_code,
+            "role": comp.role,
+            "site_name": site.name if site else None,
+            "customer_name": site.customer.name if site else None,
+        }
 
     class Meta:
         model = PartUnit
@@ -161,6 +225,7 @@ class PartUnitSerializer(serializers.ModelSerializer):
             "purchase_order_no",
             "status",
             "status_display",
+            "current_set",
             "note",
             "created_at",
             "updated_at",

@@ -915,6 +915,42 @@ class PartGroupTest(APITestCase):
         self.assertEqual(rows[("ASSEMBLY", "その他")], 1)
 
 
+class PartMasterUnitCountAPITest(APITestCase):
+    """部品マスタの実物カウント（unit_count/in_stock_count/broken_count）のテスト"""
+
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(
+            username="testuser",
+            password="testpass123",
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+        self.pm = PartMaster.objects.create(
+            part_code="PC-1", name="PC", category=make_category("PC"),
+        )
+        PartUnit.objects.create(part_master=self.pm, serial_number="U-1", status="IN_STOCK")
+        PartUnit.objects.create(part_master=self.pm, serial_number="U-2", status="IN_STOCK")
+        PartUnit.objects.create(part_master=self.pm, serial_number="U-3", status="ASSIGNED")
+        PartUnit.objects.create(part_master=self.pm, serial_number="U-4", status="BROKEN")
+
+    def test_counts_on_list(self) -> None:
+        """一覧の annotate カウントが実数と一致することのテスト"""
+        url = reverse("bom:part-master-list")
+        row = self.client.get(url).data["results"][0]
+        self.assertEqual(row["unit_count"], 4)
+        self.assertEqual(row["in_stock_count"], 2)
+        self.assertEqual(row["broken_count"], 1)
+
+    def test_counts_on_create_response(self) -> None:
+        """作成レスポンス（未注釈）でもカウントが 0 で返ること（フォールバック）"""
+        url = reverse("bom:part-master-list")
+        resp = self.client.post(
+            url, {"part_code": "NEW-1", "name": "New", "category": make_category("PC").id}
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(resp.data["unit_count"], 0)
+
+
 class PartMasterProductRelationAPITest(APITestCase):
     """部品マスタ×製品ファミリ（ProductBOM 由来）のフィルタ・集計テスト"""
 
@@ -1085,6 +1121,59 @@ class PartUnitCategoryFilterAPITest(APITestCase):
         self.assertEqual(response.data["count"], 2)
         serials = {r["serial_number"] for r in response.data["results"]}
         self.assertEqual(serials, {"CAM-1", "CAM-2"})
+
+
+class PartUnitCurrentSetAPITest(APITestCase):
+    """部品実物の現在の搭載先セット（current_set）のテスト"""
+
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(
+            username="testuser",
+            password="testpass123",
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+        model = ProductModel.objects.create(code="M-1", name="Model")
+        customer = Customer.objects.create(code="C-1", name="AIBOD")
+        site = CustomerSite.objects.create(customer=customer, name="大名")
+        self.bss = BssSet.objects.create(
+            set_code="S-1", product_model=model, customer_site=site,
+        )
+        pm = PartMaster.objects.create(
+            part_code="PC-1", name="PC", category=make_category("PC"),
+        )
+        self.mounted = PartUnit.objects.create(
+            part_master=pm, serial_number="U-MOUNTED", status="ASSIGNED",
+        )
+        self.stock = PartUnit.objects.create(
+            part_master=pm, serial_number="U-STOCK", status="IN_STOCK",
+        )
+        # 搭載中（unmounted_at=None）
+        BssSetComponent.objects.create(
+            bss_set=self.bss, part_unit=self.mounted, role="MAIN_PC",
+        )
+        # 過去に搭載→取外し済み（current にはならない）
+        BssSetComponent.objects.create(
+            bss_set=self.bss,
+            part_unit=self.stock,
+            role="OLD",
+            unmounted_at=timezone.now(),
+        )
+
+    def test_current_set_on_mounted(self) -> None:
+        """搭載中ユニットは current_set にセット情報が載ることのテスト"""
+        url = reverse("bom:part-unit-detail", kwargs={"pk": self.mounted.pk})
+        cs = self.client.get(url).data["current_set"]
+        self.assertEqual(cs["set_code"], "S-1")
+        self.assertEqual(cs["role"], "MAIN_PC")
+        self.assertEqual(cs["site_name"], "大名")
+        self.assertEqual(cs["customer_name"], "AIBOD")
+
+    def test_current_set_none_for_stock_or_unmounted(self) -> None:
+        """在庫（取外し済み含む）は current_set が None であることのテスト"""
+        url = reverse("bom:part-unit-detail", kwargs={"pk": self.stock.pk})
+        self.assertIsNone(self.client.get(url).data["current_set"])
 
 
 class BssSetConfigAPITest(APITestCase):

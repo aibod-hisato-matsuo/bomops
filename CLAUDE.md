@@ -118,7 +118,7 @@ ruff check . && ruff format .
 | `Site` | `CustomerSite` | `lifecycle_status` 実装済み。`country`（ISO 3166-1 alpha-2・既定JP）実装済み — 納品エリアは 国→顧客(`Customer`)→拠点(`CustomerSite`) の既存関係で表現（タグ複製しない）。UIグループは正準 Configuration 層に対応する **「導入先（準静的）」**（マスタ/運用とは別の第3グループ） |
 | `SiteConfig` | `SiteConfig` | 1:1、secret系は `EncryptedTextField` で暗号化・APIマスク |
 | `DeviceSet` | `BssSet` | **UI表示名は「製品セット」**（コード識別子・API は `BssSet`/`bss-sets` のまま）。実装は `ProductModel`/`ProductBOM`（型番・レシピ層）を追加で持つ。ProductModel は **ファミリ（`ProductFamily`マスタFK・nullable）→ グレード → バリエーション → モデル** の4層分類（grade/variation は暫定的に自由文字列。整備後にマスタ昇格を検討） |
-| `Unit` | `PartUnit` | Identity = `serial_number` |
+| `Unit` | `PartUnit` | Identity = `serial_number`。件数が多いため UI は 製品→部品コード→実物一覧 のドリルダウン（`?part_master=<id>` でフレーム切替）。部品コード一覧は `PartMaster` に annotate した `unit_count`/`in_stock_count`/`broken_count` を表示 |
 | `PartMaster` | `PartMaster` | 正準の category（本体構成品/オプション品/組立部品/その他）は `part_group`（主要/周辺/組立/その他）として実装。正準の type（種別）は `category` = **`PartCategory` マスタへのFK**（画面から追加可能・使用中削除はPROTECT）。「どの製品で使うか」は旧 `used_in_ai`/`used_in_mini` フラグを廃止し **`ProductBOM` 関係から導出**（API: `used_in` / フィルタ: `used_in_model`・`used_in_family`・`used_in_grade`） |
 | `MaintenanceEvent` | `MaintenanceEvent` | 追記型（API/Adminとも更新・削除不可） |
 | `DeployEvent` | `DeployEvent` | 追記型（API/Adminとも更新・削除不可） |

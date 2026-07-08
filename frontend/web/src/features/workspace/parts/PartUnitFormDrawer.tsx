@@ -36,9 +36,11 @@ const statusOptions = [
 interface Props {
   item: PartUnit | null
   onClose: () => void
+  /** 新規作成時に部品マスタを初期選択する（実物一覧フレームからの作成用） */
+  defaultPartMasterId?: number
 }
 
-export function PartUnitFormDrawer({ item, onClose }: Props) {
+export function PartUnitFormDrawer({ item, onClose, defaultPartMasterId }: Props) {
   const toast = useToast()
   const create = useCreate<PartUnit>('/part-units/')
   const update = useUpdate<PartUnit>('/part-units/')
@@ -55,7 +57,11 @@ export function PartUnitFormDrawer({ item, onClose }: Props) {
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      part_master: item ? String(item.part_master) : '',
+      part_master: item
+        ? String(item.part_master)
+        : defaultPartMasterId
+          ? String(defaultPartMasterId)
+          : '',
       serial_number: item?.serial_number ?? '',
       status: item?.status ?? 'IN_STOCK',
       purchase_date: item?.purchase_date ?? '',

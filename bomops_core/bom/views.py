@@ -319,6 +319,18 @@ class PartMasterViewSet(viewsets.ModelViewSet):
 
     queryset = PartMaster.objects.prefetch_related(
         "bom_usages__product_model__family"
+    ).annotate(
+        unit_count=Count("units", distinct=True),
+        in_stock_count=Count(
+            "units",
+            filter=Q(units__status=PartUnit.Status.IN_STOCK),
+            distinct=True,
+        ),
+        broken_count=Count(
+            "units",
+            filter=Q(units__status=PartUnit.Status.BROKEN),
+            distinct=True,
+        ),
     )
     serializer_class = PartMasterSerializer
     filterset_class = PartMasterFilter
@@ -389,7 +401,9 @@ class PartUnitViewSet(viewsets.ModelViewSet):
     フィルタ: part_master, status, serial_number
     """
 
-    queryset = PartUnit.objects.select_related("part_master").all()
+    queryset = PartUnit.objects.select_related("part_master").prefetch_related(
+        "set_assignments__bss_set__customer_site__customer"
+    )
     serializer_class = PartUnitSerializer
     filterset_class = PartUnitFilter
     search_fields = ["serial_number"]

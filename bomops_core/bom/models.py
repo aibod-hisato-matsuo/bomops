@@ -368,6 +368,13 @@ class Customer(TimestampMixin):
         blank=True,
         verbose_name="備考",
     )
+    product_families = models.ManyToManyField(
+        ProductFamily,
+        blank=True,
+        related_name="customers",
+        verbose_name="取扱製品ファミリ（手動）",
+        help_text="契約・商談段階など設置実績がない関連の手動登録。設置実績は自動導出される",
+    )
 
     class Meta:
         db_table = "customer"

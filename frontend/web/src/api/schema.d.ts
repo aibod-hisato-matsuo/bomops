@@ -500,6 +500,26 @@ export interface paths {
         patch: operations["customers_partial_update"];
         trace?: never;
     };
+    "/api/v1/customers/product-summary/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 製品ファミリ別顧客数集計
+         * @description 設置済みセットから導出した、製品ファミリごとの顧客数を返す（一覧画面のボタン用）
+         */
+        get: operations["customers_product_summary_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/dashboard/summary/": {
         parameters: {
             query?: never;
@@ -1588,7 +1608,13 @@ export interface components {
             part_code: string;
             serial_number: string;
         };
-        /** @description 顧客シリアライザ */
+        /**
+         * @description 顧客シリアライザ
+         *
+         *     取扱製品は2系統:
+         *     - `product_families`: 手動登録（ProductFamily の ID リスト・書き込み可）
+         *     - `products`: 表示用の統合ビュー（設置実績からの導出 ∪ 手動登録・読み取り専用）
+         */
         Customer: {
             readonly id: number;
             /** 顧客コード */
@@ -1608,6 +1634,12 @@ export interface components {
             note?: string | null;
             readonly sites_count: number;
             /**
+             * 取扱製品ファミリ（手動）
+             * @description 契約・商談段階など設置実績がない関連の手動登録。設置実績は自動導出される
+             */
+            product_families?: number[];
+            readonly products: components["schemas"]["CustomerProduct"][];
+            /**
              * 作成日時
              * Format: date-time
              */
@@ -1618,7 +1650,24 @@ export interface components {
              */
             readonly updated_at: string;
         };
-        /** @description 顧客シリアライザ */
+        /** @description 顧客: 取扱製品1件（実績/手動の由来付き・読み取り専用） */
+        CustomerProduct: {
+            name: string;
+            installed: boolean;
+            manual: boolean;
+        };
+        /** @description 顧客: 製品ファミリ別の顧客数集計（読み取り専用） */
+        CustomerProductSummary: {
+            family: string;
+            count: number;
+        };
+        /**
+         * @description 顧客シリアライザ
+         *
+         *     取扱製品は2系統:
+         *     - `product_families`: 手動登録（ProductFamily の ID リスト・書き込み可）
+         *     - `products`: 表示用の統合ビュー（設置実績からの導出 ∪ 手動登録・読み取り専用）
+         */
         CustomerRequest: {
             /** 顧客コード */
             code: string;
@@ -1635,6 +1684,11 @@ export interface components {
             contact_tel?: string | null;
             /** 備考 */
             note?: string | null;
+            /**
+             * 取扱製品ファミリ（手動）
+             * @description 契約・商談段階など設置実績がない関連の手動登録。設置実績は自動導出される
+             */
+            product_families?: number[];
         };
         /** @description 顧客拠点シリアライザ */
         CustomerSite: {
@@ -1995,6 +2049,21 @@ export interface components {
              */
             previous?: string | null;
             results: components["schemas"]["Customer"][];
+        };
+        PaginatedCustomerProductSummaryList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["CustomerProductSummary"][];
         };
         PaginatedCustomerSiteList: {
             /** @example 123 */
@@ -2515,7 +2584,13 @@ export interface components {
             /** 備考 */
             note?: string | null;
         };
-        /** @description 顧客シリアライザ */
+        /**
+         * @description 顧客シリアライザ
+         *
+         *     取扱製品は2系統:
+         *     - `product_families`: 手動登録（ProductFamily の ID リスト・書き込み可）
+         *     - `products`: 表示用の統合ビュー（設置実績からの導出 ∪ 手動登録・読み取り専用）
+         */
         PatchedCustomerRequest: {
             /** 顧客コード */
             code?: string;
@@ -2532,6 +2607,11 @@ export interface components {
             contact_tel?: string | null;
             /** 備考 */
             note?: string | null;
+            /**
+             * 取扱製品ファミリ（手動）
+             * @description 契約・商談段階など設置実績がない関連の手動登録。設置実績は自動導出される
+             */
+            product_families?: number[];
         };
         /** @description 顧客拠点シリアライザ */
         PatchedCustomerSiteRequest: {
@@ -3819,6 +3899,7 @@ export interface operations {
                 page?: number;
                 /** @description Number of results to return per page. */
                 page_size?: number;
+                product_family?: string;
                 /** @description A search term. */
                 search?: string;
             };
@@ -3958,6 +4039,35 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Customer"];
+                };
+            };
+        };
+    };
+    customers_product_summary_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                product_family?: string;
+                /** @description A search term. */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCustomerProductSummaryList"];
                 };
             };
         };

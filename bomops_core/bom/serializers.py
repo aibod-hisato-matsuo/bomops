@@ -6,6 +6,7 @@ Django REST Frameworkのシリアライザを定義。
 
 from typing import Any
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from .models import (
@@ -248,13 +249,50 @@ class ProductBOMSerializer(serializers.ModelSerializer):
 # =============================================================================
 
 
+class CustomerProductSummarySerializer(serializers.Serializer):
+    """顧客: 製品ファミリ別の顧客数集計（読み取り専用）"""
+
+    family = serializers.CharField()
+    count = serializers.IntegerField()
+
+
+class CustomerProductSerializer(serializers.Serializer):
+    """顧客: 取扱製品1件（実績/手動の由来付き・読み取り専用）"""
+
+    name = serializers.CharField()
+    installed = serializers.BooleanField()
+    manual = serializers.BooleanField()
+
+
 class CustomerSerializer(serializers.ModelSerializer):
-    """顧客シリアライザ"""
+    """顧客シリアライザ
+
+    取扱製品は2系統:
+    - `product_families`: 手動登録（ProductFamily の ID リスト・書き込み可）
+    - `products`: 表示用の統合ビュー（設置実績からの導出 ∪ 手動登録・読み取り専用）
+    """
 
     sites_count = serializers.IntegerField(
         source="sites.count",
         read_only=True,
     )
+    products = serializers.SerializerMethodField()
+
+    @extend_schema_field(CustomerProductSerializer(many=True))
+    def get_products(self, obj: Customer) -> list[dict]:
+        """設置実績と手動登録を統合した取扱製品リスト"""
+        installed = set(
+            ProductFamily.objects.filter(
+                product_models__sets__customer_site__customer=obj
+            )
+            .values_list("name", flat=True)
+            .distinct()
+        )
+        manual = set(obj.product_families.values_list("name", flat=True))
+        return [
+            {"name": name, "installed": name in installed, "manual": name in manual}
+            for name in sorted(installed | manual)
+        ]
 
     class Meta:
         model = Customer
@@ -267,6 +305,8 @@ class CustomerSerializer(serializers.ModelSerializer):
             "contact_tel",
             "note",
             "sites_count",
+            "product_families",
+            "products",
             "created_at",
             "updated_at",
         ]

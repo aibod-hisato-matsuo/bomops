@@ -1217,6 +1217,10 @@ paths:
         description: Number of results to return per page.
         schema:
           type: integer
+      - in: query
+        name: product_family
+        schema:
+          type: string
       - name: search
         required: false
         in: query
@@ -1395,6 +1399,52 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/customers/product-summary/:
+    get:
+      operationId: customers_product_summary_list
+      description: 設置済みセットから導出した、製品ファミリごとの顧客数を返す（一覧画面のボタン用）
+      summary: 製品ファミリ別顧客数集計
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: product_family
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 顧客
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCustomerProductSummaryList'
+          description: ''
   /api/v1/dashboard/summary/:
     get:
       operationId: dashboard_summary_retrieve
@@ -4070,7 +4120,12 @@ components:
       - serial_number
     Customer:
       type: object
-      description: 顧客シリアライザ
+      description: |-
+        顧客シリアライザ
+
+        取扱製品は2系統:
+        - `product_families`: 手動登録（ProductFamily の ID リスト・書き込み可）
+        - `products`: 表示用の統合ビュー（設置実績からの導出 ∪ 手動登録・読み取り専用）
       properties:
         id:
           type: integer
@@ -4106,6 +4161,18 @@ components:
         sites_count:
           type: integer
           readOnly: true
+        product_families:
+          type: array
+          items:
+            type: integer
+            title: 取扱製品ファミリ（手動）
+          title: 取扱製品ファミリ（手動）
+          description: 契約・商談段階など設置実績がない関連の手動登録。設置実績は自動導出される
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerProduct'
+          readOnly: true
         created_at:
           type: string
           format: date-time
@@ -4121,11 +4188,42 @@ components:
       - created_at
       - id
       - name
+      - products
       - sites_count
       - updated_at
+    CustomerProduct:
+      type: object
+      description: '顧客: 取扱製品1件（実績/手動の由来付き・読み取り専用）'
+      properties:
+        name:
+          type: string
+        installed:
+          type: boolean
+        manual:
+          type: boolean
+      required:
+      - installed
+      - manual
+      - name
+    CustomerProductSummary:
+      type: object
+      description: '顧客: 製品ファミリ別の顧客数集計（読み取り専用）'
+      properties:
+        family:
+          type: string
+        count:
+          type: integer
+      required:
+      - count
+      - family
     CustomerRequest:
       type: object
-      description: 顧客シリアライザ
+      description: |-
+        顧客シリアライザ
+
+        取扱製品は2系統:
+        - `product_families`: 手動登録（ProductFamily の ID リスト・書き込み可）
+        - `products`: 表示用の統合ビュー（設置実績からの導出 ∪ 手動登録・読み取り専用）
       properties:
         code:
           type: string
@@ -4157,6 +4255,13 @@ components:
           type: string
           nullable: true
           title: 備考
+        product_families:
+          type: array
+          items:
+            type: integer
+            title: 取扱製品ファミリ（手動）
+          title: 取扱製品ファミリ（手動）
+          description: 契約・商談段階など設置実績がない関連の手動登録。設置実績は自動導出される
       required:
       - code
       - name
@@ -4804,6 +4909,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Customer'
+    PaginatedCustomerProductSummaryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerProductSummary'
     PaginatedCustomerSiteList:
       type: object
       required:
@@ -5637,7 +5765,12 @@ components:
           title: 備考
     PatchedCustomerRequest:
       type: object
-      description: 顧客シリアライザ
+      description: |-
+        顧客シリアライザ
+
+        取扱製品は2系統:
+        - `product_families`: 手動登録（ProductFamily の ID リスト・書き込み可）
+        - `products`: 表示用の統合ビュー（設置実績からの導出 ∪ 手動登録・読み取り専用）
       properties:
         code:
           type: string
@@ -5669,6 +5802,13 @@ components:
           type: string
           nullable: true
           title: 備考
+        product_families:
+          type: array
+          items:
+            type: integer
+            title: 取扱製品ファミリ（手動）
+          title: 取扱製品ファミリ（手動）
+          description: 契約・商談段階など設置実績がない関連の手動登録。設置実績は自動導出される
     PatchedCustomerSiteRequest:
       type: object
       description: 顧客拠点シリアライザ

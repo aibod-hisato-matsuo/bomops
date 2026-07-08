@@ -7,11 +7,16 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { useList } from '../../../api/hooks'
-import type { Customer, CustomerSite } from '../../../api/types'
+import { useGet, useList } from '../../../api/hooks'
+import type {
+  Customer,
+  CustomerProductSummary,
+  CustomerSite,
+} from '../../../api/types'
 import { Badge } from '../../../components/Badge'
 import { lifecycleStatusVariant } from '../../../components/badge-variants'
 import { Button } from '../../../components/Button'
+import { CascadeRow } from '../../../components/CascadeRow'
 import { DataTable, type Column } from '../../../components/DataTable'
 import { FilterBar, SearchInput, SelectFilter } from '../../../components/FilterBar'
 import { PageHeader } from '../../../components/PageHeader'
@@ -25,6 +30,22 @@ import { SiteFormDrawer } from './SiteFormDrawer'
 const customerColumns: Column<Customer>[] = [
   { key: 'code', header: '顧客コード', render: (r) => r.code },
   { key: 'name', header: '顧客名', render: (r) => r.name },
+  {
+    key: 'products',
+    header: '取扱製品',
+    render: (r) =>
+      r.products.length === 0 ? (
+        '-'
+      ) : (
+        <>
+          {r.products.map((p) => (
+            <span key={p.name} title={p.installed ? '設置実績あり' : '手動登録（実績なし）'}>
+              <Badge variant={p.installed ? 'sky' : 'pale'}>{p.name}</Badge>{' '}
+            </span>
+          ))}
+        </>
+      ),
+  },
   { key: 'contact_person', header: '担当者', render: (r) => r.contact_person ?? '-' },
   { key: 'contact_email', header: 'メール', render: (r) => r.contact_email ?? '-' },
   { key: 'sites_count', header: '拠点数', render: (r) => r.sites_count },
@@ -50,6 +71,17 @@ export function CustomersPage() {
 
   const [editingCustomer, setEditingCustomer] = useState<Customer | 'new' | null>(null)
   const [editingSite, setEditingSite] = useState<CustomerSite | 'new' | null>(null)
+
+  // 製品ファミリ別の顧客数（設置実績からの導出）
+  const productSummary = useGet<CustomerProductSummary[]>(
+    '/customers/product-summary/',
+  )
+  const productOptions = (productSummary.data ?? []).map((r) => ({
+    value: r.family,
+    label: r.family,
+    count: r.count,
+  }))
+  const customerTotal = useList<Customer>('/customers/', { page_size: 1 })
 
   const siteColumns: Column<CustomerSite>[] = [
     { key: 'name', header: '拠点名', render: (r) => r.name },
@@ -105,6 +137,16 @@ export function CustomersPage() {
         active={tab}
         onChange={(key) => setFilter('tab', key)}
       />
+
+      {tab === 'customers' && productOptions.length > 0 && (
+        <CascadeRow
+          label="製品:"
+          options={productOptions}
+          active={getFilter('product_family')}
+          allCount={customerTotal.data?.count}
+          onChange={(v) => setFilter('product_family', v)}
+        />
+      )}
 
       <FilterBar>
         <SearchInput

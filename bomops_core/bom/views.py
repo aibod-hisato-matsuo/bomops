@@ -7,7 +7,7 @@ Django REST FrameworkのViewSetとカスタムAPIビューを定義。
 from datetime import datetime, time
 from typing import Any
 
-from django.db.models import Count, QuerySet
+from django.db.models import Count, Q, QuerySet
 from django.utils import timezone
 from django_filters import rest_framework as django_filters
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
@@ -47,6 +47,7 @@ from .serializers import (
     EffectiveConfigSerializer,
     EquipmentRefSerializer,
     LookupBySerialSerializer,
+    CustomerProductSummarySerializer,
     MaintenanceEventSerializer,
     PartCategorySerializer,
     PartMasterCategorySummarySerializer,
@@ -131,6 +132,23 @@ class ProductBOMFilter(django_filters.FilterSet):
     class Meta:
         model = ProductBOM
         fields = ["product_model", "part_master"]
+
+
+class CustomerFilter(django_filters.FilterSet):
+    """顧客用フィルタ"""
+
+    product_family = django_filters.CharFilter(method="filter_product_family")
+
+    def filter_product_family(self, queryset, name, value):
+        """取扱製品フィルタ（設置実績 ∪ 手動登録）"""
+        return queryset.filter(
+            Q(sites__sets__product_model__family__name=value)
+            | Q(product_families__name=value)
+        ).distinct()
+
+    class Meta:
+        model = Customer
+        fields = ["product_family"]
 
 
 class CustomerSiteFilter(django_filters.FilterSet):
@@ -538,8 +556,34 @@ class CustomerViewSet(viewsets.ModelViewSet):
 
     queryset = Customer.objects.prefetch_related("sites").all()
     serializer_class = CustomerSerializer
+    filterset_class = CustomerFilter
     search_fields = ["name", "code"]
     ordering_fields = ["code", "name", "created_at"]
+
+    @extend_schema(
+        summary="製品ファミリ別顧客数集計",
+        description="設置済みセットから導出した、製品ファミリごとの顧客数を返す（一覧画面のボタン用）",
+        responses={200: CustomerProductSummarySerializer(many=True)},
+        tags=["顧客"],
+    )
+    @action(detail=False, methods=["get"], url_path="product-summary")
+    def product_summary(self, request: Request) -> Response:
+        """製品ファミリ×顧客数の集計API（設置実績 ∪ 手動登録）"""
+        data = []
+        for family in ProductFamily.objects.all():
+            count = (
+                Customer.objects.filter(
+                    Q(sites__sets__product_model__family=family)
+                    | Q(product_families=family)
+                )
+                .distinct()
+                .count()
+            )
+            if count > 0:
+                data.append({"family": family.name, "count": count})
+        data.sort(key=lambda r: (-r["count"], r["family"]))
+        serializer = CustomerProductSummarySerializer(data, many=True)
+        return Response(serializer.data)
 
 
 @extend_schema_view(

@@ -17,6 +17,27 @@
   box-shadow: var(--shadow);
   animation: fadeIn 0.15s ease-out;
   max-width: 360px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.action {
+  flex-shrink: 0;
+  padding: 4px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--aibod-white);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.action:hover {
+  background: rgba(255, 255, 255, 0.28);
 }
 
 @keyframes fadeIn {

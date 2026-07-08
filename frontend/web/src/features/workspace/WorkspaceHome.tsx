@@ -78,6 +78,22 @@ export function WorkspaceHome() {
         description="データの関係マップ — カードをクリックで各一覧へ"
       />
 
+      {/* ===== 新規作成ランチャー（タスク入口を1箇所に集約） ===== */}
+      <div className={styles.launcher}>
+        <span className={styles.launcherLabel}>新規作成</span>
+        {[
+          { to: '/workspace/product-models?new=1', label: '製品モデルを追加' },
+          { to: '/workspace/part-masters?new=1', label: '部品を追加' },
+          { to: '/workspace/sets?new=1', label: '製品セットを設置' },
+          { to: '/workspace/customers?tab=customers&new=1', label: '顧客を追加' },
+          { to: '/workspace/customers?tab=sites&new=1', label: '拠点を開設' },
+        ].map((t) => (
+          <Link key={t.to} to={t.to} className={styles.launcherButton}>
+            ＋ {t.label}
+          </Link>
+        ))}
+      </div>
+
       <div className={styles.map}>
         {/* ===== マスタ層（静的）: 製品モデルが起点（BOMで部品を参照） ===== */}
         <section className={`${styles.band} ${styles.bandMaster}`}>

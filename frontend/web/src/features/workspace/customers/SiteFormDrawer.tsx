@@ -12,7 +12,7 @@ import type { Customer, CustomerSite } from '../../../api/types'
 import { Button } from '../../../components/Button'
 import { Drawer } from '../../../components/Drawer'
 import { Field, Select, TextArea, TextInput } from '../../../components/form/Field'
-import { useToast } from '../../../components/toast/toast-context'
+import { useToast, type ToastAction } from '../../../components/toast/toast-context'
 import { applyServerErrors, cleanPayload } from '../../../lib/form-utils'
 
 const schema = z.object({
@@ -40,9 +40,19 @@ interface Props {
   onClose: () => void
   /** 新規作成成功時に、作成された拠点を呼び出し元へ返す（インライン作成用） */
   onCreated?: (created: CustomerSite) => void
+  /** 新規作成時に顧客を初期選択する（次の一手用） */
+  defaultCustomerId?: number
+  /** 新規作成成功時に「次の一手」トーストへ添えるアクションを返す */
+  successAction?: (created: CustomerSite) => ToastAction | undefined
 }
 
-export function SiteFormDrawer({ item, onClose, onCreated }: Props) {
+export function SiteFormDrawer({
+  item,
+  onClose,
+  onCreated,
+  defaultCustomerId,
+  successAction,
+}: Props) {
   const toast = useToast()
   const create = useCreate<CustomerSite>('/customer-sites/')
   const update = useUpdate<CustomerSite>('/customer-sites/')
@@ -56,7 +66,11 @@ export function SiteFormDrawer({ item, onClose, onCreated }: Props) {
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      customer: item ? String(item.customer) : '',
+      customer: item
+        ? String(item.customer)
+        : defaultCustomerId
+          ? String(defaultCustomerId)
+          : '',
       name: item?.name ?? '',
       lifecycle_status: item?.lifecycle_status ?? 'PREPARING',
       country: item?.country ?? 'JP',
@@ -78,7 +92,7 @@ export function SiteFormDrawer({ item, onClose, onCreated }: Props) {
         toast.success('拠点を更新しました')
       } else {
         const created = await create.mutateAsync(payload)
-        toast.success('拠点を作成しました')
+        toast.success('拠点を作成しました', successAction?.(created))
         onCreated?.(created)
       }
       onClose()

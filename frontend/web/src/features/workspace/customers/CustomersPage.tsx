@@ -23,6 +23,7 @@ import { PageHeader } from '../../../components/PageHeader'
 import { Pagination } from '../../../components/Pagination'
 import { Tabs } from '../../../components/Tabs'
 import { useListParams } from '../../../hooks/useListParams'
+import { useNewParam } from '../../../hooks/useNewParam'
 import { useSearchFilter } from '../shared/useSearchFilter'
 import { CustomerFormDrawer } from './CustomerFormDrawer'
 import { SiteFormDrawer } from './SiteFormDrawer'
@@ -71,6 +72,13 @@ export function CustomersPage() {
 
   const [editingCustomer, setEditingCustomer] = useState<Customer | 'new' | null>(null)
   const [editingSite, setEditingSite] = useState<CustomerSite | 'new' | null>(null)
+  // 「この顧客で拠点を追加」から来たとき、拠点フォームに顧客を初期選択する
+  const [siteDraftCustomerId, setSiteDraftCustomerId] = useState<number | undefined>()
+
+  // ランチャー ?new=1 → タブに応じた作成ドロワーを開く
+  useNewParam(() =>
+    tab === 'sites' ? setEditingSite('new') : setEditingCustomer('new'),
+  )
 
   // 製品ファミリ別の集計（設置実績からの導出）。顧客タブ・拠点タブで別集計
   const customerProductSummary = useGet<CustomerProductSummary[]>(
@@ -212,12 +220,29 @@ export function CustomersPage() {
         <CustomerFormDrawer
           item={editingCustomer === 'new' ? null : editingCustomer}
           onClose={() => setEditingCustomer(null)}
+          successAction={(created) => ({
+            label: 'この顧客で拠点を追加',
+            onClick: () => {
+              setSiteDraftCustomerId(created.id)
+              setEditingSite('new')
+            },
+          })}
         />
       )}
       {editingSite && (
         <SiteFormDrawer
           item={editingSite === 'new' ? null : editingSite}
-          onClose={() => setEditingSite(null)}
+          defaultCustomerId={
+            editingSite === 'new' ? siteDraftCustomerId : undefined
+          }
+          onClose={() => {
+            setEditingSite(null)
+            setSiteDraftCustomerId(undefined)
+          }}
+          successAction={(created) => ({
+            label: 'この拠点にセットを設置',
+            onClick: () => navigate(`/workspace/sets?new=1&site=${created.id}`),
+          })}
         />
       )}
     </div>

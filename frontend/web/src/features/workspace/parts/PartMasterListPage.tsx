@@ -23,6 +23,7 @@ import { FilterBar, SearchInput, SelectFilter } from '../../../components/Filter
 import { PageHeader } from '../../../components/PageHeader'
 import { Pagination } from '../../../components/Pagination'
 import { useListParams } from '../../../hooks/useListParams'
+import { useNewParam } from '../../../hooks/useNewParam'
 import { useSearchFilter } from '../shared/useSearchFilter'
 import { PartMasterFormDrawer } from './PartMasterFormDrawer'
 import styles from './PartMasterListPage.module.css'
@@ -100,6 +101,7 @@ export function PartMasterListPage() {
   const { text, setText } = useSearchFilter(getFilter, setFilter)
   const { data, isPending } = useList<PartMaster>('/part-masters/', params)
   const [editing, setEditing] = useState<PartMaster | 'new' | null>(null)
+  useNewParam(() => setEditing('new'))
 
   // グループ×カテゴリの件数集計（グループボタン・カテゴリボタン両方の件数に使う）
   const summary = useGet<PartMasterCategorySummary[]>(

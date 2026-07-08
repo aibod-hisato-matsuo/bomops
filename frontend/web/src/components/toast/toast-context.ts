@@ -4,9 +4,15 @@
 
 import { createContext, useContext } from 'react'
 
+/** トーストに添えるアクション（「次の一手」導線用） */
+export interface ToastAction {
+  label: string
+  onClick: () => void
+}
+
 export interface ToastApi {
-  success: (message: string) => void
-  error: (message: string) => void
+  success: (message: string, action?: ToastAction) => void
+  error: (message: string, action?: ToastAction) => void
 }
 
 export const ToastContext = createContext<ToastApi | null>(null)

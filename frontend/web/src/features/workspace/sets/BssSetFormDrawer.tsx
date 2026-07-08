@@ -46,10 +46,12 @@ const statusOptions = [
 
 interface Props {
   item: BssSet | null
+  /** 新規作成時に設置拠点を初期選択する（次の一手・ランチャー用） */
+  defaultSiteId?: number
   onClose: () => void
 }
 
-export function BssSetFormDrawer({ item, onClose }: Props) {
+export function BssSetFormDrawer({ item, defaultSiteId, onClose }: Props) {
   const toast = useToast()
   const create = useCreate<BssSet>('/bss-sets/')
   const update = useUpdate<BssSet>('/bss-sets/')
@@ -73,7 +75,11 @@ export function BssSetFormDrawer({ item, onClose }: Props) {
       set_code: item?.set_code ?? '',
       product_model: item ? String(item.product_model) : '',
       status: item?.status ?? 'ASSEMBLED',
-      customer_site: item?.customer_site ? String(item.customer_site) : '',
+      customer_site: item?.customer_site
+        ? String(item.customer_site)
+        : defaultSiteId
+          ? String(defaultSiteId)
+          : '',
       installed_at: isoToDtLocal(item?.installed_at),
       removed_at: isoToDtLocal(item?.removed_at),
       note: item?.note ?? '',

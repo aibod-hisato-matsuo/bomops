@@ -16,6 +16,7 @@ import { FilterBar, SearchInput, SelectFilter } from '../../../components/Filter
 import { PageHeader } from '../../../components/PageHeader'
 import { Pagination } from '../../../components/Pagination'
 import { useListParams } from '../../../hooks/useListParams'
+import { useNewParam } from '../../../hooks/useNewParam'
 import { useSearchFilter } from '../shared/useSearchFilter'
 import { BssSetFormDrawer } from './BssSetFormDrawer'
 
@@ -57,6 +58,9 @@ export function BssSetListPage() {
   const { text, setText } = useSearchFilter(getFilter, setFilter)
   const { data, isPending } = useList<BssSet>('/bss-sets/', params)
   const [creating, setCreating] = useState(false)
+  // ランチャー/次の一手から ?new=1&site=<id> で来たら作成ドロワーを拠点付きで開く
+  const draftSiteId = getFilter('site')
+  useNewParam(() => setCreating(true))
 
   // 納品先（国×顧客×拠点）の件数集計
   const summary = useGet<BssSetLocationSummary[]>('/bss-sets/location-summary/')
@@ -175,7 +179,13 @@ export function BssSetListPage() {
       />
       <Pagination count={data?.count} page={page} onPageChange={setPage} />
 
-      {creating && <BssSetFormDrawer item={null} onClose={() => setCreating(false)} />}
+      {creating && (
+        <BssSetFormDrawer
+          item={null}
+          defaultSiteId={draftSiteId ? Number(draftSiteId) : undefined}
+          onClose={() => setCreating(false)}
+        />
+      )}
     </div>
   )
 }

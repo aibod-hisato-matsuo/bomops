@@ -17,7 +17,7 @@ import {
   TextArea,
   TextInput,
 } from '../../../components/form/Field'
-import { useToast } from '../../../components/toast/toast-context'
+import { useToast, type ToastAction } from '../../../components/toast/toast-context'
 import { applyServerErrors, cleanPayload } from '../../../lib/form-utils'
 
 const schema = z.object({
@@ -35,9 +35,11 @@ type FormValues = z.infer<typeof schema>
 interface Props {
   item: Customer | null
   onClose: () => void
+  /** 新規作成成功時に「次の一手」トーストへ添えるアクションを返す */
+  successAction?: (created: Customer) => ToastAction | undefined
 }
 
-export function CustomerFormDrawer({ item, onClose }: Props) {
+export function CustomerFormDrawer({ item, onClose, successAction }: Props) {
   const toast = useToast()
   const create = useCreate<Customer>('/customers/')
   const update = useUpdate<Customer>('/customers/')
@@ -73,8 +75,8 @@ export function CustomerFormDrawer({ item, onClose }: Props) {
         await update.mutateAsync({ id: item.id, payload })
         toast.success('顧客を更新しました')
       } else {
-        await create.mutateAsync(payload)
-        toast.success('顧客を作成しました')
+        const created = await create.mutateAsync(payload)
+        toast.success('顧客を作成しました', successAction?.(created))
       }
       onClose()
     } catch (err) {

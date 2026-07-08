@@ -20,6 +20,7 @@ import { FilterBar, SearchInput } from '../../../components/FilterBar'
 import { PageHeader } from '../../../components/PageHeader'
 import { Pagination } from '../../../components/Pagination'
 import { useListParams } from '../../../hooks/useListParams'
+import { useNewParam } from '../../../hooks/useNewParam'
 import { useSearchFilter } from '../shared/useSearchFilter'
 import { ProductModelFormDrawer } from './ProductModelFormDrawer'
 
@@ -57,6 +58,7 @@ export function ProductModelListPage() {
   const { text, setText } = useSearchFilter(getFilter, setFilter)
   const { data, isPending } = useList<ProductModel>('/product-models/', params)
   const [creating, setCreating] = useState(false)
+  useNewParam(() => setCreating(true))
 
   const summary = useGet<ProductModelHierarchySummary[]>(
     '/product-models/hierarchy-summary/',

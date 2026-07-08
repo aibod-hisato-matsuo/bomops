@@ -1,5 +1,7 @@
 /**
  * 製品モデル詳細（W-4）— 基本情報とBOM構成表の編集
+ *
+ * BOM行は 行クリックで編集、操作列から複製・削除できる。
  */
 
 import { useState } from 'react'
@@ -17,6 +19,13 @@ import { useToast } from '../../../components/toast/toast-context'
 import { BomLineFormDrawer } from './BomLineFormDrawer'
 import { ProductModelFormDrawer } from './ProductModelFormDrawer'
 
+/** BOM行ドロワーの状態: 新規 / 編集 / 複製 */
+type BomLineDrawerState =
+  | { mode: 'create' }
+  | { mode: 'edit'; line: ProductBOM }
+  | { mode: 'duplicate'; line: ProductBOM }
+  | null
+
 export function ProductModelDetailPage() {
   const { id } = useParams()
   const toast = useToast()
@@ -27,7 +36,7 @@ export function ProductModelDetailPage() {
   })
   const deleteBomLine = useDelete('/product-boms/')
   const [editing, setEditing] = useState(false)
-  const [addingBomLine, setAddingBomLine] = useState(false)
+  const [bomDrawer, setBomDrawer] = useState<BomLineDrawerState>(null)
 
   const handleDeleteBomLine = async (line: ProductBOM) => {
     if (!window.confirm(`BOM行「${line.part_master_code}」を削除しますか？`)) return
@@ -57,11 +66,40 @@ export function ProductModelDetailPage() {
     {
       key: 'actions',
       header: '操作',
-      width: '80px',
+      width: '200px',
       render: (r) => (
-        <Button variant="danger" size="sm" onClick={() => handleDeleteBomLine(r)}>
-          削除
-        </Button>
+        <>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation()
+              setBomDrawer({ mode: 'edit', line: r })
+            }}
+          >
+            編集
+          </Button>{' '}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation()
+              setBomDrawer({ mode: 'duplicate', line: r })
+            }}
+          >
+            複製
+          </Button>{' '}
+          <Button
+            variant="danger"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleDeleteBomLine(r)
+            }}
+          >
+            削除
+          </Button>
+        </>
       ),
     },
   ]
@@ -89,6 +127,9 @@ export function ProductModelDetailPage() {
             items={[
               { label: '製品コード', value: model.code },
               { label: '製品名', value: model.name },
+              { label: 'ファミリ', value: model.family_name },
+              { label: 'グレード', value: model.grade },
+              { label: 'バリエーション', value: model.variation },
               { label: '説明', value: model.description },
               { label: '作成日時', value: model.created_at },
             ]}
@@ -98,7 +139,7 @@ export function ProductModelDetailPage() {
 
       <Section title="BOM構成表">
         <div style={{ marginBottom: 10 }}>
-          <Button size="sm" onClick={() => setAddingBomLine(true)}>
+          <Button size="sm" onClick={() => setBomDrawer({ mode: 'create' })}>
             BOM行を追加
           </Button>
         </div>
@@ -106,6 +147,7 @@ export function ProductModelDetailPage() {
           columns={bomColumns}
           rows={bom?.results}
           rowKey={(r) => r.id}
+          onRowClick={(r) => setBomDrawer({ mode: 'edit', line: r })}
           emptyText="BOMが未定義です"
         />
       </Section>
@@ -113,10 +155,12 @@ export function ProductModelDetailPage() {
       {editing && model && (
         <ProductModelFormDrawer item={model} onClose={() => setEditing(false)} />
       )}
-      {addingBomLine && model && (
+      {bomDrawer && model && (
         <BomLineFormDrawer
           productModelId={model.id}
-          onClose={() => setAddingBomLine(false)}
+          item={bomDrawer.mode === 'create' ? null : bomDrawer.line}
+          duplicate={bomDrawer.mode === 'duplicate'}
+          onClose={() => setBomDrawer(null)}
         />
       )}
     </div>

@@ -72,20 +72,45 @@ export function CustomersPage() {
   const [editingCustomer, setEditingCustomer] = useState<Customer | 'new' | null>(null)
   const [editingSite, setEditingSite] = useState<CustomerSite | 'new' | null>(null)
 
-  // 製品ファミリ別の顧客数（設置実績からの導出）
-  const productSummary = useGet<CustomerProductSummary[]>(
+  // 製品ファミリ別の集計（設置実績からの導出）。顧客タブ・拠点タブで別集計
+  const customerProductSummary = useGet<CustomerProductSummary[]>(
     '/customers/product-summary/',
   )
-  const productOptions = (productSummary.data ?? []).map((r) => ({
-    value: r.family,
-    label: r.family,
-    count: r.count,
-  }))
+  const siteProductSummary = useGet<CustomerProductSummary[]>(
+    '/customer-sites/product-summary/',
+  )
   const customerTotal = useList<Customer>('/customers/', { page_size: 1 })
+  const siteTotal = useList<CustomerSite>('/customer-sites/', { page_size: 1 })
+
+  const toOptions = (rows: CustomerProductSummary[] | undefined) =>
+    (rows ?? []).map((r) => ({ value: r.family, label: r.family, count: r.count }))
+
+  const productOptions =
+    tab === 'customers'
+      ? toOptions(customerProductSummary.data)
+      : toOptions(siteProductSummary.data)
+  const productTotalCount =
+    tab === 'customers' ? customerTotal.data?.count : siteTotal.data?.count
 
   const siteColumns: Column<CustomerSite>[] = [
     { key: 'name', header: '拠点名', render: (r) => r.name },
     { key: 'customer_name', header: '顧客', render: (r) => r.customer_name },
+    {
+      key: 'products',
+      header: '設置製品',
+      render: (r) =>
+        r.products.length === 0 ? (
+          '-'
+        ) : (
+          <>
+            {r.products.map((name) => (
+              <span key={name}>
+                <Badge variant="sky">{name}</Badge>{' '}
+              </span>
+            ))}
+          </>
+        ),
+    },
     {
       key: 'lifecycle_status',
       header: '状態',
@@ -138,12 +163,12 @@ export function CustomersPage() {
         onChange={(key) => setFilter('tab', key)}
       />
 
-      {tab === 'customers' && productOptions.length > 0 && (
+      {productOptions.length > 0 && (
         <CascadeRow
           label="製品:"
           options={productOptions}
           active={getFilter('product_family')}
-          allCount={customerTotal.data?.count}
+          allCount={productTotalCount}
           onChange={(v) => setFilter('product_family', v)}
         />
       )}

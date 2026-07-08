@@ -668,6 +668,71 @@ class CustomerProductRelationAPITest(APITestCase):
         self.assertEqual(response.data["count"], 2)
 
 
+class SiteProductRelationAPITest(APITestCase):
+    """拠点×製品ファミリ（設置実績からの導出）のテスト"""
+
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(
+            username="testuser",
+            password="testpass123",
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+        from .models import ProductFamily
+
+        baiten, _ = ProductFamily.objects.get_or_create(name="BAITEN STAND")
+        riscv, _ = ProductFamily.objects.get_or_create(name="RISC-V Board")
+        m_baiten = ProductModel.objects.create(code="B-1", name="B", family=baiten)
+        m_riscv = ProductModel.objects.create(code="R-1", name="R", family=riscv)
+
+        cust = Customer.objects.create(code="C-1", name="AIBOD")
+        # 大名: BAITEN+RISC-V / 工場: BAITEN のみ / 準備中: 設置なし
+        self.site_multi = CustomerSite.objects.create(customer=cust, name="大名")
+        self.site_baiten = CustomerSite.objects.create(customer=cust, name="工場")
+        self.site_empty = CustomerSite.objects.create(customer=cust, name="準備中")
+        BssSet.objects.create(
+            set_code="S-1", product_model=m_baiten, customer_site=self.site_multi
+        )
+        BssSet.objects.create(
+            set_code="S-2", product_model=m_riscv, customer_site=self.site_multi
+        )
+        BssSet.objects.create(
+            set_code="S-3", product_model=m_baiten, customer_site=self.site_baiten
+        )
+
+    def test_products_derived_on_site(self) -> None:
+        """拠点APIに設置実績由来の products（名前リスト）が載ることのテスト"""
+        url = reverse("bom:customer-site-detail", kwargs={"pk": self.site_multi.pk})
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["products"], ["BAITEN STAND", "RISC-V Board"])
+
+        url = reverse("bom:customer-site-detail", kwargs={"pk": self.site_empty.pk})
+        self.assertEqual(self.client.get(url).data["products"], [])
+
+    def test_product_summary(self) -> None:
+        """製品ファミリ別拠点数集計のテスト"""
+        url = reverse("bom:customer-site-product-summary")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        rows = {r["family"]: r["count"] for r in response.data}
+        self.assertEqual(rows["BAITEN STAND"], 2)  # 大名 + 工場
+        self.assertEqual(rows["RISC-V Board"], 1)  # 大名のみ
+
+    def test_filter_by_product_family(self) -> None:
+        """product_family フィルタのテスト（重複行が出ないこと）"""
+        url = reverse("bom:customer-site-list")
+        response = self.client.get(url, {"product_family": "BAITEN STAND"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        names = sorted(r["name"] for r in response.data["results"])
+        self.assertEqual(names, ["大名", "工場"])
+        self.assertEqual(response.data["count"], 2)
+
+
 class ProductHierarchyAPITest(APITestCase):
     """製品ファミリ・階層集計APIのテスト"""
 

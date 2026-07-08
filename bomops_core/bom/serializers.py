@@ -314,7 +314,12 @@ class CustomerSerializer(serializers.ModelSerializer):
 
 
 class CustomerSiteSerializer(serializers.ModelSerializer):
-    """顧客拠点シリアライザ"""
+    """顧客拠点シリアライザ
+
+    `products` は設置済みセットから導出した製品ファミリ名（読み取り専用）。
+    拠点は物理的な場所であり「何が設置されているか」は実績から一意に決まるため、
+    顧客のような手動登録は持たない。
+    """
 
     customer_name = serializers.CharField(
         source="customer.name",
@@ -324,6 +329,16 @@ class CustomerSiteSerializer(serializers.ModelSerializer):
         source="get_lifecycle_status_display",
         read_only=True,
     )
+    products = serializers.SerializerMethodField()
+
+    @extend_schema_field(serializers.ListField(child=serializers.CharField()))
+    def get_products(self, obj: CustomerSite) -> list[str]:
+        """設置済みセットから導出した製品ファミリ名（重複なし）"""
+        return sorted(
+            ProductFamily.objects.filter(product_models__sets__customer_site=obj)
+            .values_list("name", flat=True)
+            .distinct()
+        )
 
     class Meta:
         model = CustomerSite
@@ -337,6 +352,7 @@ class CustomerSiteSerializer(serializers.ModelSerializer):
             "timezone",
             "lifecycle_status",
             "lifecycle_status_display",
+            "products",
             "note",
             "created_at",
             "updated_at",

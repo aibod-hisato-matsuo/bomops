@@ -156,13 +156,16 @@ class CustomerSiteFilter(django_filters.FilterSet):
 
     customer = django_filters.NumberFilter()
     country = django_filters.CharFilter(lookup_expr="iexact")
+    product_family = django_filters.CharFilter(
+        field_name="sets__product_model__family__name", distinct=True
+    )
     lifecycle_status = django_filters.ChoiceFilter(
         choices=CustomerSite.LifecycleStatus.choices
     )
 
     class Meta:
         model = CustomerSite
-        fields = ["customer", "country", "lifecycle_status"]
+        fields = ["customer", "country", "product_family", "lifecycle_status"]
 
 
 class SiteConfigFilter(django_filters.FilterSet):
@@ -599,14 +602,41 @@ class CustomerSiteViewSet(viewsets.ModelViewSet):
     顧客拠点 CRUD API
 
     顧客ごとの設置拠点を管理。
-    フィルタ: customer
+    フィルタ: customer, country, product_family, lifecycle_status
     """
 
-    queryset = CustomerSite.objects.select_related("customer").all()
+    queryset = (
+        CustomerSite.objects.select_related("customer")
+        .prefetch_related("sets__product_model__family")
+        .all()
+    )
     serializer_class = CustomerSiteSerializer
     filterset_class = CustomerSiteFilter
     search_fields = ["name", "address"]
     ordering_fields = ["customer", "name", "created_at"]
+
+    @extend_schema(
+        summary="製品ファミリ別拠点数集計",
+        description="設置済みセットから導出した、製品ファミリごとの拠点数を返す（一覧画面のボタン用）",
+        responses={200: CustomerProductSummarySerializer(many=True)},
+        tags=["顧客拠点"],
+    )
+    @action(detail=False, methods=["get"], url_path="product-summary")
+    def product_summary(self, request: Request) -> Response:
+        """製品ファミリ×拠点数の集計API（設置実績からの導出）"""
+        rows = (
+            BssSet.objects.exclude(product_model__family=None)
+            .exclude(customer_site=None)
+            .values("product_model__family__name")
+            .annotate(count=Count("customer_site", distinct=True))
+            .order_by("-count", "product_model__family__name")
+        )
+        data = [
+            {"family": row["product_model__family__name"], "count": row["count"]}
+            for row in rows
+        ]
+        serializer = CustomerProductSummarySerializer(data, many=True)
+        return Response(serializer.data)
 
 
 @extend_schema_view(

@@ -364,7 +364,7 @@ export interface paths {
          * @description 顧客拠点 CRUD API
          *
          *     顧客ごとの設置拠点を管理。
-         *     フィルタ: customer
+         *     フィルタ: customer, country, product_family, lifecycle_status
          */
         get: operations["customer_sites_list"];
         put?: never;
@@ -373,7 +373,7 @@ export interface paths {
          * @description 顧客拠点 CRUD API
          *
          *     顧客ごとの設置拠点を管理。
-         *     フィルタ: customer
+         *     フィルタ: customer, country, product_family, lifecycle_status
          */
         post: operations["customer_sites_create"];
         delete?: never;
@@ -394,7 +394,7 @@ export interface paths {
          * @description 顧客拠点 CRUD API
          *
          *     顧客ごとの設置拠点を管理。
-         *     フィルタ: customer
+         *     フィルタ: customer, country, product_family, lifecycle_status
          */
         get: operations["customer_sites_retrieve"];
         /**
@@ -402,7 +402,7 @@ export interface paths {
          * @description 顧客拠点 CRUD API
          *
          *     顧客ごとの設置拠点を管理。
-         *     フィルタ: customer
+         *     フィルタ: customer, country, product_family, lifecycle_status
          */
         put: operations["customer_sites_update"];
         post?: never;
@@ -411,7 +411,7 @@ export interface paths {
          * @description 顧客拠点 CRUD API
          *
          *     顧客ごとの設置拠点を管理。
-         *     フィルタ: customer
+         *     フィルタ: customer, country, product_family, lifecycle_status
          */
         delete: operations["customer_sites_destroy"];
         options?: never;
@@ -421,9 +421,29 @@ export interface paths {
          * @description 顧客拠点 CRUD API
          *
          *     顧客ごとの設置拠点を管理。
-         *     フィルタ: customer
+         *     フィルタ: customer, country, product_family, lifecycle_status
          */
         patch: operations["customer_sites_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/customer-sites/product-summary/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 製品ファミリ別拠点数集計
+         * @description 設置済みセットから導出した、製品ファミリごとの拠点数を返す（一覧画面のボタン用）
+         */
+        get: operations["customer_sites_product_summary_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/customers/": {
@@ -1690,7 +1710,13 @@ export interface components {
              */
             product_families?: number[];
         };
-        /** @description 顧客拠点シリアライザ */
+        /**
+         * @description 顧客拠点シリアライザ
+         *
+         *     `products` は設置済みセットから導出した製品ファミリ名（読み取り専用）。
+         *     拠点は物理的な場所であり「何が設置されているか」は実績から一意に決まるため、
+         *     顧客のような手動登録は持たない。
+         */
         CustomerSite: {
             readonly id: number;
             /** 顧客 */
@@ -1713,6 +1739,7 @@ export interface components {
             /** ライフサイクル状態 */
             lifecycle_status?: components["schemas"]["LifecycleStatusEnum"];
             readonly lifecycle_status_display: string;
+            readonly products: string[];
             /** 備考 */
             note?: string | null;
             /**
@@ -1726,7 +1753,13 @@ export interface components {
              */
             readonly updated_at: string;
         };
-        /** @description 顧客拠点シリアライザ */
+        /**
+         * @description 顧客拠点シリアライザ
+         *
+         *     `products` は設置済みセットから導出した製品ファミリ名（読み取り専用）。
+         *     拠点は物理的な場所であり「何が設置されているか」は実績から一意に決まるため、
+         *     顧客のような手動登録は持たない。
+         */
         CustomerSiteRequest: {
             /** 顧客 */
             customer: number;
@@ -2613,7 +2646,13 @@ export interface components {
              */
             product_families?: number[];
         };
-        /** @description 顧客拠点シリアライザ */
+        /**
+         * @description 顧客拠点シリアライザ
+         *
+         *     `products` は設置済みセットから導出した製品ファミリ名（読み取り専用）。
+         *     拠点は物理的な場所であり「何が設置されているか」は実績から一意に決まるため、
+         *     顧客のような手動登録は持たない。
+         */
         PatchedCustomerSiteRequest: {
             /** 顧客 */
             customer?: number;
@@ -3747,6 +3786,7 @@ export interface operations {
                 page?: number;
                 /** @description Number of results to return per page. */
                 page_size?: number;
+                product_family?: string;
                 /** @description A search term. */
                 search?: string;
             };
@@ -3886,6 +3926,45 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CustomerSite"];
+                };
+            };
+        };
+    };
+    customer_sites_product_summary_list: {
+        parameters: {
+            query?: {
+                country?: string;
+                customer?: number;
+                /**
+                 * @description * `PREPARING` - 準備中
+                 *     * `ACTIVE` - 稼働中
+                 *     * `WITHDRAWN` - 撤退済
+                 *     * `BASE` - 拠点
+                 *     * `LOANED` - 貸出中
+                 */
+                lifecycle_status?: "ACTIVE" | "BASE" | "LOANED" | "PREPARING" | "WITHDRAWN";
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                product_family?: string;
+                /** @description A search term. */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCustomerProductSummaryList"];
                 };
             };
         };

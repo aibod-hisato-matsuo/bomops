@@ -197,6 +197,24 @@ export function PartMasterFormDrawer({ item, onClose, onCreated }: Props) {
       <Field label="有効フラグ">
         <CheckboxLabel label="有効" {...register('is_active')} />
       </Field>
+      {item && (
+        <Field
+          label="使用製品（BOM由来・読取専用）"
+          hint="製品への接続は各製品モデルのBOM構成表で行う"
+        >
+          {item.used_in.length === 0 ? (
+            <span style={{ color: 'var(--color-danger)', fontSize: 13 }}>
+              未接続（どの製品BOMにも未登録）
+            </span>
+          ) : (
+            <span style={{ fontSize: 13 }}>
+              {item.used_in
+                .map((u) => (u.family ? `${u.family} / ${u.code}` : u.code))
+                .join('、 ')}
+            </span>
+          )}
+        </Field>
+      )}
     </Drawer>
   )
 }

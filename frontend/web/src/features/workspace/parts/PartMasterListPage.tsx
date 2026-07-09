@@ -54,6 +54,9 @@ const partGroupVariant: Record<string, BadgeVariant> = {
   OTHER: 'gray',
 }
 
+// 製品フィルタで「未接続（どのBOMにも無い）」を表す擬似値
+const UNASSIGNED = '__unassigned__'
+
 const columns: Column<PartMaster>[] = [
   { key: 'part_code', header: '部品コード', render: (r) => r.part_code },
   { key: 'name', header: '部品名', render: (r) => r.name },
@@ -71,21 +74,31 @@ const columns: Column<PartMaster>[] = [
   { key: 'model_number', header: '型番', render: (r) => r.model_number ?? '-' },
   {
     key: 'usage',
-    header: '使用製品',
-    render: (r) =>
-      r.used_in.length === 0 ? (
-        '-'
-      ) : (
-        <>
-          {r.used_in.map((u) => (
-            <span key={u.product_model}>
-              <Badge variant={u.is_optional ? 'pale' : 'sky'}>
-                {u.grade ?? u.code}
-              </Badge>{' '}
-            </span>
-          ))}
-        </>
-      ),
+    header: '製品',
+    render: (r) => {
+      // used_in から製品ファミリ名を重複なく集約（製品として認識しやすくする）
+      const families = [
+        ...new Set(
+          r.used_in.map((u) => u.family).filter((f): f is string => !!f),
+        ),
+      ]
+      if (families.length > 0) {
+        return (
+          <>
+            {families.map((f) => (
+              <span key={f}>
+                <Badge variant="sky">{f}</Badge>{' '}
+              </span>
+            ))}
+          </>
+        )
+      }
+      // BOM登録があるがファミリ未設定 → モデルコードで表示
+      if (r.used_in.length > 0) {
+        return r.used_in.map((u) => u.code).join(', ')
+      }
+      return <Badge variant="danger">未接続</Badge>
+    },
   },
   {
     key: 'is_active',
@@ -116,11 +129,23 @@ export function PartMasterListPage() {
   const productSummary = useGet<PartMasterProductSummary[]>(
     '/part-masters/product-summary/',
   )
-  const productOptions = (productSummary.data ?? []).map((r) => ({
-    value: r.family,
-    label: r.family,
-    count: r.count,
-  }))
+  // 製品未接続（どのBOMにも無い）部品の件数
+  const unassigned = useList<PartMaster>('/part-masters/', {
+    unassigned: true,
+    page_size: 1,
+  })
+  const productOptions = [
+    ...(productSummary.data ?? []).map((r) => ({
+      value: r.family,
+      label: r.family,
+      count: r.count,
+    })),
+    ...(unassigned.data?.count
+      ? [{ value: UNASSIGNED, label: '未接続', count: unassigned.data.count }]
+      : []),
+  ]
+  const activeProduct =
+    getFilter('unassigned') === 'true' ? UNASSIGNED : getFilter('used_in_family')
 
   const groupCount = (group: string) =>
     summary.data === undefined
@@ -156,9 +181,13 @@ export function PartMasterListPage() {
         <CascadeRow
           label="製品:"
           options={productOptions}
-          active={getFilter('used_in_family')}
+          active={activeProduct}
           allCount={totalCount}
-          onChange={(v) => setFilter('used_in_family', v)}
+          onChange={(v) =>
+            v === UNASSIGNED
+              ? setFilters({ unassigned: 'true', used_in_family: '' })
+              : setFilters({ used_in_family: v, unassigned: '' })
+          }
         />
       )}
 

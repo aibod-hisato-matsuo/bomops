@@ -4858,6 +4858,7 @@ export interface operations {
                 part_group?: "ASSEMBLY" | "MAIN" | "OTHER" | "PERIPHERAL";
                 /** @description A search term. */
                 search?: string;
+                unassigned?: boolean;
                 used_in_family?: string;
                 used_in_grade?: string;
                 used_in_model?: number;
@@ -5025,6 +5026,7 @@ export interface operations {
                 part_group?: "ASSEMBLY" | "MAIN" | "OTHER" | "PERIPHERAL";
                 /** @description A search term. */
                 search?: string;
+                unassigned?: boolean;
                 used_in_family?: string;
                 used_in_grade?: string;
                 used_in_model?: number;
@@ -5068,6 +5070,7 @@ export interface operations {
                 part_group?: "ASSEMBLY" | "MAIN" | "OTHER" | "PERIPHERAL";
                 /** @description A search term. */
                 search?: string;
+                unassigned?: boolean;
                 used_in_family?: string;
                 used_in_grade?: string;
                 used_in_model?: number;

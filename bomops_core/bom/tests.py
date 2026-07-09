@@ -1006,6 +1006,16 @@ class PartMasterProductRelationAPITest(APITestCase):
         self.assertEqual(codes, ["BRD-1", "PC-1"])
         self.assertEqual(response.data["count"], 2)
 
+    def test_filter_unassigned(self) -> None:
+        """unassigned=true で製品BOM未接続の部品だけに絞れることのテスト"""
+        url = reverse("bom:part-master-list")
+        response = self.client.get(url, {"unassigned": "true"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # PC/CAM/Board は BOM 登録済み、UNU-1 のみ未接続
+        codes = [r["part_code"] for r in response.data["results"]]
+        self.assertEqual(codes, ["UNU-1"])
+
 
 class DeriveBomCommandTest(TestCase):
     """derive_bom 管理コマンドのテスト"""

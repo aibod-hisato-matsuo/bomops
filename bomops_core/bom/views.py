@@ -85,6 +85,13 @@ class PartMasterFilter(django_filters.FilterSet):
     used_in_grade = django_filters.CharFilter(
         field_name="bom_usages__product_model__grade", distinct=True
     )
+    unassigned = django_filters.BooleanFilter(method="filter_unassigned")
+
+    def filter_unassigned(self, queryset, name, value):
+        """真のとき、どの製品BOMにも登録されていない（未接続）部品に絞る"""
+        if value:
+            return queryset.filter(bom_usages__isnull=True)
+        return queryset
 
     class Meta:
         model = PartMaster
@@ -96,6 +103,7 @@ class PartMasterFilter(django_filters.FilterSet):
             "used_in_model",
             "used_in_family",
             "used_in_grade",
+            "unassigned",
         ]
 
 

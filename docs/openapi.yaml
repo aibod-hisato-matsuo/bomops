@@ -2407,6 +2407,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: unassigned
+        schema:
+          type: boolean
+      - in: query
         name: used_in_family
         schema:
           type: string
@@ -2655,6 +2659,10 @@ paths:
         schema:
           type: string
       - in: query
+        name: unassigned
+        schema:
+          type: boolean
+      - in: query
         name: used_in_family
         schema:
           type: string
@@ -2737,6 +2745,10 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: unassigned
+        schema:
+          type: boolean
       - in: query
         name: used_in_family
         schema:

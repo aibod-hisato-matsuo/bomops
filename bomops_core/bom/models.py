@@ -203,6 +203,137 @@ class PartUnit(TimestampMixin):
 
 
 # =============================================================================
+# 2.1b ソフトウェア（Phase 1: マスタ＋バージョンのカタログ）
+#
+# ハードの PartMaster/PartUnit と対の関係だが、ソフトはコピー可能なため
+# 「バージョン（リリース）」と「搭載（どの台に何版）」が別概念になる。
+# Phase 1 ではマスタ＋バージョンのカタログのみ。搭載(SoftwareInstall)と
+# 製品BOMへの取り込みは後続フェーズ。粒度は粗く（アプリスタック単位、
+# 個々のアプリは端末側 config で切替）。
+# =============================================================================
+
+
+class SoftwareMaster(TimestampMixin):
+    """
+    ソフトウェアマスタ（種別レベル）
+
+    部品マスタ(PartMaster) のソフト版。1台に載るソフト一式（アプリスタック）
+    やファームウェアを粗い粒度で管理する。実際の版は SoftwareVersion。
+    """
+
+    class Kind(models.TextChoices):
+        """ソフトウェア種別"""
+
+        STACK = "STACK", "アプリスタック"
+        FIRMWARE = "FIRMWARE", "ファームウェア"
+        OS = "OS", "OS"
+        OTHER = "OTHER", "その他"
+
+    code = models.CharField(
+        max_length=50,
+        unique=True,
+        verbose_name="ソフトウェアコード",
+        help_text="例: BSTAND-SW, RISCV-FW",
+    )
+    name = models.CharField(
+        max_length=200,
+        verbose_name="ソフトウェア名",
+    )
+    kind = models.CharField(
+        max_length=20,
+        choices=Kind.choices,
+        default=Kind.STACK,
+        verbose_name="種別",
+    )
+    vendor = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name="提供元",
+    )
+    description = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name="説明",
+    )
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="有効フラグ",
+    )
+
+    class Meta:
+        db_table = "software_master"
+        verbose_name = "ソフトウェアマスタ"
+        verbose_name_plural = "ソフトウェアマスタ"
+        ordering = ["code"]
+
+    def __str__(self) -> str:
+        return f"{self.code}: {self.name}"
+
+
+class SoftwareVersion(TimestampMixin):
+    """
+    ソフトウェアバージョン（リリース）
+
+    部品実物(PartUnit) のソフト版に相当するが、シリアル単位ではなく
+    「リリース」単位。同じ版が多数のセットに載る（コピー可能）。
+    Identity = (software, version)。
+    """
+
+    class Status(models.TextChoices):
+        """バージョン状態"""
+
+        RELEASED = "RELEASED", "リリース"
+        BETA = "BETA", "ベータ"
+        DEPRECATED = "DEPRECATED", "非推奨"
+
+    software = models.ForeignKey(
+        SoftwareMaster,
+        on_delete=models.CASCADE,
+        related_name="versions",
+        verbose_name="ソフトウェア",
+    )
+    version = models.CharField(
+        max_length=50,
+        verbose_name="バージョン",
+        help_text="例: 2.3.1",
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.RELEASED,
+        verbose_name="状態",
+    )
+    release_date = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="リリース日",
+    )
+    artifact_ref = models.CharField(
+        max_length=300,
+        null=True,
+        blank=True,
+        verbose_name="アーティファクト参照",
+        help_text="git tag / commit hash / 配布URL 等",
+    )
+    notes = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name="リリースノート",
+    )
+
+    class Meta:
+        db_table = "software_version"
+        verbose_name = "ソフトウェアバージョン"
+        verbose_name_plural = "ソフトウェアバージョン"
+        unique_together = ["software", "version"]
+        ordering = ["-release_date", "-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.software.code} {self.version}"
+
+
+# =============================================================================
 # 2.2 セットの型番（BOM定義）
 # =============================================================================
 

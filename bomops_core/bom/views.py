@@ -33,6 +33,8 @@ from .models import (
     ProductFamily,
     ProductModel,
     SiteConfig,
+    SoftwareMaster,
+    SoftwareVersion,
 )
 from .serializers import (
     BssSetCompositionSerializer,
@@ -61,6 +63,8 @@ from .serializers import (
     ProductModelHierarchySummarySerializer,
     ProductModelSerializer,
     SiteConfigSerializer,
+    SoftwareMasterSerializer,
+    SoftwareVersionSerializer,
 )
 
 
@@ -503,14 +507,77 @@ class PartUnitViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
+class SoftwareMasterFilter(django_filters.FilterSet):
+    """ソフトウェアマスタ用フィルタ"""
+
+    code = django_filters.CharFilter(lookup_expr="icontains")
+    kind = django_filters.ChoiceFilter(choices=SoftwareMaster.Kind.choices)
+    is_active = django_filters.BooleanFilter()
+
+    class Meta:
+        model = SoftwareMaster
+        fields = ["code", "kind", "is_active"]
+
+
 @extend_schema_view(
-    list=extend_schema(summary="製品モデル一覧取得", tags=["製品モデル"]),
-    create=extend_schema(summary="製品モデル作成", tags=["製品モデル"]),
-    retrieve=extend_schema(summary="製品モデル詳細取得", tags=["製品モデル"]),
-    update=extend_schema(summary="製品モデル更新", tags=["製品モデル"]),
-    partial_update=extend_schema(summary="製品モデル部分更新", tags=["製品モデル"]),
-    destroy=extend_schema(summary="製品モデル削除", tags=["製品モデル"]),
+    list=extend_schema(summary="ソフトウェアマスタ一覧取得", tags=["ソフトウェア"]),
+    create=extend_schema(summary="ソフトウェアマスタ作成", tags=["ソフトウェア"]),
+    retrieve=extend_schema(summary="ソフトウェアマスタ詳細取得", tags=["ソフトウェア"]),
+    update=extend_schema(summary="ソフトウェアマスタ更新", tags=["ソフトウェア"]),
+    partial_update=extend_schema(summary="ソフトウェアマスタ部分更新", tags=["ソフトウェア"]),
+    destroy=extend_schema(summary="ソフトウェアマスタ削除", tags=["ソフトウェア"]),
 )
+class SoftwareMasterViewSet(viewsets.ModelViewSet):
+    """
+    ソフトウェアマスタ CRUD API（Phase 1）
+
+    1台に載るソフト一式（アプリスタック）やファームウェアを粗い粒度で管理。
+    実際の版は SoftwareVersion。
+    """
+
+    queryset = SoftwareMaster.objects.annotate(
+        version_count=Count("versions", distinct=True)
+    )
+    serializer_class = SoftwareMasterSerializer
+    filterset_class = SoftwareMasterFilter
+    search_fields = ["code", "name", "vendor"]
+    ordering_fields = ["code", "name", "created_at"]
+
+
+class SoftwareVersionFilter(django_filters.FilterSet):
+    """ソフトウェアバージョン用フィルタ"""
+
+    software = django_filters.NumberFilter()
+    status = django_filters.ChoiceFilter(choices=SoftwareVersion.Status.choices)
+    version = django_filters.CharFilter(lookup_expr="icontains")
+
+    class Meta:
+        model = SoftwareVersion
+        fields = ["software", "status", "version"]
+
+
+@extend_schema_view(
+    list=extend_schema(summary="ソフトウェアバージョン一覧取得", tags=["ソフトウェア"]),
+    create=extend_schema(summary="ソフトウェアバージョン作成", tags=["ソフトウェア"]),
+    retrieve=extend_schema(summary="ソフトウェアバージョン詳細取得", tags=["ソフトウェア"]),
+    update=extend_schema(summary="ソフトウェアバージョン更新", tags=["ソフトウェア"]),
+    partial_update=extend_schema(summary="ソフトウェアバージョン部分更新", tags=["ソフトウェア"]),
+    destroy=extend_schema(summary="ソフトウェアバージョン削除", tags=["ソフトウェア"]),
+)
+class SoftwareVersionViewSet(viewsets.ModelViewSet):
+    """
+    ソフトウェアバージョン CRUD API（Phase 1）
+
+    ソフトウェアマスタのリリース版を管理する。Identity = (software, version)。
+    """
+
+    queryset = SoftwareVersion.objects.select_related("software").all()
+    serializer_class = SoftwareVersionSerializer
+    filterset_class = SoftwareVersionFilter
+    search_fields = ["version", "software__code", "software__name"]
+    ordering_fields = ["version", "release_date", "created_at"]
+
+
 class ProductFamilyViewSet(viewsets.ModelViewSet):
     """
     製品ファミリ CRUD API
@@ -524,6 +591,14 @@ class ProductFamilyViewSet(viewsets.ModelViewSet):
     search_fields = ["name"]
 
 
+@extend_schema_view(
+    list=extend_schema(summary="製品モデル一覧取得", tags=["製品モデル"]),
+    create=extend_schema(summary="製品モデル作成", tags=["製品モデル"]),
+    retrieve=extend_schema(summary="製品モデル詳細取得", tags=["製品モデル"]),
+    update=extend_schema(summary="製品モデル更新", tags=["製品モデル"]),
+    partial_update=extend_schema(summary="製品モデル部分更新", tags=["製品モデル"]),
+    destroy=extend_schema(summary="製品モデル削除", tags=["製品モデル"]),
+)
 class ProductModelViewSet(viewsets.ModelViewSet):
     """
     製品モデル CRUD API

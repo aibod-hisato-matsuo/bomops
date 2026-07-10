@@ -20,6 +20,12 @@ router.register(
     r"part-categories", views.PartCategoryViewSet, basename="part-category"
 )
 router.register(r"part-masters", views.PartMasterViewSet, basename="part-master")
+router.register(
+    r"software-masters", views.SoftwareMasterViewSet, basename="software-master"
+)
+router.register(
+    r"software-versions", views.SoftwareVersionViewSet, basename="software-version"
+)
 router.register(r"part-units", views.PartUnitViewSet, basename="part-unit")
 router.register(
     r"product-families", views.ProductFamilyViewSet, basename="product-family"

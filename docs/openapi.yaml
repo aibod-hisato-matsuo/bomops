@@ -3252,7 +3252,6 @@ paths:
 
         製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
         使用中ファミリの削除は 409 を返す（PROTECT）。
-      summary: 製品モデル一覧取得
       parameters:
       - name: ordering
         required: false
@@ -3279,7 +3278,7 @@ paths:
         schema:
           type: string
       tags:
-      - 製品モデル
+      - product-families
       security:
       - jwtAuth: []
       - cookieAuth: []
@@ -3297,9 +3296,8 @@ paths:
 
         製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
         使用中ファミリの削除は 409 を返す（PROTECT）。
-      summary: 製品モデル作成
       tags:
-      - 製品モデル
+      - product-families
       requestBody:
         content:
           application/json:
@@ -3330,7 +3328,6 @@ paths:
 
         製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
         使用中ファミリの削除は 409 を返す（PROTECT）。
-      summary: 製品モデル詳細取得
       parameters:
       - in: path
         name: id
@@ -3339,7 +3336,7 @@ paths:
         description: A unique integer value identifying this 製品ファミリ.
         required: true
       tags:
-      - 製品モデル
+      - product-families
       security:
       - jwtAuth: []
       - cookieAuth: []
@@ -3357,7 +3354,6 @@ paths:
 
         製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
         使用中ファミリの削除は 409 を返す（PROTECT）。
-      summary: 製品モデル更新
       parameters:
       - in: path
         name: id
@@ -3366,7 +3362,7 @@ paths:
         description: A unique integer value identifying this 製品ファミリ.
         required: true
       tags:
-      - 製品モデル
+      - product-families
       requestBody:
         content:
           application/json:
@@ -3396,7 +3392,6 @@ paths:
 
         製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
         使用中ファミリの削除は 409 を返す（PROTECT）。
-      summary: 製品モデル部分更新
       parameters:
       - in: path
         name: id
@@ -3405,7 +3400,7 @@ paths:
         description: A unique integer value identifying this 製品ファミリ.
         required: true
       tags:
-      - 製品モデル
+      - product-families
       requestBody:
         content:
           application/json:
@@ -3434,7 +3429,6 @@ paths:
 
         製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
         使用中ファミリの削除は 409 を返す（PROTECT）。
-      summary: 製品モデル削除
       parameters:
       - in: path
         name: id
@@ -3443,7 +3437,7 @@ paths:
         description: A unique integer value identifying this 製品ファミリ.
         required: true
       tags:
-      - 製品モデル
+      - product-families
       security:
       - jwtAuth: []
       - cookieAuth: []
@@ -3458,6 +3452,7 @@ paths:
 
         BAITEN STAND などの製品型番・バージョンを管理。
         分類は ファミリ → グレード → バリエーション の3軸フィルタ。
+      summary: 製品モデル一覧取得
       parameters:
       - in: query
         name: code
@@ -3500,7 +3495,7 @@ paths:
         schema:
           type: string
       tags:
-      - product-models
+      - 製品モデル
       security:
       - jwtAuth: []
       - cookieAuth: []
@@ -3518,8 +3513,9 @@ paths:
 
         BAITEN STAND などの製品型番・バージョンを管理。
         分類は ファミリ → グレード → バリエーション の3軸フィルタ。
+      summary: 製品モデル作成
       tags:
-      - product-models
+      - 製品モデル
       requestBody:
         content:
           application/json:
@@ -3550,6 +3546,7 @@ paths:
 
         BAITEN STAND などの製品型番・バージョンを管理。
         分類は ファミリ → グレード → バリエーション の3軸フィルタ。
+      summary: 製品モデル詳細取得
       parameters:
       - in: path
         name: id
@@ -3558,7 +3555,7 @@ paths:
         description: A unique integer value identifying this 製品モデル.
         required: true
       tags:
-      - product-models
+      - 製品モデル
       security:
       - jwtAuth: []
       - cookieAuth: []
@@ -3576,6 +3573,7 @@ paths:
 
         BAITEN STAND などの製品型番・バージョンを管理。
         分類は ファミリ → グレード → バリエーション の3軸フィルタ。
+      summary: 製品モデル更新
       parameters:
       - in: path
         name: id
@@ -3584,7 +3582,7 @@ paths:
         description: A unique integer value identifying this 製品モデル.
         required: true
       tags:
-      - product-models
+      - 製品モデル
       requestBody:
         content:
           application/json:
@@ -3614,6 +3612,7 @@ paths:
 
         BAITEN STAND などの製品型番・バージョンを管理。
         分類は ファミリ → グレード → バリエーション の3軸フィルタ。
+      summary: 製品モデル部分更新
       parameters:
       - in: path
         name: id
@@ -3622,7 +3621,7 @@ paths:
         description: A unique integer value identifying this 製品モデル.
         required: true
       tags:
-      - product-models
+      - 製品モデル
       requestBody:
         content:
           application/json:
@@ -3651,6 +3650,7 @@ paths:
 
         BAITEN STAND などの製品型番・バージョンを管理。
         分類は ファミリ → グレード → バリエーション の3軸フィルタ。
+      summary: 製品モデル削除
       parameters:
       - in: path
         name: id
@@ -3659,7 +3659,7 @@ paths:
         description: A unique integer value identifying this 製品モデル.
         required: true
       tags:
-      - product-models
+      - 製品モデル
       security:
       - jwtAuth: []
       - cookieAuth: []
@@ -3934,6 +3934,456 @@ paths:
         required: true
       tags:
       - 拠点設定
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/software-masters/:
+    get:
+      operationId: software_masters_list
+      description: |-
+        ソフトウェアマスタ CRUD API（Phase 1）
+
+        1台に載るソフト一式（アプリスタック）やファームウェアを粗い粒度で管理。
+        実際の版は SoftwareVersion。
+      summary: ソフトウェアマスタ一覧取得
+      parameters:
+      - in: query
+        name: code
+        schema:
+          type: string
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - in: query
+        name: kind
+        schema:
+          type: string
+          title: 種別
+          enum:
+          - FIRMWARE
+          - OS
+          - OTHER
+          - STACK
+        description: |-
+          * `STACK` - アプリスタック
+          * `FIRMWARE` - ファームウェア
+          * `OS` - OS
+          * `OTHER` - その他
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - ソフトウェア
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSoftwareMasterList'
+          description: ''
+    post:
+      operationId: software_masters_create
+      description: |-
+        ソフトウェアマスタ CRUD API（Phase 1）
+
+        1台に載るソフト一式（アプリスタック）やファームウェアを粗い粒度で管理。
+        実際の版は SoftwareVersion。
+      summary: ソフトウェアマスタ作成
+      tags:
+      - ソフトウェア
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SoftwareMasterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SoftwareMasterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SoftwareMasterRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SoftwareMaster'
+          description: ''
+  /api/v1/software-masters/{id}/:
+    get:
+      operationId: software_masters_retrieve
+      description: |-
+        ソフトウェアマスタ CRUD API（Phase 1）
+
+        1台に載るソフト一式（アプリスタック）やファームウェアを粗い粒度で管理。
+        実際の版は SoftwareVersion。
+      summary: ソフトウェアマスタ詳細取得
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ソフトウェアマスタ.
+        required: true
+      tags:
+      - ソフトウェア
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SoftwareMaster'
+          description: ''
+    put:
+      operationId: software_masters_update
+      description: |-
+        ソフトウェアマスタ CRUD API（Phase 1）
+
+        1台に載るソフト一式（アプリスタック）やファームウェアを粗い粒度で管理。
+        実際の版は SoftwareVersion。
+      summary: ソフトウェアマスタ更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ソフトウェアマスタ.
+        required: true
+      tags:
+      - ソフトウェア
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SoftwareMasterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SoftwareMasterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SoftwareMasterRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SoftwareMaster'
+          description: ''
+    patch:
+      operationId: software_masters_partial_update
+      description: |-
+        ソフトウェアマスタ CRUD API（Phase 1）
+
+        1台に載るソフト一式（アプリスタック）やファームウェアを粗い粒度で管理。
+        実際の版は SoftwareVersion。
+      summary: ソフトウェアマスタ部分更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ソフトウェアマスタ.
+        required: true
+      tags:
+      - ソフトウェア
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSoftwareMasterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSoftwareMasterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSoftwareMasterRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SoftwareMaster'
+          description: ''
+    delete:
+      operationId: software_masters_destroy
+      description: |-
+        ソフトウェアマスタ CRUD API（Phase 1）
+
+        1台に載るソフト一式（アプリスタック）やファームウェアを粗い粒度で管理。
+        実際の版は SoftwareVersion。
+      summary: ソフトウェアマスタ削除
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ソフトウェアマスタ.
+        required: true
+      tags:
+      - ソフトウェア
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/software-versions/:
+    get:
+      operationId: software_versions_list
+      description: |-
+        ソフトウェアバージョン CRUD API（Phase 1）
+
+        ソフトウェアマスタのリリース版を管理する。Identity = (software, version)。
+      summary: ソフトウェアバージョン一覧取得
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: software
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          type: string
+          title: 状態
+          enum:
+          - BETA
+          - DEPRECATED
+          - RELEASED
+        description: |-
+          * `RELEASED` - リリース
+          * `BETA` - ベータ
+          * `DEPRECATED` - 非推奨
+      - in: query
+        name: version
+        schema:
+          type: string
+      tags:
+      - ソフトウェア
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSoftwareVersionList'
+          description: ''
+    post:
+      operationId: software_versions_create
+      description: |-
+        ソフトウェアバージョン CRUD API（Phase 1）
+
+        ソフトウェアマスタのリリース版を管理する。Identity = (software, version)。
+      summary: ソフトウェアバージョン作成
+      tags:
+      - ソフトウェア
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SoftwareVersionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SoftwareVersionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SoftwareVersionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SoftwareVersion'
+          description: ''
+  /api/v1/software-versions/{id}/:
+    get:
+      operationId: software_versions_retrieve
+      description: |-
+        ソフトウェアバージョン CRUD API（Phase 1）
+
+        ソフトウェアマスタのリリース版を管理する。Identity = (software, version)。
+      summary: ソフトウェアバージョン詳細取得
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ソフトウェアバージョン.
+        required: true
+      tags:
+      - ソフトウェア
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SoftwareVersion'
+          description: ''
+    put:
+      operationId: software_versions_update
+      description: |-
+        ソフトウェアバージョン CRUD API（Phase 1）
+
+        ソフトウェアマスタのリリース版を管理する。Identity = (software, version)。
+      summary: ソフトウェアバージョン更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ソフトウェアバージョン.
+        required: true
+      tags:
+      - ソフトウェア
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SoftwareVersionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SoftwareVersionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SoftwareVersionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SoftwareVersion'
+          description: ''
+    patch:
+      operationId: software_versions_partial_update
+      description: |-
+        ソフトウェアバージョン CRUD API（Phase 1）
+
+        ソフトウェアマスタのリリース版を管理する。Identity = (software, version)。
+      summary: ソフトウェアバージョン部分更新
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ソフトウェアバージョン.
+        required: true
+      tags:
+      - ソフトウェア
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSoftwareVersionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSoftwareVersionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSoftwareVersionRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SoftwareVersion'
+          description: ''
+    delete:
+      operationId: software_versions_destroy
+      description: |-
+        ソフトウェアバージョン CRUD API（Phase 1）
+
+        ソフトウェアマスタのリリース版を管理する。Identity = (software, version)。
+      summary: ソフトウェアバージョン削除
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ソフトウェアバージョン.
+        required: true
+      tags:
+      - ソフトウェア
       security:
       - jwtAuth: []
       - cookieAuth: []
@@ -4930,18 +5380,6 @@ components:
         * `REPLACEMENT` - 交換
         * `INSPECTION` - 点検
         * `CONFIG_CHANGE` - 設定変更
-    KindEnum:
-      enum:
-      - PURCHASED
-      - MOUNTED
-      - UNMOUNTED
-      - MAINTENANCE
-      type: string
-      description: |-
-        * `PURCHASED` - PURCHASED
-        * `MOUNTED` - MOUNTED
-        * `UNMOUNTED` - UNMOUNTED
-        * `MAINTENANCE` - MAINTENANCE
     LifecycleStatusEnum:
       enum:
       - PREPARING
@@ -5568,6 +6006,52 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SiteConfig'
+    PaginatedSoftwareMasterList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SoftwareMaster'
+    PaginatedSoftwareVersionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SoftwareVersion'
     PartCategory:
       type: object
       description: 部品カテゴリシリアライザ
@@ -5956,7 +6440,7 @@ components:
       description: 部品使用履歴タイムライン1件分のシリアライザ（読み取り専用）
       properties:
         kind:
-          $ref: '#/components/schemas/KindEnum'
+          $ref: '#/components/schemas/PartUnitHistoryEntryKindEnum'
         occurred_at:
           type: string
           format: date-time
@@ -5987,6 +6471,18 @@ components:
       - purchase_order_no
       - role
       - set_code
+    PartUnitHistoryEntryKindEnum:
+      enum:
+      - PURCHASED
+      - MOUNTED
+      - UNMOUNTED
+      - MAINTENANCE
+      type: string
+      description: |-
+        * `PURCHASED` - PURCHASED
+        * `MOUNTED` - MOUNTED
+        * `UNMOUNTED` - UNMOUNTED
+        * `MAINTENANCE` - MAINTENANCE
     PartUnitRequest:
       type: object
       description: 部品実物シリアライザ
@@ -6487,6 +6983,69 @@ components:
           nullable: true
           title: Baiten.env
           description: 端末に配布する環境変数ファイルの内容
+    PatchedSoftwareMasterRequest:
+      type: object
+      description: ソフトウェアマスタシリアライザ
+      properties:
+        code:
+          type: string
+          minLength: 1
+          title: ソフトウェアコード
+          description: '例: BSTAND-SW, RISCV-FW'
+          maxLength: 50
+        name:
+          type: string
+          minLength: 1
+          title: ソフトウェア名
+          maxLength: 200
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/SoftwareMasterKindEnum'
+          title: 種別
+        vendor:
+          type: string
+          nullable: true
+          title: 提供元
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          title: 説明
+        is_active:
+          type: boolean
+          title: 有効フラグ
+    PatchedSoftwareVersionRequest:
+      type: object
+      description: ソフトウェアバージョンシリアライザ
+      properties:
+        software:
+          type: integer
+          title: ソフトウェア
+        version:
+          type: string
+          minLength: 1
+          title: バージョン
+          description: '例: 2.3.1'
+          maxLength: 50
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SoftwareVersionStatusEnum'
+          title: 状態
+        release_date:
+          type: string
+          format: date
+          nullable: true
+          title: リリース日
+        artifact_ref:
+          type: string
+          nullable: true
+          title: アーティファクト参照
+          description: git tag / commit hash / 配布URL 等
+          maxLength: 300
+        notes:
+          type: string
+          nullable: true
+          title: リリースノート
     ProductBOM:
       type: object
       description: 製品BOMシリアライザ
@@ -6885,6 +7444,215 @@ components:
           description: 端末に配布する環境変数ファイルの内容
       required:
       - customer_site
+    SoftwareMaster:
+      type: object
+      description: ソフトウェアマスタシリアライザ
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          title: ソフトウェアコード
+          description: '例: BSTAND-SW, RISCV-FW'
+          maxLength: 50
+        name:
+          type: string
+          title: ソフトウェア名
+          maxLength: 200
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/SoftwareMasterKindEnum'
+          title: 種別
+        kind_display:
+          type: string
+          readOnly: true
+        vendor:
+          type: string
+          nullable: true
+          title: 提供元
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          title: 説明
+        version_count:
+          type: integer
+          readOnly: true
+        is_active:
+          type: boolean
+          title: 有効フラグ
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 作成日時
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新日時
+      required:
+      - code
+      - created_at
+      - id
+      - kind_display
+      - name
+      - updated_at
+      - version_count
+    SoftwareMasterKindEnum:
+      enum:
+      - STACK
+      - FIRMWARE
+      - OS
+      - OTHER
+      type: string
+      description: |-
+        * `STACK` - アプリスタック
+        * `FIRMWARE` - ファームウェア
+        * `OS` - OS
+        * `OTHER` - その他
+    SoftwareMasterRequest:
+      type: object
+      description: ソフトウェアマスタシリアライザ
+      properties:
+        code:
+          type: string
+          minLength: 1
+          title: ソフトウェアコード
+          description: '例: BSTAND-SW, RISCV-FW'
+          maxLength: 50
+        name:
+          type: string
+          minLength: 1
+          title: ソフトウェア名
+          maxLength: 200
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/SoftwareMasterKindEnum'
+          title: 種別
+        vendor:
+          type: string
+          nullable: true
+          title: 提供元
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          title: 説明
+        is_active:
+          type: boolean
+          title: 有効フラグ
+      required:
+      - code
+      - name
+    SoftwareVersion:
+      type: object
+      description: ソフトウェアバージョンシリアライザ
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        software:
+          type: integer
+          title: ソフトウェア
+        software_code:
+          type: string
+          readOnly: true
+        software_name:
+          type: string
+          readOnly: true
+        version:
+          type: string
+          title: バージョン
+          description: '例: 2.3.1'
+          maxLength: 50
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SoftwareVersionStatusEnum'
+          title: 状態
+        status_display:
+          type: string
+          readOnly: true
+        release_date:
+          type: string
+          format: date
+          nullable: true
+          title: リリース日
+        artifact_ref:
+          type: string
+          nullable: true
+          title: アーティファクト参照
+          description: git tag / commit hash / 配布URL 等
+          maxLength: 300
+        notes:
+          type: string
+          nullable: true
+          title: リリースノート
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 作成日時
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新日時
+      required:
+      - created_at
+      - id
+      - software
+      - software_code
+      - software_name
+      - status_display
+      - updated_at
+      - version
+    SoftwareVersionRequest:
+      type: object
+      description: ソフトウェアバージョンシリアライザ
+      properties:
+        software:
+          type: integer
+          title: ソフトウェア
+        version:
+          type: string
+          minLength: 1
+          title: バージョン
+          description: '例: 2.3.1'
+          maxLength: 50
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SoftwareVersionStatusEnum'
+          title: 状態
+        release_date:
+          type: string
+          format: date
+          nullable: true
+          title: リリース日
+        artifact_ref:
+          type: string
+          nullable: true
+          title: アーティファクト参照
+          description: git tag / commit hash / 配布URL 等
+          maxLength: 300
+        notes:
+          type: string
+          nullable: true
+          title: リリースノート
+      required:
+      - software
+      - version
+    SoftwareVersionStatusEnum:
+      enum:
+      - RELEASED
+      - BETA
+      - DEPRECATED
+      type: string
+      description: |-
+        * `RELEASED` - リリース
+        * `BETA` - ベータ
+        * `DEPRECATED` - 非推奨
     StageEnum:
       enum:
       - INSTALL

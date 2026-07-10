@@ -25,6 +25,8 @@ import { PartUnitHistoryPage } from './features/workspace/search/PartUnitHistory
 import { SearchPage } from './features/workspace/search/SearchPage'
 import { PartMasterListPage } from './features/workspace/parts/PartMasterListPage'
 import { PartUnitListPage } from './features/workspace/parts/PartUnitListPage'
+import { SoftwareMasterListPage } from './features/workspace/software/SoftwareMasterListPage'
+import { SoftwareVersionPage } from './features/workspace/software/SoftwareVersionPage'
 import { ProductModelDetailPage } from './features/workspace/products/ProductModelDetailPage'
 import { ProductModelListPage } from './features/workspace/products/ProductModelListPage'
 import { BssSetDetailPage } from './features/workspace/sets/BssSetDetailPage'
@@ -93,6 +95,14 @@ export default function App() {
                 <Route
                   path="/workspace/part-units/:id/history"
                   element={<PartUnitHistoryPage />}
+                />
+                <Route
+                  path="/workspace/software-masters"
+                  element={<SoftwareMasterListPage />}
+                />
+                <Route
+                  path="/workspace/software-versions"
+                  element={<SoftwareVersionPage />}
                 />
                 <Route
                   path="/workspace/product-models"

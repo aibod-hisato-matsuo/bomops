@@ -1170,7 +1170,6 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * 製品モデル一覧取得
          * @description 製品ファミリ CRUD API
          *
          *     製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
@@ -1179,7 +1178,6 @@ export interface paths {
         get: operations["product_families_list"];
         put?: never;
         /**
-         * 製品モデル作成
          * @description 製品ファミリ CRUD API
          *
          *     製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
@@ -1200,7 +1198,6 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * 製品モデル詳細取得
          * @description 製品ファミリ CRUD API
          *
          *     製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
@@ -1208,7 +1205,6 @@ export interface paths {
          */
         get: operations["product_families_retrieve"];
         /**
-         * 製品モデル更新
          * @description 製品ファミリ CRUD API
          *
          *     製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
@@ -1217,7 +1213,6 @@ export interface paths {
         put: operations["product_families_update"];
         post?: never;
         /**
-         * 製品モデル削除
          * @description 製品ファミリ CRUD API
          *
          *     製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
@@ -1227,7 +1222,6 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * 製品モデル部分更新
          * @description 製品ファミリ CRUD API
          *
          *     製品ライン（BAITEN STAND / RISC-V Board 等）のマスタ。
@@ -1244,6 +1238,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * 製品モデル一覧取得
          * @description 製品モデル CRUD API
          *
          *     BAITEN STAND などの製品型番・バージョンを管理。
@@ -1252,6 +1247,7 @@ export interface paths {
         get: operations["product_models_list"];
         put?: never;
         /**
+         * 製品モデル作成
          * @description 製品モデル CRUD API
          *
          *     BAITEN STAND などの製品型番・バージョンを管理。
@@ -1272,6 +1268,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * 製品モデル詳細取得
          * @description 製品モデル CRUD API
          *
          *     BAITEN STAND などの製品型番・バージョンを管理。
@@ -1279,6 +1276,7 @@ export interface paths {
          */
         get: operations["product_models_retrieve"];
         /**
+         * 製品モデル更新
          * @description 製品モデル CRUD API
          *
          *     BAITEN STAND などの製品型番・バージョンを管理。
@@ -1287,6 +1285,7 @@ export interface paths {
         put: operations["product_models_update"];
         post?: never;
         /**
+         * 製品モデル削除
          * @description 製品モデル CRUD API
          *
          *     BAITEN STAND などの製品型番・バージョンを管理。
@@ -1296,6 +1295,7 @@ export interface paths {
         options?: never;
         head?: never;
         /**
+         * 製品モデル部分更新
          * @description 製品モデル CRUD API
          *
          *     BAITEN STAND などの製品型番・バージョンを管理。
@@ -1402,6 +1402,148 @@ export interface paths {
          *     フィルタ: customer_site
          */
         patch: operations["site_configs_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/software-masters/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * ソフトウェアマスタ一覧取得
+         * @description ソフトウェアマスタ CRUD API（Phase 1）
+         *
+         *     1台に載るソフト一式（アプリスタック）やファームウェアを粗い粒度で管理。
+         *     実際の版は SoftwareVersion。
+         */
+        get: operations["software_masters_list"];
+        put?: never;
+        /**
+         * ソフトウェアマスタ作成
+         * @description ソフトウェアマスタ CRUD API（Phase 1）
+         *
+         *     1台に載るソフト一式（アプリスタック）やファームウェアを粗い粒度で管理。
+         *     実際の版は SoftwareVersion。
+         */
+        post: operations["software_masters_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/software-masters/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * ソフトウェアマスタ詳細取得
+         * @description ソフトウェアマスタ CRUD API（Phase 1）
+         *
+         *     1台に載るソフト一式（アプリスタック）やファームウェアを粗い粒度で管理。
+         *     実際の版は SoftwareVersion。
+         */
+        get: operations["software_masters_retrieve"];
+        /**
+         * ソフトウェアマスタ更新
+         * @description ソフトウェアマスタ CRUD API（Phase 1）
+         *
+         *     1台に載るソフト一式（アプリスタック）やファームウェアを粗い粒度で管理。
+         *     実際の版は SoftwareVersion。
+         */
+        put: operations["software_masters_update"];
+        post?: never;
+        /**
+         * ソフトウェアマスタ削除
+         * @description ソフトウェアマスタ CRUD API（Phase 1）
+         *
+         *     1台に載るソフト一式（アプリスタック）やファームウェアを粗い粒度で管理。
+         *     実際の版は SoftwareVersion。
+         */
+        delete: operations["software_masters_destroy"];
+        options?: never;
+        head?: never;
+        /**
+         * ソフトウェアマスタ部分更新
+         * @description ソフトウェアマスタ CRUD API（Phase 1）
+         *
+         *     1台に載るソフト一式（アプリスタック）やファームウェアを粗い粒度で管理。
+         *     実際の版は SoftwareVersion。
+         */
+        patch: operations["software_masters_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/software-versions/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * ソフトウェアバージョン一覧取得
+         * @description ソフトウェアバージョン CRUD API（Phase 1）
+         *
+         *     ソフトウェアマスタのリリース版を管理する。Identity = (software, version)。
+         */
+        get: operations["software_versions_list"];
+        put?: never;
+        /**
+         * ソフトウェアバージョン作成
+         * @description ソフトウェアバージョン CRUD API（Phase 1）
+         *
+         *     ソフトウェアマスタのリリース版を管理する。Identity = (software, version)。
+         */
+        post: operations["software_versions_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/software-versions/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * ソフトウェアバージョン詳細取得
+         * @description ソフトウェアバージョン CRUD API（Phase 1）
+         *
+         *     ソフトウェアマスタのリリース版を管理する。Identity = (software, version)。
+         */
+        get: operations["software_versions_retrieve"];
+        /**
+         * ソフトウェアバージョン更新
+         * @description ソフトウェアバージョン CRUD API（Phase 1）
+         *
+         *     ソフトウェアマスタのリリース版を管理する。Identity = (software, version)。
+         */
+        put: operations["software_versions_update"];
+        post?: never;
+        /**
+         * ソフトウェアバージョン削除
+         * @description ソフトウェアバージョン CRUD API（Phase 1）
+         *
+         *     ソフトウェアマスタのリリース版を管理する。Identity = (software, version)。
+         */
+        delete: operations["software_versions_destroy"];
+        options?: never;
+        head?: never;
+        /**
+         * ソフトウェアバージョン部分更新
+         * @description ソフトウェアバージョン CRUD API（Phase 1）
+         *
+         *     ソフトウェアマスタのリリース版を管理する。Identity = (software, version)。
+         */
+        patch: operations["software_versions_partial_update"];
         trace?: never;
     };
 }
@@ -1978,14 +2120,6 @@ export interface components {
          */
         EventTypeEnum: "FAILURE" | "REPLACEMENT" | "INSPECTION" | "CONFIG_CHANGE";
         /**
-         * @description * `PURCHASED` - PURCHASED
-         *     * `MOUNTED` - MOUNTED
-         *     * `UNMOUNTED` - UNMOUNTED
-         *     * `MAINTENANCE` - MAINTENANCE
-         * @enum {string}
-         */
-        KindEnum: "PURCHASED" | "MOUNTED" | "UNMOUNTED" | "MAINTENANCE";
-        /**
          * @description * `PREPARING` - 準備中
          *     * `ACTIVE` - 稼働中
          *     * `WITHDRAWN` - 撤退済
@@ -2383,6 +2517,36 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["SiteConfig"][];
         };
+        PaginatedSoftwareMasterList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["SoftwareMaster"][];
+        };
+        PaginatedSoftwareVersionList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["SoftwareVersion"][];
+        };
         /** @description 部品カテゴリシリアライザ */
         PartCategory: {
             readonly id: number;
@@ -2589,7 +2753,7 @@ export interface components {
         };
         /** @description 部品使用履歴タイムライン1件分のシリアライザ（読み取り専用） */
         PartUnitHistoryEntry: {
-            kind: components["schemas"]["KindEnum"];
+            kind: components["schemas"]["PartUnitHistoryEntryKindEnum"];
             /** Format: date-time */
             occurred_at: string;
             set_code: string | null;
@@ -2599,6 +2763,14 @@ export interface components {
             note: string | null;
             purchase_order_no: string | null;
         };
+        /**
+         * @description * `PURCHASED` - PURCHASED
+         *     * `MOUNTED` - MOUNTED
+         *     * `UNMOUNTED` - UNMOUNTED
+         *     * `MAINTENANCE` - MAINTENANCE
+         * @enum {string}
+         */
+        PartUnitHistoryEntryKindEnum: "PURCHASED" | "MOUNTED" | "UNMOUNTED" | "MAINTENANCE";
         /** @description 部品実物シリアライザ */
         PartUnitRequest: {
             /** 部品マスタ */
@@ -2946,6 +3118,48 @@ export interface components {
              */
             baiten_env?: string | null;
         };
+        /** @description ソフトウェアマスタシリアライザ */
+        PatchedSoftwareMasterRequest: {
+            /**
+             * ソフトウェアコード
+             * @description 例: BSTAND-SW, RISCV-FW
+             */
+            code?: string;
+            /** ソフトウェア名 */
+            name?: string;
+            /** 種別 */
+            kind?: components["schemas"]["SoftwareMasterKindEnum"];
+            /** 提供元 */
+            vendor?: string | null;
+            /** 説明 */
+            description?: string | null;
+            /** 有効フラグ */
+            is_active?: boolean;
+        };
+        /** @description ソフトウェアバージョンシリアライザ */
+        PatchedSoftwareVersionRequest: {
+            /** ソフトウェア */
+            software?: number;
+            /**
+             * バージョン
+             * @description 例: 2.3.1
+             */
+            version?: string;
+            /** 状態 */
+            status?: components["schemas"]["SoftwareVersionStatusEnum"];
+            /**
+             * リリース日
+             * Format: date
+             */
+            release_date?: string | null;
+            /**
+             * アーティファクト参照
+             * @description git tag / commit hash / 配布URL 等
+             */
+            artifact_ref?: string | null;
+            /** リリースノート */
+            notes?: string | null;
+        };
         /** @description 製品BOMシリアライザ */
         ProductBOM: {
             readonly id: number;
@@ -3182,6 +3396,132 @@ export interface components {
              */
             baiten_env?: string | null;
         };
+        /** @description ソフトウェアマスタシリアライザ */
+        SoftwareMaster: {
+            readonly id: number;
+            /**
+             * ソフトウェアコード
+             * @description 例: BSTAND-SW, RISCV-FW
+             */
+            code: string;
+            /** ソフトウェア名 */
+            name: string;
+            /** 種別 */
+            kind?: components["schemas"]["SoftwareMasterKindEnum"];
+            readonly kind_display: string;
+            /** 提供元 */
+            vendor?: string | null;
+            /** 説明 */
+            description?: string | null;
+            readonly version_count: number;
+            /** 有効フラグ */
+            is_active?: boolean;
+            /**
+             * 作成日時
+             * Format: date-time
+             */
+            readonly created_at: string;
+            /**
+             * 更新日時
+             * Format: date-time
+             */
+            readonly updated_at: string;
+        };
+        /**
+         * @description * `STACK` - アプリスタック
+         *     * `FIRMWARE` - ファームウェア
+         *     * `OS` - OS
+         *     * `OTHER` - その他
+         * @enum {string}
+         */
+        SoftwareMasterKindEnum: "STACK" | "FIRMWARE" | "OS" | "OTHER";
+        /** @description ソフトウェアマスタシリアライザ */
+        SoftwareMasterRequest: {
+            /**
+             * ソフトウェアコード
+             * @description 例: BSTAND-SW, RISCV-FW
+             */
+            code: string;
+            /** ソフトウェア名 */
+            name: string;
+            /** 種別 */
+            kind?: components["schemas"]["SoftwareMasterKindEnum"];
+            /** 提供元 */
+            vendor?: string | null;
+            /** 説明 */
+            description?: string | null;
+            /** 有効フラグ */
+            is_active?: boolean;
+        };
+        /** @description ソフトウェアバージョンシリアライザ */
+        SoftwareVersion: {
+            readonly id: number;
+            /** ソフトウェア */
+            software: number;
+            readonly software_code: string;
+            readonly software_name: string;
+            /**
+             * バージョン
+             * @description 例: 2.3.1
+             */
+            version: string;
+            /** 状態 */
+            status?: components["schemas"]["SoftwareVersionStatusEnum"];
+            readonly status_display: string;
+            /**
+             * リリース日
+             * Format: date
+             */
+            release_date?: string | null;
+            /**
+             * アーティファクト参照
+             * @description git tag / commit hash / 配布URL 等
+             */
+            artifact_ref?: string | null;
+            /** リリースノート */
+            notes?: string | null;
+            /**
+             * 作成日時
+             * Format: date-time
+             */
+            readonly created_at: string;
+            /**
+             * 更新日時
+             * Format: date-time
+             */
+            readonly updated_at: string;
+        };
+        /** @description ソフトウェアバージョンシリアライザ */
+        SoftwareVersionRequest: {
+            /** ソフトウェア */
+            software: number;
+            /**
+             * バージョン
+             * @description 例: 2.3.1
+             */
+            version: string;
+            /** 状態 */
+            status?: components["schemas"]["SoftwareVersionStatusEnum"];
+            /**
+             * リリース日
+             * Format: date
+             */
+            release_date?: string | null;
+            /**
+             * アーティファクト参照
+             * @description git tag / commit hash / 配布URL 等
+             */
+            artifact_ref?: string | null;
+            /** リリースノート */
+            notes?: string | null;
+        };
+        /**
+         * @description * `RELEASED` - リリース
+         *     * `BETA` - ベータ
+         *     * `DEPRECATED` - 非推奨
+         * @enum {string}
+         */
+        SoftwareVersionStatusEnum: "RELEASED" | "BETA" | "DEPRECATED";
         /**
          * @description * `INSTALL` - 設置
          *     * `ACTIVATION` - 開通
@@ -5918,6 +6258,327 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SiteConfig"];
+                };
+            };
+        };
+    };
+    software_masters_list: {
+        parameters: {
+            query?: {
+                code?: string;
+                is_active?: boolean;
+                /**
+                 * @description * `STACK` - アプリスタック
+                 *     * `FIRMWARE` - ファームウェア
+                 *     * `OS` - OS
+                 *     * `OTHER` - その他
+                 */
+                kind?: "FIRMWARE" | "OS" | "OTHER" | "STACK";
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description A search term. */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSoftwareMasterList"];
+                };
+            };
+        };
+    };
+    software_masters_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SoftwareMasterRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SoftwareMasterRequest"];
+                "multipart/form-data": components["schemas"]["SoftwareMasterRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SoftwareMaster"];
+                };
+            };
+        };
+    };
+    software_masters_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this ソフトウェアマスタ. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SoftwareMaster"];
+                };
+            };
+        };
+    };
+    software_masters_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this ソフトウェアマスタ. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SoftwareMasterRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SoftwareMasterRequest"];
+                "multipart/form-data": components["schemas"]["SoftwareMasterRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SoftwareMaster"];
+                };
+            };
+        };
+    };
+    software_masters_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this ソフトウェアマスタ. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    software_masters_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this ソフトウェアマスタ. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedSoftwareMasterRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedSoftwareMasterRequest"];
+                "multipart/form-data": components["schemas"]["PatchedSoftwareMasterRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SoftwareMaster"];
+                };
+            };
+        };
+    };
+    software_versions_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description A search term. */
+                search?: string;
+                software?: number;
+                /**
+                 * @description * `RELEASED` - リリース
+                 *     * `BETA` - ベータ
+                 *     * `DEPRECATED` - 非推奨
+                 */
+                status?: "BETA" | "DEPRECATED" | "RELEASED";
+                version?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSoftwareVersionList"];
+                };
+            };
+        };
+    };
+    software_versions_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SoftwareVersionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SoftwareVersionRequest"];
+                "multipart/form-data": components["schemas"]["SoftwareVersionRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SoftwareVersion"];
+                };
+            };
+        };
+    };
+    software_versions_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this ソフトウェアバージョン. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SoftwareVersion"];
+                };
+            };
+        };
+    };
+    software_versions_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this ソフトウェアバージョン. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SoftwareVersionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SoftwareVersionRequest"];
+                "multipart/form-data": components["schemas"]["SoftwareVersionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SoftwareVersion"];
+                };
+            };
+        };
+    };
+    software_versions_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this ソフトウェアバージョン. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    software_versions_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this ソフトウェアバージョン. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedSoftwareVersionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedSoftwareVersionRequest"];
+                "multipart/form-data": components["schemas"]["PatchedSoftwareVersionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SoftwareVersion"];
                 };
             };
         };

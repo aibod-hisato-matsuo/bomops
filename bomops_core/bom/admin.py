@@ -23,6 +23,8 @@ from .models import (
     ProductBOM,
     ProductFamily,
     ProductModel,
+    SoftwareMaster,
+    SoftwareVersion,
     SiteConfig,
 )
 
@@ -631,3 +633,23 @@ class EquipmentRefAdmin(admin.ModelAdmin):
 admin.site.site_header = "BOMOps 管理画面"
 admin.site.site_title = "BOMOps"
 admin.site.index_title = "AIBOD Factory / BOMOps"
+
+
+@admin.register(SoftwareMaster)
+class SoftwareMasterAdmin(admin.ModelAdmin):
+    """ソフトウェアマスタ管理"""
+
+    list_display = ["code", "name", "kind", "vendor", "is_active", "created_at"]
+    list_filter = ["kind", "is_active"]
+    search_fields = ["code", "name", "vendor"]
+    ordering = ["code"]
+
+
+@admin.register(SoftwareVersion)
+class SoftwareVersionAdmin(admin.ModelAdmin):
+    """ソフトウェアバージョン管理"""
+
+    list_display = ["software", "version", "status", "release_date", "created_at"]
+    list_filter = ["status", "software"]
+    search_fields = ["version", "software__code", "software__name"]
+    ordering = ["software", "-release_date"]

@@ -1201,6 +1201,51 @@ class PartUnitCurrentSetAPITest(APITestCase):
         self.assertEqual(resp.data["storage_site_name"], "AIBOD大名")
 
 
+class SoftwareAPITest(APITestCase):
+    """ソフトウェアマスタ・バージョンAPIのテスト（Phase 1）"""
+
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(
+            username="testuser",
+            password="testpass123",
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+        from .models import SoftwareMaster, SoftwareVersion
+
+        self.sw = SoftwareMaster.objects.create(
+            code="BSTAND-SW", name="BAITEN ソフト一式", kind="STACK",
+        )
+        SoftwareVersion.objects.create(software=self.sw, version="1.0.0")
+        SoftwareVersion.objects.create(software=self.sw, version="1.1.0", status="BETA")
+
+    def test_master_list_has_version_count(self) -> None:
+        """マスタ一覧に version_count が載ることのテスト"""
+        url = reverse("bom:software-master-list")
+        row = self.client.get(url).data["results"][0]
+        self.assertEqual(row["code"], "BSTAND-SW")
+        self.assertEqual(row["version_count"], 2)
+        self.assertEqual(row["kind_display"], "アプリスタック")
+
+    def test_version_filter_by_software(self) -> None:
+        """software パラメータでバージョンを絞れることのテスト"""
+        url = reverse("bom:software-version-list")
+        response = self.client.get(url, {"software": self.sw.id})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 2)
+        versions = {r["version"] for r in response.data["results"]}
+        self.assertEqual(versions, {"1.0.0", "1.1.0"})
+
+    def test_version_unique_per_software(self) -> None:
+        """同一ソフトでのバージョン重複が弾かれることのテスト"""
+        url = reverse("bom:software-version-list")
+        response = self.client.post(
+            url, {"software": self.sw.id, "version": "1.0.0"}
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
 class BssSetConfigAPITest(APITestCase):
     """BSSセット設定APIのテスト"""
 

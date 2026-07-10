@@ -25,6 +25,8 @@ from .models import (
     ProductFamily,
     ProductModel,
     SiteConfig,
+    SoftwareMaster,
+    SoftwareVersion,
 )
 
 
@@ -235,6 +237,68 @@ class PartUnitSerializer(serializers.ModelSerializer):
             "storage_site_name",
             "current_set",
             "note",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+
+# =============================================================================
+# ソフトウェア（Phase 1: マスタ＋バージョン）
+# =============================================================================
+
+
+class SoftwareMasterSerializer(serializers.ModelSerializer):
+    """ソフトウェアマスタシリアライザ"""
+
+    kind_display = serializers.CharField(source="get_kind_display", read_only=True)
+    version_count = serializers.SerializerMethodField()
+
+    @extend_schema_field(serializers.IntegerField())
+    def get_version_count(self, obj: SoftwareMaster) -> int:
+        n = getattr(obj, "version_count", None)
+        return n if n is not None else obj.versions.count()
+
+    class Meta:
+        model = SoftwareMaster
+        fields = [
+            "id",
+            "code",
+            "name",
+            "kind",
+            "kind_display",
+            "vendor",
+            "description",
+            "version_count",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+
+class SoftwareVersionSerializer(serializers.ModelSerializer):
+    """ソフトウェアバージョンシリアライザ"""
+
+    software_code = serializers.CharField(source="software.code", read_only=True)
+    software_name = serializers.CharField(source="software.name", read_only=True)
+    status_display = serializers.CharField(
+        source="get_status_display", read_only=True
+    )
+
+    class Meta:
+        model = SoftwareVersion
+        fields = [
+            "id",
+            "software",
+            "software_code",
+            "software_name",
+            "version",
+            "status",
+            "status_display",
+            "release_date",
+            "artifact_ref",
+            "notes",
             "created_at",
             "updated_at",
         ]

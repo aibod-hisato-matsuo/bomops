@@ -10,8 +10,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { useDetail, useGet, useList } from '../../../api/hooks'
+import { useCreate, useDetail, useGet, useList } from '../../../api/hooks'
 import type {
+  CustomerSite,
   PartMaster,
   PartMasterProductSummary,
   PartUnit,
@@ -22,8 +23,10 @@ import { Button } from '../../../components/Button'
 import { CascadeRow } from '../../../components/CascadeRow'
 import { DataTable, type Column } from '../../../components/DataTable'
 import { FilterBar, SearchInput, SelectFilter } from '../../../components/FilterBar'
+import { Select } from '../../../components/form/Field'
 import { PageHeader } from '../../../components/PageHeader'
 import { Pagination } from '../../../components/Pagination'
+import { useToast } from '../../../components/toast/toast-context'
 import { useListParams } from '../../../hooks/useListParams'
 import { PartUnitFormDrawer } from './PartUnitFormDrawer'
 
@@ -36,6 +39,7 @@ const statusOptions = [
 
 export function PartUnitListPage() {
   const navigate = useNavigate()
+  const toast = useToast()
   const { page, setPage, setFilter, setFilters, getFilter } = useListParams()
 
   const activeFamily = getFilter('used_in_family')
@@ -47,6 +51,56 @@ export function PartUnitListPage() {
   const [codeQuery, setCodeQuery] = useState('')
   // 実物一覧のシリアル検索
   const serial = getFilter('serial')
+
+  // ---- 倉庫フィルタ（在庫の所在）----
+  // 倉庫＝lifecycle_status=BASE（拠点）。在庫列と実物一覧をこの倉庫で絞る。
+  const warehouses = useList<CustomerSite>('/customer-sites/', {
+    lifecycle_status: 'BASE',
+    page_size: 200,
+  })
+  const warehouseOptions = (warehouses.data?.results ?? []).map((w) => ({
+    value: String(w.id),
+    label: w.name,
+  }))
+  const warehouse = getFilter('warehouse') // storage_site id
+  const unset = getFilter('unset') === '1' // 在庫だが保管先未設定のみ
+  const warehouseName = warehouses.data?.results.find(
+    (w) => String(w.id) === warehouse,
+  )?.name
+  // 在庫件数（部品マスタ列）・実物一覧に渡す倉庫パラメータ
+  const stockParam = unset
+    ? { storage_unset: 'true' }
+    : warehouse
+      ? { storage_site: warehouse }
+      : {}
+
+  // ---- 実物一覧の一括保管先設定（バックフィル）----
+  const [selected, setSelected] = useState<Set<number>>(new Set())
+  const [bulkWarehouse, setBulkWarehouse] = useState('')
+  const bulkSet = useCreate<{ updated: number }>('/part-units/bulk-set-storage/')
+
+  const toggleSelect = (id: number) =>
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+
+  const applyBulk = async () => {
+    if (!bulkWarehouse || selected.size === 0) return
+    try {
+      const res = await bulkSet.mutateAsync({
+        unit_ids: [...selected],
+        storage_site: Number(bulkWarehouse),
+      })
+      toast.success(`${res.updated}件の保管先を設定しました`)
+      setSelected(new Set())
+      setBulkWarehouse('')
+    } catch {
+      toast.error('一括設定に失敗しました')
+    }
+  }
 
   // ---- 製品ピル（部品コード数／ファミリ）----
   const productSummary = useGet<PartMasterProductSummary[]>(
@@ -62,6 +116,7 @@ export function PartUnitListPage() {
   // ---- 部品コード一覧（browse モード）----
   const partMasters = useList<PartMaster>('/part-masters/', {
     used_in_family: activeFamily || undefined,
+    ...stockParam,
     page_size: 200,
   })
   const filteredMasters = (partMasters.data?.results ?? []).filter((m) => {
@@ -84,6 +139,7 @@ export function PartUnitListPage() {
           part_master: activePartMaster,
           status: getFilter('status') || undefined,
           serial_number: serial || undefined,
+          ...stockParam,
           page: page > 1 ? page : undefined,
         }
       : {},
@@ -101,8 +157,8 @@ export function PartUnitListPage() {
     },
     {
       key: 'in_stock_count',
-      header: '在庫',
-      width: '70px',
+      header: unset ? '在庫(未設定)' : warehouseName ? `在庫(${warehouseName})` : '在庫',
+      width: '96px',
       render: (r) => (
         <span style={{ fontWeight: 700, color: 'var(--aibod-sky)' }}>
           {r.in_stock_count}
@@ -123,6 +179,20 @@ export function PartUnitListPage() {
   ]
 
   const unitColumns: Column<PartUnit>[] = [
+    {
+      key: 'select',
+      header: '',
+      width: '36px',
+      render: (r) => (
+        <input
+          type="checkbox"
+          checked={selected.has(r.id)}
+          onClick={(e) => e.stopPropagation()}
+          onChange={() => toggleSelect(r.id)}
+          aria-label={`${r.serial_number} を選択`}
+        />
+      ),
+    },
     { key: 'serial_number', header: 'シリアル番号', render: (r) => r.serial_number },
     {
       key: 'status',
@@ -227,6 +297,52 @@ export function PartUnitListPage() {
           />
         </FilterBar>
 
+        {selected.size > 0 && (
+          <div
+            style={{
+              display: 'flex',
+              gap: 8,
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              padding: '8px 12px',
+              marginBottom: 8,
+              borderRadius: 6,
+              background: 'var(--aibod-pale, #eef2fb)',
+              border: '1px solid var(--aibod-sky, #7fb3e6)',
+            }}
+          >
+            <strong>{selected.size}件選択中</strong>
+            <span style={{ color: 'var(--color-text-sub)' }}>
+              保管先倉庫を一括設定:
+            </span>
+            <Select
+              value={bulkWarehouse}
+              onChange={(e) => setBulkWarehouse(e.target.value)}
+            >
+              <option value="">倉庫を選択</option>
+              {warehouseOptions.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </Select>
+            <Button
+              size="sm"
+              disabled={!bulkWarehouse || bulkSet.isPending}
+              onClick={applyBulk}
+            >
+              適用
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => setSelected(new Set())}
+            >
+              選択解除
+            </Button>
+          </div>
+        )}
+
         <DataTable
           columns={unitColumns}
           rows={units.data?.results}
@@ -274,7 +390,27 @@ export function PartUnitListPage() {
           onChange={setCodeQuery}
           placeholder="部品コード・部品名で絞り込み"
         />
+        <SelectFilter
+          value={unset ? '' : warehouse}
+          onChange={(v) => setFilters({ warehouse: v, unset: '' })}
+          options={warehouseOptions}
+          allLabel="全倉庫"
+        />
+        <Button
+          variant={unset ? 'primary' : 'secondary'}
+          size="sm"
+          onClick={() => setFilters({ unset: unset ? '' : '1', warehouse: '' })}
+        >
+          保管先未設定のみ
+        </Button>
       </FilterBar>
+      {(warehouseName || unset) && (
+        <p style={{ margin: '0 0 8px', color: 'var(--color-text-sub)' }}>
+          「在庫」列は
+          {unset ? ' 保管先未設定 ' : ` ${warehouseName} `}
+          の在庫数を表示しています
+        </p>
+      )}
 
       <DataTable
         columns={masterColumns}

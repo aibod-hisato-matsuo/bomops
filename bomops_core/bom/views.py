@@ -10,7 +10,12 @@ from typing import Any
 from django.db.models import Count, Q, QuerySet
 from django.utils import timezone
 from django_filters import rest_framework as django_filters
-from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    OpenApiResponse,
+    extend_schema,
+    extend_schema_view,
+)
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -42,6 +47,7 @@ from .serializers import (
     BssSetConfigSerializer,
     BssSetLocationSummarySerializer,
     BssSetSerializer,
+    BulkSetStorageSerializer,
     CustomerSerializer,
     CustomerSiteSerializer,
     DashboardSummarySerializer,
@@ -118,10 +124,26 @@ class PartUnitFilter(django_filters.FilterSet):
     status = django_filters.ChoiceFilter(choices=PartUnit.Status.choices)
     serial_number = django_filters.CharFilter(lookup_expr="icontains")
     category = django_filters.CharFilter(field_name="part_master__category__name")
+    storage_site = django_filters.NumberFilter()
+    storage_unset = django_filters.BooleanFilter(method="filter_storage_unset")
+
+    def filter_storage_unset(self, queryset, name, value):
+        """真のとき、在庫だが保管先倉庫が未設定（要対応）の実物に絞る"""
+        if value:
+            return queryset.filter(
+                status=PartUnit.Status.IN_STOCK, storage_site__isnull=True
+            )
+        return queryset
 
     class Meta:
         model = PartUnit
-        fields = ["part_master", "status", "serial_number", "category"]
+        fields = [
+            "part_master",
+            "status",
+            "serial_number",
+            "category",
+            "storage_site",
+        ]
 
 
 class ProductModelFilter(django_filters.FilterSet):
@@ -330,25 +352,38 @@ class PartMasterViewSet(viewsets.ModelViewSet):
     検索: part_code, name, model_number
     """
 
-    queryset = PartMaster.objects.prefetch_related(
-        "bom_usages__product_model__family"
-    ).annotate(
-        unit_count=Count("units", distinct=True),
-        in_stock_count=Count(
-            "units",
-            filter=Q(units__status=PartUnit.Status.IN_STOCK),
-            distinct=True,
-        ),
-        broken_count=Count(
-            "units",
-            filter=Q(units__status=PartUnit.Status.BROKEN),
-            distinct=True,
-        ),
-    )
     serializer_class = PartMasterSerializer
     filterset_class = PartMasterFilter
     search_fields = ["part_code", "name", "model_number"]
     ordering_fields = ["part_code", "name", "created_at"]
+
+    def get_queryset(self) -> QuerySet:
+        """
+        在庫件数(in_stock_count)を倉庫フィルタ対応にする。
+
+        - storage_unset=true : 在庫だが保管先未設定（要対応）の件数
+        - storage_site=<id>  : その倉庫にある在庫の件数
+        - 指定なし           : 在庫の総件数
+        「在庫がどこにあるか」を列の分解ではなくフィルタで見せるための土台。
+        """
+        params = self.request.query_params
+        stock_filter = Q(units__status=PartUnit.Status.IN_STOCK)
+        storage_site = params.get("storage_site")
+        if params.get("storage_unset") in ("true", "True", "1"):
+            stock_filter &= Q(units__storage_site__isnull=True)
+        elif storage_site and storage_site.isdigit():
+            stock_filter &= Q(units__storage_site=int(storage_site))
+        return PartMaster.objects.prefetch_related(
+            "bom_usages__product_model__family"
+        ).annotate(
+            unit_count=Count("units", distinct=True),
+            in_stock_count=Count("units", filter=stock_filter, distinct=True),
+            broken_count=Count(
+                "units",
+                filter=Q(units__status=PartUnit.Status.BROKEN),
+                distinct=True,
+            ),
+        )
 
     @extend_schema(
         summary="グループ×カテゴリ件数集計",
@@ -505,6 +540,28 @@ class PartUnitViewSet(viewsets.ModelViewSet):
         }
         serializer = PartUnitHistorySerializer(data)
         return Response(serializer.data)
+
+    @extend_schema(
+        summary="保管先倉庫の一括設定",
+        description=(
+            "複数の部品実物の保管先倉庫(storage_site)をまとめて設定する。"
+            "在庫の所在を現場が素早く埋めるためのバックフィルツール。"
+        ),
+        request=BulkSetStorageSerializer,
+        responses={200: OpenApiResponse(description='{"updated": <件数>}')},
+        tags=["部品実物"],
+    )
+    @action(detail=False, methods=["post"], url_path="bulk-set-storage")
+    def bulk_set_storage(self, request: Request) -> Response:
+        """保管先倉庫の一括設定API（在庫所在のバックフィル用）"""
+        serializer = BulkSetStorageSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        unit_ids = serializer.validated_data["unit_ids"]
+        storage_site = serializer.validated_data["storage_site"]
+        updated = PartUnit.objects.filter(id__in=unit_ids).update(
+            storage_site=storage_site
+        )
+        return Response({"updated": updated})
 
 
 class SoftwareMasterFilter(django_filters.FilterSet):

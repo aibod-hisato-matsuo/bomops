@@ -4,6 +4,7 @@ BOMOps データモデル定義
 AIBOD Factory / BOMOps - BOM（部品構成）＋セット＋設置先＋設定情報の一元管理システム
 """
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
@@ -200,6 +201,14 @@ class PartUnit(TimestampMixin):
 
     def __str__(self) -> str:
         return f"{self.serial_number} ({self.part_master.part_code})"
+
+    def clean(self) -> None:
+        """在庫(IN_STOCK)は保管先倉庫が必須（在庫の所在は重要情報のため）"""
+        super().clean()
+        if self.status == self.Status.IN_STOCK and self.storage_site_id is None:
+            raise ValidationError(
+                {"storage_site": "在庫ステータスの部品は保管先倉庫が必須です"}
+            )
 
 
 # =============================================================================

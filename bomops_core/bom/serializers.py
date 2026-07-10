@@ -221,6 +221,23 @@ class PartUnitSerializer(serializers.ModelSerializer):
             "customer_name": site.customer.name if site else None,
         }
 
+    def validate(self, attrs: dict) -> dict:
+        """
+        在庫(IN_STOCK)の実物は保管先倉庫(storage_site)を必須とする。
+
+        「在庫がどこにあるか」は重要情報のため、在庫化する時点で必ず倉庫を持たせる。
+        PATCH（部分更新）でも、更新後の実効ステータス・保管先で判定する。
+        """
+        status = attrs.get("status", getattr(self.instance, "status", None))
+        storage_site = attrs.get(
+            "storage_site", getattr(self.instance, "storage_site", None)
+        )
+        if status == PartUnit.Status.IN_STOCK and storage_site is None:
+            raise serializers.ValidationError(
+                {"storage_site": "在庫ステータスの部品は保管先倉庫が必須です"}
+            )
+        return attrs
+
     class Meta:
         model = PartUnit
         fields = [
@@ -241,6 +258,22 @@ class PartUnitSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
+
+
+class BulkSetStorageSerializer(serializers.Serializer):
+    """保管先倉庫の一括設定リクエスト（在庫所在のバックフィル用）"""
+
+    unit_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        allow_empty=False,
+        help_text="保管先を設定する部品実物IDの配列",
+    )
+    storage_site = serializers.PrimaryKeyRelatedField(
+        queryset=CustomerSite.objects.filter(
+            lifecycle_status=CustomerSite.LifecycleStatus.BASE
+        ),
+        help_text="保管先倉庫（lifecycle_status=拠点(BASE) の拠点のみ）",
+    )
 
 
 # =============================================================================

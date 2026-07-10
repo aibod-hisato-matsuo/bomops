@@ -1088,6 +1088,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/part-units/bulk-set-storage/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 保管先倉庫の一括設定
+         * @description 複数の部品実物の保管先倉庫(storage_site)をまとめて設定する。在庫の所在を現場が素早く埋めるためのバックフィルツール。
+         */
+        post: operations["part_units_bulk_set_storage_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/product-boms/": {
         parameters: {
             query?: never;
@@ -1804,6 +1824,13 @@ export interface components {
          * @enum {string}
          */
         BssSetStatusEnum: "ASSEMBLED" | "INSTALLED" | "REPAIR" | "RECOVERED" | "SCRAPPED";
+        /** @description 保管先倉庫の一括設定リクエスト（在庫所在のバックフィル用） */
+        BulkSetStorageRequest: {
+            /** @description 保管先を設定する部品実物IDの配列 */
+            unit_ids: number[];
+            /** @description 保管先倉庫（lifecycle_status=拠点(BASE) の拠点のみ） */
+            storage_site: number;
+        };
         /** @description セット構成詳細用シリアライザ（読み取り専用） */
         ComponentDetail: {
             role: string;
@@ -1825,11 +1852,8 @@ export interface components {
             name: string;
             /** 担当者名 */
             contact_person?: string | null;
-            /**
-             * 連絡先メール
-             * Format: email
-             */
-            contact_email?: string | null;
+            /** 連絡先メール */
+            contact_email?: (string) | null;
             /** 連絡先電話番号 */
             contact_tel?: string | null;
             /** 備考 */
@@ -1877,11 +1901,8 @@ export interface components {
             name: string;
             /** 担当者名 */
             contact_person?: string | null;
-            /**
-             * 連絡先メール
-             * Format: email
-             */
-            contact_email?: string | null;
+            /** 連絡先メール */
+            contact_email?: (string) | null;
             /** 連絡先電話番号 */
             contact_tel?: string | null;
             /** 備考 */
@@ -2906,11 +2927,8 @@ export interface components {
             name?: string;
             /** 担当者名 */
             contact_person?: string | null;
-            /**
-             * 連絡先メール
-             * Format: email
-             */
-            contact_email?: string | null;
+            /** 連絡先メール */
+            contact_email?: (string) | null;
             /** 連絡先電話番号 */
             contact_tel?: string | null;
             /** 備考 */
@@ -5452,6 +5470,8 @@ export interface operations {
                  *     * `SCRAPPED` - 廃棄
                  */
                 status?: "ASSIGNED" | "BROKEN" | "IN_STOCK" | "SCRAPPED";
+                storage_site?: number;
+                storage_unset?: boolean;
             };
             header?: never;
             path?: never;
@@ -5612,6 +5632,30 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["PartUnitHistory"];
                 };
+            };
+        };
+    };
+    part_units_bulk_set_storage_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkSetStorageRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["BulkSetStorageRequest"];
+                "multipart/form-data": components["schemas"]["BulkSetStorageRequest"];
+            };
+        };
+        responses: {
+            /** @description {"updated": <件数>} */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

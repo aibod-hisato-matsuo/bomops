@@ -2834,6 +2834,14 @@ paths:
           * `ASSIGNED` - 割当済
           * `BROKEN` - 故障
           * `SCRAPPED` - 廃棄
+      - in: query
+        name: storage_site
+        schema:
+          type: integer
+      - in: query
+        name: storage_unset
+        schema:
+          type: boolean
       tags:
       - 部品実物
       security:
@@ -3030,6 +3038,31 @@ paths:
               schema:
                 $ref: '#/components/schemas/PartUnitHistory'
           description: ''
+  /api/v1/part-units/bulk-set-storage/:
+    post:
+      operationId: part_units_bulk_set_storage_create
+      description: 複数の部品実物の保管先倉庫(storage_site)をまとめて設定する。在庫の所在を現場が素早く埋めるためのバックフィルツール。
+      summary: 保管先倉庫の一括設定
+      tags:
+      - 部品実物
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkSetStorageRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BulkSetStorageRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BulkSetStorageRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: '{"updated": <件数>}'
   /api/v1/product-boms/:
     get:
       operationId: product_boms_list
@@ -4795,6 +4828,21 @@ components:
         * `REPAIR` - 修理中
         * `RECOVERED` - 回収済
         * `SCRAPPED` - 廃棄
+    BulkSetStorageRequest:
+      type: object
+      description: 保管先倉庫の一括設定リクエスト（在庫所在のバックフィル用）
+      properties:
+        unit_ids:
+          type: array
+          items:
+            type: integer
+          description: 保管先を設定する部品実物IDの配列
+        storage_site:
+          type: integer
+          description: 保管先倉庫（lifecycle_status=拠点(BASE) の拠点のみ）
+      required:
+      - storage_site
+      - unit_ids
     ComponentDetail:
       type: object
       description: セット構成詳細用シリアライザ（読み取り専用）
@@ -4835,11 +4883,14 @@ components:
           title: 担当者名
           maxLength: 100
         contact_email:
-          type: string
-          format: email
           nullable: true
           title: 連絡先メール
-          maxLength: 254
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
         contact_tel:
           type: string
           nullable: true
@@ -4932,11 +4983,14 @@ components:
           title: 担当者名
           maxLength: 100
         contact_email:
-          type: string
-          format: email
           nullable: true
           title: 連絡先メール
-          maxLength: 254
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
         contact_tel:
           type: string
           nullable: true
@@ -6665,11 +6719,14 @@ components:
           title: 担当者名
           maxLength: 100
         contact_email:
-          type: string
-          format: email
           nullable: true
           title: 連絡先メール
-          maxLength: 254
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
         contact_tel:
           type: string
           nullable: true

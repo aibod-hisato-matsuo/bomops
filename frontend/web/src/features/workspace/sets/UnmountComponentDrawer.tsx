@@ -46,11 +46,18 @@ export function UnmountComponentDrawer({ bssSetId, component, onClose }: Props) 
 
   const [status, setStatus] = useState('IN_STOCK')
   const [storageSite, setStorageSite] = useState('')
+  const [storageError, setStorageError] = useState('')
   const [note, setNote] = useState('')
   const [recordEvent, setRecordEvent] = useState(true)
   const [submitting, setSubmitting] = useState(false)
 
   const onSubmit = async () => {
+    // 在庫に戻す場合は保管先倉庫が必須（在庫の所在は重要情報のため）
+    if (status === 'IN_STOCK' && !storageSite) {
+      setStorageError('在庫に戻すには保管先倉庫が必須です')
+      return
+    }
+    setStorageError('')
     setSubmitting(true)
     try {
       // 1. 取外し（搭載終了）
@@ -109,10 +116,18 @@ export function UnmountComponentDrawer({ bssSetId, component, onClose }: Props) 
           ))}
         </Select>
       </Field>
-      <Field label="保管先倉庫" hint="外した部品の置き先（AIBOD拠点＝倉庫）">
+      <Field
+        label="保管先倉庫"
+        required={status === 'IN_STOCK'}
+        hint="外した部品の置き先（AIBOD拠点＝倉庫）。在庫に戻す場合は必須"
+        error={storageError || undefined}
+      >
         <Select
           value={storageSite}
-          onChange={(e) => setStorageSite(e.target.value)}
+          onChange={(e) => {
+            setStorageSite(e.target.value)
+            if (e.target.value) setStorageError('')
+          }}
         >
           <option value="">未選択</option>
           {(warehouses.data?.results ?? []).map((w) => (

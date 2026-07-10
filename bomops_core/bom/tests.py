@@ -1644,3 +1644,152 @@ class EquipmentRefAPITest(APITestCase):
         })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(self.unit1.equipment_refs.count(), 2)
+
+
+class PartUnitStorageSiteTest(APITestCase):
+    """在庫の保管先倉庫(storage_site): 必須ルール・フィルタ・一括設定のテスト"""
+
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(username="wh", password="pw")
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+        # 倉庫（BASE拠点）= AIBOD自身の拠点
+        self.aibod = Customer.objects.create(code="AIBOD", name="AIBOD")
+        self.wh_daimyo = CustomerSite.objects.create(
+            customer=self.aibod,
+            name="AIBOD大名",
+            lifecycle_status=CustomerSite.LifecycleStatus.BASE,
+        )
+        self.wh_okuma = CustomerSite.objects.create(
+            customer=self.aibod,
+            name="AIBOD大熊オフィス",
+            lifecycle_status=CustomerSite.LifecycleStatus.BASE,
+        )
+        # 顧客拠点（倉庫ではない）— 一括設定の対象外であることの検証用
+        self.cust_site = CustomerSite.objects.create(
+            customer=Customer.objects.create(code="C1", name="客先"),
+            name="客先店舗",
+            lifecycle_status=CustomerSite.LifecycleStatus.ACTIVE,
+        )
+
+        self.master = PartMaster.objects.create(
+            part_code="PC-1", name="MiniPC", category=make_category("PC")
+        )
+
+    def _unit(self, serial, status_val, storage=None):
+        return PartUnit.objects.create(
+            part_master=self.master,
+            serial_number=serial,
+            status=status_val,
+            storage_site=storage,
+        )
+
+    # ---- MUST: 在庫は保管先必須 ----
+    def test_create_in_stock_without_storage_rejected(self):
+        url = reverse("bom:part-unit-list")
+        res = self.client.post(url, {
+            "part_master": self.master.pk,
+            "serial_number": "S-1",
+            "status": "IN_STOCK",
+        })
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("storage_site", res.data)
+
+    def test_create_in_stock_with_storage_ok(self):
+        url = reverse("bom:part-unit-list")
+        res = self.client.post(url, {
+            "part_master": self.master.pk,
+            "serial_number": "S-2",
+            "status": "IN_STOCK",
+            "storage_site": self.wh_daimyo.pk,
+        })
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+    def test_non_stock_status_allows_null_storage(self):
+        url = reverse("bom:part-unit-list")
+        res = self.client.post(url, {
+            "part_master": self.master.pk,
+            "serial_number": "S-3",
+            "status": "BROKEN",
+        })
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+    def test_patch_to_in_stock_without_storage_rejected(self):
+        unit = self._unit("S-4", PartUnit.Status.BROKEN)
+        url = reverse("bom:part-unit-detail", args=[unit.pk])
+        res = self.client.patch(url, {"status": "IN_STOCK"})
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("storage_site", res.data)
+
+    def test_patch_to_in_stock_with_storage_ok(self):
+        unit = self._unit("S-5", PartUnit.Status.BROKEN)
+        url = reverse("bom:part-unit-detail", args=[unit.pk])
+        res = self.client.patch(url, {
+            "status": "IN_STOCK", "storage_site": self.wh_okuma.pk,
+        })
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    # ---- フィルタ ----
+    def test_storage_unset_filter(self):
+        self._unit("U-1", PartUnit.Status.IN_STOCK, self.wh_daimyo)
+        # 在庫だが未設定（直接ORMで作り、必須検証を回避）
+        self._unit("U-2", PartUnit.Status.IN_STOCK, None)
+        self._unit("U-3", PartUnit.Status.IN_STOCK, None)
+        url = reverse("bom:part-unit-list")
+        res = self.client.get(url, {"storage_unset": "true"})
+        self.assertEqual(res.data["count"], 2)
+
+    def test_storage_site_filter(self):
+        self._unit("V-1", PartUnit.Status.IN_STOCK, self.wh_daimyo)
+        self._unit("V-2", PartUnit.Status.IN_STOCK, self.wh_okuma)
+        url = reverse("bom:part-unit-list")
+        res = self.client.get(url, {"storage_site": self.wh_daimyo.pk})
+        self.assertEqual(res.data["count"], 1)
+        self.assertEqual(res.data["results"][0]["serial_number"], "V-1")
+
+    # ---- 部品マスタの在庫件数が倉庫フィルタ対応 ----
+    def test_partmaster_in_stock_count_warehouse_aware(self):
+        self._unit("W-1", PartUnit.Status.IN_STOCK, self.wh_daimyo)
+        self._unit("W-2", PartUnit.Status.IN_STOCK, self.wh_daimyo)
+        self._unit("W-3", PartUnit.Status.IN_STOCK, self.wh_okuma)
+        self._unit("W-4", PartUnit.Status.IN_STOCK, None)
+        url = reverse("bom:part-master-list")
+        # 総在庫 = 4
+        total = self.client.get(url).data["results"][0]["in_stock_count"]
+        self.assertEqual(total, 4)
+        # 大名の在庫 = 2
+        daimyo = self.client.get(
+            url, {"storage_site": self.wh_daimyo.pk}
+        ).data["results"][0]["in_stock_count"]
+        self.assertEqual(daimyo, 2)
+        # 未設定の在庫 = 1
+        unset = self.client.get(
+            url, {"storage_unset": "true"}
+        ).data["results"][0]["in_stock_count"]
+        self.assertEqual(unset, 1)
+
+    # ---- 一括設定 ----
+    def test_bulk_set_storage(self):
+        u1 = self._unit("B-1", PartUnit.Status.IN_STOCK, None)
+        u2 = self._unit("B-2", PartUnit.Status.IN_STOCK, None)
+        url = reverse("bom:part-unit-bulk-set-storage")
+        res = self.client.post(url, {
+            "unit_ids": [u1.pk, u2.pk],
+            "storage_site": self.wh_daimyo.pk,
+        }, format="json")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["updated"], 2)
+        u1.refresh_from_db()
+        u2.refresh_from_db()
+        self.assertEqual(u1.storage_site, self.wh_daimyo)
+        self.assertEqual(u2.storage_site, self.wh_daimyo)
+
+    def test_bulk_set_storage_rejects_non_base_site(self):
+        u1 = self._unit("B-3", PartUnit.Status.IN_STOCK, None)
+        url = reverse("bom:part-unit-bulk-set-storage")
+        res = self.client.post(url, {
+            "unit_ids": [u1.pk],
+            "storage_site": self.cust_site.pk,
+        }, format="json")
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)

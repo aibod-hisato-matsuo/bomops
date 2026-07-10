@@ -3,7 +3,7 @@
  */
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 
 import { parseApiErrors } from '../../../api/errors'
@@ -15,15 +15,26 @@ import { Field, Select, TextArea, TextInput } from '../../../components/form/Fie
 import { useToast } from '../../../components/toast/toast-context'
 import { applyServerErrors, cleanPayload } from '../../../lib/form-utils'
 
-const schema = z.object({
-  part_master: z.string().min(1, '部品マスタを選択してください'),
-  serial_number: z.string().min(1, 'シリアル番号を入力してください'),
-  status: z.string(),
-  storage_site: z.string(),
-  purchase_date: z.string(),
-  purchase_order_no: z.string(),
-  note: z.string(),
-})
+const schema = z
+  .object({
+    part_master: z.string().min(1, '部品マスタを選択してください'),
+    serial_number: z.string().min(1, 'シリアル番号を入力してください'),
+    status: z.string(),
+    storage_site: z.string(),
+    purchase_date: z.string(),
+    purchase_order_no: z.string(),
+    note: z.string(),
+  })
+  .superRefine((val, ctx) => {
+    // 在庫は保管先倉庫が必須（在庫の所在は重要情報のため）
+    if (val.status === 'IN_STOCK' && !val.storage_site) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['storage_site'],
+        message: '在庫は保管先倉庫が必須です',
+      })
+    }
+  })
 
 type FormValues = z.infer<typeof schema>
 
@@ -58,6 +69,7 @@ export function PartUnitFormDrawer({ item, onClose, defaultPartMasterId }: Props
     register,
     handleSubmit,
     setError,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -75,6 +87,8 @@ export function PartUnitFormDrawer({ item, onClose, defaultPartMasterId }: Props
       note: item?.note ?? '',
     },
   })
+
+  const status = useWatch({ control, name: 'status' })
 
   const onSubmit = async (values: FormValues) => {
     const payload = cleanPayload({
@@ -135,7 +149,12 @@ export function PartUnitFormDrawer({ item, onClose, defaultPartMasterId }: Props
           ))}
         </Select>
       </Field>
-      <Field label="保管先倉庫" hint="未搭載時の置き先（AIBOD拠点＝倉庫）">
+      <Field
+        label="保管先倉庫"
+        required={status === 'IN_STOCK'}
+        hint="未搭載時の置き先（AIBOD拠点＝倉庫）。在庫は必須"
+        error={errors.storage_site?.message}
+      >
         <Select {...register('storage_site')}>
           <option value="">未選択</option>
           {(warehouses.data?.results ?? []).map((w) => (
